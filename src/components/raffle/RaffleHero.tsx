@@ -29,9 +29,9 @@ export function RaffleHero({
   const availableNumbers = totalNumbers - soldNumbers;
 
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden py-8">
-      {/* Background decorations */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+    <section className="relative min-h-screen flex items-center justify-center overflow-hidden py-6 px-4">
+      {/* Background decorations - hidden on mobile for cleaner look */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden hidden sm:block">
         {/* Glow orbs */}
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-emerald/5 rounded-full blur-3xl animate-pulse-slow" />
         <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-purple/10 rounded-full blur-3xl animate-pulse-slow" style={{ animationDelay: '1s' }} />
@@ -52,97 +52,97 @@ export function RaffleHero({
         </div>
       </div>
 
-      <div className="container mx-auto px-4 relative z-10">
-        <div className="grid lg:grid-cols-2 gap-8 items-center">
+      <div className="w-full max-w-6xl mx-auto relative z-10">
+        <div className="flex flex-col lg:grid lg:grid-cols-2 gap-6 lg:gap-8 items-center">
           {/* Left: Content */}
-          <div className="space-y-6 animate-fade-in">
+          <div className="space-y-4 sm:space-y-6 animate-fade-in w-full">
             {/* Badge */}
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald/10 border border-emerald/30 glow-emerald">
+            <div className="inline-flex items-center gap-2 px-3 sm:px-4 py-2 rounded-full bg-emerald/10 border border-emerald/30 glow-emerald">
               <span className="text-emerald animate-sparkle">🍀</span>
-              <span className="text-sm font-semibold text-emerald">Rifa da Sorte</span>
-              <Sparkles className="w-4 h-4 text-gold animate-sparkle" />
+              <span className="text-xs sm:text-sm font-semibold text-emerald">Rifa da Sorte</span>
+              <Sparkles className="w-3 h-3 sm:w-4 sm:h-4 text-gold animate-sparkle" />
             </div>
 
             {/* Title */}
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-display font-bold leading-tight">
+            <h1 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-display font-bold leading-tight">
               <span className="text-gradient-luck">{title}</span>
             </h1>
 
             {/* Description */}
             {description && (
-              <p className="text-lg text-muted-foreground max-w-xl">
+              <p className="text-sm sm:text-lg text-muted-foreground max-w-xl">
                 {description}
               </p>
             )}
 
             {/* Prize Card */}
-            <div className="card-jackpot p-6 rounded-xl border border-gold/30 relative overflow-hidden">
-              <div className="absolute top-2 right-2 text-gold/20">
+            <div className="card-jackpot p-4 sm:p-6 rounded-xl border border-gold/30 relative overflow-hidden">
+              <div className="absolute top-2 right-2 text-gold/20 hidden sm:block">
                 <Trophy className="w-12 h-12" />
               </div>
-              <div className="flex items-start gap-4 relative z-10">
-                <div className="p-3 rounded-lg bg-gradient-gold animate-pulse-glow shrink-0">
-                  <Gift className="w-6 h-6 text-purple-dark" />
+              <div className="flex items-start gap-3 sm:gap-4 relative z-10">
+                <div className="p-2 sm:p-3 rounded-lg bg-gradient-gold animate-pulse-glow shrink-0">
+                  <Gift className="w-5 h-5 sm:w-6 sm:h-6 text-purple-dark" />
                 </div>
-                <div>
-                  <p className="text-sm text-gold font-medium mb-1 flex items-center gap-1">
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs sm:text-sm text-gold font-medium mb-1 flex items-center gap-1">
                     <Zap className="w-3 h-3" />
                     GRANDE PRÊMIO
                   </p>
-                  <p className="text-xl font-bold text-foreground">{prizeDescription}</p>
+                  <p className="text-base sm:text-xl font-bold text-foreground break-words">{prizeDescription}</p>
                 </div>
               </div>
             </div>
 
             {/* Stats */}
-            <div className="grid grid-cols-3 gap-3">
-              <div className="card-casino text-center p-4 rounded-xl border border-emerald/20">
-                <div className="w-10 h-10 mx-auto mb-2 rounded-lg bg-emerald/10 flex items-center justify-center">
-                  <Ticket className="w-5 h-5 text-emerald" />
+            <div className="grid grid-cols-3 gap-2 sm:gap-3">
+              <div className="card-casino text-center p-2 sm:p-4 rounded-xl border border-emerald/20">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 mx-auto mb-1 sm:mb-2 rounded-lg bg-emerald/10 flex items-center justify-center">
+                  <Ticket className="w-4 h-4 sm:w-5 sm:h-5 text-emerald" />
                 </div>
-                <p className="text-2xl font-display font-bold text-emerald">{formatCurrency(pricePerNumber)}</p>
-                <p className="text-xs text-muted-foreground">por número</p>
+                <p className="text-lg sm:text-2xl font-display font-bold text-emerald">{formatCurrency(pricePerNumber)}</p>
+                <p className="text-[10px] sm:text-xs text-muted-foreground">por número</p>
               </div>
-              <div className="card-casino text-center p-4 rounded-xl border border-gold/20">
-                <div className="w-10 h-10 mx-auto mb-2 rounded-lg bg-gold/10 flex items-center justify-center">
-                  <Star className="w-5 h-5 text-gold" />
+              <div className="card-casino text-center p-2 sm:p-4 rounded-xl border border-gold/20">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 mx-auto mb-1 sm:mb-2 rounded-lg bg-gold/10 flex items-center justify-center">
+                  <Star className="w-4 h-4 sm:w-5 sm:h-5 text-gold" />
                 </div>
-                <p className="text-2xl font-display font-bold text-gold">{availableNumbers.toLocaleString()}</p>
-                <p className="text-xs text-muted-foreground">disponíveis</p>
+                <p className="text-lg sm:text-2xl font-display font-bold text-gold">{availableNumbers.toLocaleString()}</p>
+                <p className="text-[10px] sm:text-xs text-muted-foreground">disponíveis</p>
               </div>
-              <div className="card-casino text-center p-4 rounded-xl border border-purple/20">
-                <div className="w-10 h-10 mx-auto mb-2 rounded-lg bg-purple/10 flex items-center justify-center">
-                  <Coins className="w-5 h-5 text-purple" />
+              <div className="card-casino text-center p-2 sm:p-4 rounded-xl border border-purple/20">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 mx-auto mb-1 sm:mb-2 rounded-lg bg-purple/10 flex items-center justify-center">
+                  <Coins className="w-4 h-4 sm:w-5 sm:h-5 text-purple" />
                 </div>
-                <p className="text-2xl font-display font-bold text-purple">{totalNumbers.toLocaleString()}</p>
-                <p className="text-xs text-muted-foreground">total</p>
+                <p className="text-lg sm:text-2xl font-display font-bold text-purple">{totalNumbers.toLocaleString()}</p>
+                <p className="text-[10px] sm:text-xs text-muted-foreground">total</p>
               </div>
             </div>
 
             {/* Progress bar */}
-            <div className="card-casino p-4 rounded-xl border border-border space-y-3">
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground flex items-center gap-2">
-                  <Ticket className="w-4 h-4 text-emerald" />
+            <div className="card-casino p-3 sm:p-4 rounded-xl border border-border space-y-2 sm:space-y-3">
+              <div className="flex justify-between text-xs sm:text-sm">
+                <span className="text-muted-foreground flex items-center gap-1 sm:gap-2">
+                  <Ticket className="w-3 h-3 sm:w-4 sm:h-4 text-emerald" />
                   Números vendidos
                 </span>
                 <span className="text-emerald font-bold">{progressPercentage.toFixed(1)}%</span>
               </div>
-              <div className="progress-jackpot h-4">
+              <div className="progress-jackpot h-3 sm:h-4">
                 <div 
                   className="progress-jackpot-bar"
                   style={{ width: `${progressPercentage}%` }}
                 />
               </div>
-              <p className="text-center text-sm text-muted-foreground">
+              <p className="text-center text-xs sm:text-sm text-muted-foreground">
                 <span className="text-gold font-semibold">{soldNumbers.toLocaleString()}</span> de {totalNumbers.toLocaleString()} vendidos
               </p>
             </div>
 
             {/* Draw date */}
             {drawDate && (
-              <div className="flex items-center gap-2 text-muted-foreground bg-purple/10 border border-purple/20 px-4 py-3 rounded-xl w-fit">
-                <Timer className="w-5 h-5 text-purple" />
+              <div className="flex items-center gap-2 text-muted-foreground bg-purple/10 border border-purple/20 px-3 sm:px-4 py-2 sm:py-3 rounded-xl text-xs sm:text-base">
+                <Timer className="w-4 h-4 sm:w-5 sm:h-5 text-purple shrink-0" />
                 <span>Sorteio: <span className="text-foreground font-medium">{new Date(drawDate).toLocaleDateString('pt-BR', { 
                   day: '2-digit', 
                   month: 'long', 
@@ -157,16 +157,16 @@ export function RaffleHero({
             <Button 
               onClick={onParticipate}
               size="lg"
-              className="btn-luck w-full sm:w-auto text-lg px-10 py-7 text-primary-foreground font-bold uppercase tracking-wider"
+              className="btn-luck w-full text-base sm:text-lg px-6 sm:px-10 py-5 sm:py-7 text-primary-foreground font-bold uppercase tracking-wider"
             >
-              <span className="mr-2 text-xl">🍀</span>
+              <span className="mr-2 text-lg sm:text-xl">🍀</span>
               Participar Agora
-              <Sparkles className="w-5 h-5 ml-2" />
+              <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 ml-2" />
             </Button>
           </div>
 
-          {/* Right: Image */}
-          <div className="relative animate-fade-in" style={{ animationDelay: '0.2s' }}>
+          {/* Right: Image - Hidden on mobile since there's no image */}
+          <div className="relative animate-fade-in hidden lg:block" style={{ animationDelay: '0.2s' }}>
             <div className="relative aspect-square rounded-2xl overflow-hidden border-2 border-gold/30 shadow-gold-lg card-jackpot">
               {imageUrl ? (
                 <img 
