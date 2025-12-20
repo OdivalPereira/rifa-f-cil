@@ -196,6 +196,98 @@ export type Database = {
         }
         Relationships: []
       }
+      spin_rewards: {
+        Row: {
+          id: string
+          raffle_id: string
+          buyer_email: string
+          buyer_phone: string
+          total_spins: number
+          used_spins: number
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          raffle_id: string
+          buyer_email: string
+          buyer_phone: string
+          total_spins?: number
+          used_spins?: number
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          raffle_id?: string
+          buyer_email?: string
+          buyer_phone?: string
+          total_spins?: number
+          used_spins?: number
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "spin_rewards_raffle_id_fkey"
+            columns: ["raffle_id"]
+            isOneToOne: false
+            referencedRelation: "raffles"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      spin_history: {
+        Row: {
+          id: string
+          spin_reward_id: string
+          raffle_id: string
+          spin_type: string
+          prize_type: string
+          fixed_amount: number | null
+          multiplier: number | null
+          bonus_numbers: number[] | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          spin_reward_id: string
+          raffle_id: string
+          spin_type: string
+          prize_type: string
+          fixed_amount?: number | null
+          multiplier?: number | null
+          bonus_numbers?: number[] | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          spin_reward_id?: string
+          raffle_id?: string
+          spin_type?: string
+          prize_type?: string
+          fixed_amount?: number | null
+          multiplier?: number | null
+          bonus_numbers?: number[] | null
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "spin_history_spin_reward_id_fkey"
+            columns: ["spin_reward_id"]
+            isOneToOne: false
+            referencedRelation: "spin_rewards"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "spin_history_raffle_id_fkey"
+            columns: ["raffle_id"]
+            isOneToOne: false
+            referencedRelation: "raffles"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
     }
     Views: {
       [_ in never]: never

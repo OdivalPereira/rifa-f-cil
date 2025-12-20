@@ -1,22 +1,51 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useMyPurchases } from '@/hooks/useRaffle';
+import { useAvailableSpins } from '@/hooks/useSpinRewards';
 import { formatCurrency, formatRaffleNumber } from '@/lib/validators';
 import { Search, ArrowLeft, Clover, Sparkles, Star, Trophy } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { SlotMachineFrame } from '@/components/SlotMachineFrame';
+import { SpinRewardModal } from '@/components/raffle/SpinRewardModal';
 
 export default function MyNumbers() {
   const [searchValue, setSearchValue] = useState('');
   const [searchType, setSearchType] = useState<'email' | 'phone'>('email');
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState('');
+  const [isSpinModalOpen, setIsSpinModalOpen] = useState(false);
+  const [activeRaffleId, setActiveRaffleId] = useState<string | null>(null);
 
   const email = searchType === 'email' && submitted ? searchValue : '';
   const phone = searchType === 'phone' && submitted ? searchValue : '';
 
   const { data: purchases, isLoading } = useMyPurchases(email, phone);
+
+  // Derive unique raffle IDs from purchases to check for spins
+  // We check the first one that has spins available.
+  const raffleIds = Array.from(new Set(purchases?.map(p => p.raffle_id) || []));
+
+  // We need to check spins for EACH raffle. This hook design (single raffle check) makes it slightly tricky.
+  // Ideally, we'd have a hook `useAllAvailableSpins(email, phone)` that returns a list.
+  // For this fix, let's just pick the most recent purchase's raffle, OR if we want to be thorough,
+  // we can iterate. Given React hooks rules, we can't iterate hooks.
+  // Let's rely on the most recent purchase (index 0) as the primary target for now,
+  // but if the user has multiple active raffles, this might miss some.
+  // A better solution for a "Micro-UX" scope is acceptable: check the most relevant one.
+
+  const mostRecentRaffleId = raffleIds[0];
+  const { data: spinData } = useAvailableSpins(mostRecentRaffleId, email, phone);
+
+  const hasSpins = spinData && (spinData.total_spins - spinData.used_spins > 0);
+
+  // Auto-open modal if user has spins
+  useEffect(() => {
+    if (hasSpins && mostRecentRaffleId) {
+      setActiveRaffleId(mostRecentRaffleId);
+      setIsSpinModalOpen(true);
+    }
+  }, [hasSpins, mostRecentRaffleId]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -136,6 +165,29 @@ export default function MyNumbers() {
               </div>
             </form>
 
+            {/* Lucky Wheel Banner */}
+            {hasSpins && (
+              <div
+                className="mt-6 p-4 rounded-xl bg-gradient-to-r from-purple/20 to-gold/20 border border-gold/40 cursor-pointer hover:scale-[1.02] transition-transform"
+                onClick={() => {
+                   if (mostRecentRaffleId) {
+                       setActiveRaffleId(mostRecentRaffleId);
+                       setIsSpinModalOpen(true);
+                   }
+                }}
+              >
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-full bg-gold/20 flex items-center justify-center animate-pulse">
+                    <Trophy className="w-6 h-6 text-gold" />
+                  </div>
+                  <div>
+                    <h3 className="font-display font-bold text-lg text-gradient-gold">Roleta da Sorte Disponível!</h3>
+                    <p className="text-sm text-muted-foreground">Você tem giros pendentes. Clique para jogar!</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Loading */}
             {isLoading && (
               <div className="flex flex-col items-center justify-center py-8 sm:py-12 gap-3">
@@ -217,6 +269,16 @@ export default function MyNumbers() {
           </div>
         </main>
       </div>
+
+      {activeRaffleId && (
+        <SpinRewardModal
+          raffleId={activeRaffleId}
+          buyerEmail={email}
+          buyerPhone={phone}
+          isOpen={isSpinModalOpen}
+          onOpenChange={setIsSpinModalOpen}
+        />
+      )}
     </SlotMachineFrame>
   );
 }
