@@ -27,11 +27,7 @@ export default function MyNumbers() {
   useEffect(() => {
     if (submitted && (email || phone)) {
       getBalance(email || undefined, phone || undefined).then(balance => {
-        if (balance && balance.spins_available > 0) {
-           setSpinsAvailable(balance.spins_available);
-        } else {
-           setSpinsAvailable(0);
-        }
+        setSpinsAvailable(balance?.spins_available ?? 0);
       });
     }
   }, [submitted, email, phone]);
@@ -257,7 +253,7 @@ export default function MyNumbers() {
             // Refresh balance when closed
             if (!open && (email || phone)) {
                 getBalance(email || undefined, phone || undefined).then(balance => {
-                    setSpinsAvailable(balance ? balance.spins_available : 0);
+                    setSpinsAvailable(balance?.spins_available ?? 0);
                 });
             }
         }}

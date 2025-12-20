@@ -80,15 +80,15 @@ Deno.serve(async (req) => {
 
     const prizes = [
       { type: 'multiplier', value: 10, probability: 0.01 },
-      { type: 'multiplier', value: 5, probability: 0.05 },
-      { type: 'multiplier', value: 2, probability: 0.1 },
-      { type: 'retry', value: 'retry', probability: 5.0 },
-      { type: 'numbers', value: 6, probability: 1.97 },
-      { type: 'numbers', value: 5, probability: 3.95 },
-      { type: 'numbers', value: 4, probability: 9.87 },
-      { type: 'numbers', value: 3, probability: 17.78 },
-      { type: 'numbers', value: 2, probability: 27.66 },
-      { type: 'numbers', value: 1, probability: 33.58 },
+      { type: 'multiplier', value: 5, probability: 0.10 },
+      { type: 'multiplier', value: 2, probability: 0.35 },
+      { type: 'retry', value: 'retry', probability: 10.0 },
+      { type: 'numbers', value: 6, probability: 1.5 },
+      { type: 'numbers', value: 5, probability: 4.0 },
+      { type: 'numbers', value: 4, probability: 9.0 },
+      { type: 'numbers', value: 3, probability: 16.0 },
+      { type: 'numbers', value: 2, probability: 26.0 },
+      { type: 'numbers', value: 1, probability: 33.04 },
     ]
 
     for (const p of prizes) {
@@ -105,8 +105,25 @@ Deno.serve(async (req) => {
 
     if (prize.type === 'numbers' || prize.type === 'multiplier') {
         let ticketsToGrant = 0
-        if (prize.type === 'numbers') ticketsToGrant = typeof prize.value === 'number' ? prize.value : 0
-        if (prize.type === 'multiplier') ticketsToGrant = (typeof prize.value === 'number' ? prize.value : 0) * 5
+        if (prize.type === 'numbers') {
+            ticketsToGrant = typeof prize.value === 'number' ? prize.value : 0
+        }
+        if (prize.type === 'multiplier') {
+            // Fetch user's total confirmed numbers for multiplier
+            let userTotalNumbers = 0
+            const { data: userPurchases } = await supabase
+                .from('purchases')
+                .select('quantity')
+                .eq('payment_status', 'approved')
+                .or(`buyer_email.eq.${email},buyer_phone.eq.${phone}`)
+            
+            if (userPurchases) {
+                userTotalNumbers = userPurchases.reduce((sum, p) => sum + (p.quantity || 0), 0)
+            }
+            
+            const multiplier = typeof prize.value === 'number' ? prize.value : 0
+            ticketsToGrant = multiplier * Math.max(userTotalNumbers, 1) // At least 1 if no purchases
+        }
 
         let targetRaffleId = raffle_id
 
@@ -179,9 +196,10 @@ Deno.serve(async (req) => {
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
 
-  } catch (error) {
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error'
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: errorMessage }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
     )
   }
