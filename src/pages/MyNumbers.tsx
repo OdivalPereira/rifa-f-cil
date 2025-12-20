@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useMyPurchases } from '@/hooks/useRaffle';
 import { formatCurrency, formatRaffleNumber } from '@/lib/validators';
-import { Search, Loader2, ArrowLeft, Clover, Sparkles, Star, Trophy } from 'lucide-react';
+import { Search, ArrowLeft, Clover, Sparkles, Star, Trophy } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { SlotMachineFrame } from '@/components/SlotMachineFrame';
 
@@ -11,6 +11,7 @@ export default function MyNumbers() {
   const [searchValue, setSearchValue] = useState('');
   const [searchType, setSearchType] = useState<'email' | 'phone'>('email');
   const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState('');
 
   const email = searchType === 'email' && submitted ? searchValue : '';
   const phone = searchType === 'phone' && submitted ? searchValue : '';
@@ -19,6 +20,10 @@ export default function MyNumbers() {
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!searchValue.trim()) {
+      setError('Por favor, preencha este campo.');
+      return;
+    }
     setSubmitted(true);
   };
 
@@ -39,7 +44,12 @@ export default function MyNumbers() {
         <header className="relative z-10 border-b border-gold/20 bg-card/50 backdrop-blur-sm">
           <div className="container mx-auto px-3 sm:px-4 h-14 sm:h-16 flex items-center gap-2 sm:gap-4">
             <Link to="/">
-              <Button variant="ghost" size="icon" className="hover:bg-gold/10 hover:text-gold h-9 w-9 sm:h-10 sm:w-10">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="hover:bg-gold/10 hover:text-gold h-9 w-9 sm:h-10 sm:w-10"
+                aria-label="Voltar para início"
+              >
                 <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />
               </Button>
             </Link>
@@ -70,7 +80,7 @@ export default function MyNumbers() {
                 <Button
                   type="button"
                   variant="ghost"
-                  onClick={() => { setSearchType('email'); setSubmitted(false); }}
+                  onClick={() => { setSearchType('email'); setSubmitted(false); setError(''); }}
                   className={`flex-1 h-10 sm:h-11 font-medium transition-all text-sm ${
                     searchType === 'email' 
                       ? 'bg-gold/20 text-gold border border-gold/40 hover:bg-gold/30' 
@@ -82,7 +92,7 @@ export default function MyNumbers() {
                 <Button
                   type="button"
                   variant="ghost"
-                  onClick={() => { setSearchType('phone'); setSubmitted(false); }}
+                  onClick={() => { setSearchType('phone'); setSubmitted(false); setError(''); }}
                   className={`flex-1 h-10 sm:h-11 font-medium transition-all text-sm ${
                     searchType === 'phone' 
                       ? 'bg-gold/20 text-gold border border-gold/40 hover:bg-gold/30' 
@@ -92,23 +102,44 @@ export default function MyNumbers() {
                   Telefone
                 </Button>
               </div>
-              <div className="flex gap-2">
-                <Input
-                  placeholder={searchType === 'email' ? 'seu@email.com' : '(11) 99999-9999'}
-                  value={searchValue}
-                  onChange={(e) => { setSearchValue(e.target.value); setSubmitted(false); }}
-                  className="input-casino h-10 sm:h-12 flex-1 text-sm"
-                />
-                <Button type="submit" className="btn-luck h-10 sm:h-12 px-4 sm:px-6">
-                  <Search className="w-4 h-4 sm:w-5 sm:h-5" />
-                </Button>
+              <div className="relative">
+                <div className="flex gap-2">
+                  <Input
+                    type={searchType === 'email' ? 'email' : 'tel'}
+                    inputMode={searchType === 'email' ? 'email' : 'tel'}
+                    placeholder={searchType === 'email' ? 'seu@email.com' : '(11) 99999-9999'}
+                    value={searchValue}
+                    onChange={(e) => {
+                      setSearchValue(e.target.value);
+                      setSubmitted(false);
+                      setError('');
+                    }}
+                    className={`input-casino h-10 sm:h-12 flex-1 text-sm ${error ? 'border-destructive' : ''}`}
+                    aria-invalid={!!error}
+                  />
+                  <Button
+                    type="submit"
+                    className="btn-luck h-10 sm:h-12 px-4 sm:px-6"
+                    disabled={isLoading}
+                    aria-label="Buscar números"
+                  >
+                    {isLoading ? (
+                      <Clover className="w-5 h-5 animate-spin" />
+                    ) : (
+                      <Search className="w-4 h-4 sm:w-5 sm:h-5" />
+                    )}
+                  </Button>
+                </div>
+                {error && (
+                  <p className="text-destructive text-xs mt-1 absolute -bottom-5 left-0">{error}</p>
+                )}
               </div>
             </form>
 
             {/* Loading */}
             {isLoading && (
               <div className="flex flex-col items-center justify-center py-8 sm:py-12 gap-3">
-                <Loader2 className="w-8 h-8 sm:w-10 sm:h-10 animate-spin text-gold" />
+                <Clover className="w-8 h-8 sm:w-10 sm:h-10 animate-spin text-gold" />
                 <p className="text-muted-foreground text-sm">Buscando seus números...</p>
               </div>
             )}
@@ -125,7 +156,7 @@ export default function MyNumbers() {
             {/* Results */}
             {purchases && purchases.length > 0 && (
               <div className="space-y-3 sm:space-y-4 mt-4 sm:mt-6 relative z-10">
-                {purchases.map((purchase: any) => {
+                {purchases.map((purchase) => {
                   const status = getStatusLabel(purchase.payment_status);
                   return (
                     <div 
@@ -150,7 +181,7 @@ export default function MyNumbers() {
                       </div>
                       {purchase.numbers && purchase.numbers.length > 0 && (
                         <div className="flex flex-wrap gap-1 sm:gap-1.5 pt-2 border-t border-border/30">
-                          {purchase.numbers.map((n: any) => (
+                          {purchase.numbers.map((n: { number: number }) => (
                             <span 
                               key={n.number} 
                               className="px-1.5 sm:px-2.5 py-0.5 sm:py-1 rounded-md bg-emerald/10 text-emerald text-[10px] sm:text-xs font-mono font-bold border border-emerald/20"
@@ -167,13 +198,20 @@ export default function MyNumbers() {
             )}
           </div>
 
-          {/* Back to home */}
-          <div className="text-center mt-4 sm:mt-6">
+          {/* Buy More / Back to home */}
+          <div className="flex flex-col gap-3 mt-8 max-w-sm mx-auto">
+            <Link to="/" className="w-full">
+              <Button className="w-full btn-luck text-primary-foreground font-bold py-6">
+                <Sparkles className="w-4 h-4 mr-2 animate-pulse" />
+                Comprar mais números
+              </Button>
+            </Link>
+
             <Link 
               to="/" 
-              className="inline-flex items-center gap-2 text-xs sm:text-sm text-muted-foreground hover:text-emerald transition-colors"
+              className="inline-flex items-center justify-center gap-2 text-xs sm:text-sm text-muted-foreground hover:text-emerald transition-colors p-2"
             >
-              <Clover className="w-3 h-3 sm:w-4 sm:h-4" />
+              <ArrowLeft className="w-3 h-3 sm:w-4 sm:h-4" />
               Voltar para a página inicial
             </Link>
           </div>
