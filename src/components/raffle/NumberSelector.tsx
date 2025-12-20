@@ -139,29 +139,29 @@ export function NumberSelector({
       {/* Decorative header bar */}
       <div className="h-2 bg-gradient-luck" />
       
-      <CardHeader className="text-center space-y-2 pt-8 relative">
-        {/* Corner decorations */}
-        <div className="absolute top-4 left-4 text-gold/20">
+      <CardHeader className="text-center space-y-2 pt-6 sm:pt-8 px-4 sm:px-6 relative">
+        {/* Corner decorations - hidden on mobile */}
+        <div className="absolute top-4 left-4 text-gold/20 hidden sm:block">
           <Trophy className="w-6 h-6" />
         </div>
-        <div className="absolute top-4 right-4 text-emerald/20">
+        <div className="absolute top-4 right-4 text-emerald/20 hidden sm:block">
           <Coins className="w-6 h-6" />
         </div>
         
-        <div className="mx-auto w-16 h-16 rounded-full bg-gradient-luck flex items-center justify-center mb-2 glow-emerald animate-pulse-glow">
-          <span className="text-3xl">🎰</span>
+        <div className="mx-auto w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-gradient-luck flex items-center justify-center mb-2 glow-emerald animate-pulse-glow">
+          <span className="text-2xl sm:text-3xl">🎰</span>
         </div>
-        <CardTitle className="text-2xl font-display text-gradient-luck">Escolha seus Números</CardTitle>
-        <CardDescription>
+        <CardTitle className="text-xl sm:text-2xl font-display text-gradient-luck">Escolha seus Números</CardTitle>
+        <CardDescription className="text-sm">
           Selecione {quantityToSelect} números ou gere automaticamente
         </CardDescription>
       </CardHeader>
 
-      <CardContent className="space-y-6 pb-8">
+      <CardContent className="space-y-4 sm:space-y-6 pb-6 sm:pb-8 px-3 sm:px-6">
         {/* Controls */}
-        <div className="flex flex-col sm:flex-row gap-4">
+        <div className="flex flex-col gap-3 sm:gap-4">
           {/* Search */}
-          <div className="relative flex-1">
+          <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input
               placeholder="Buscar número..."
@@ -177,50 +177,51 @@ export function NumberSelector({
               variant="outline"
               onClick={generateRandomNumbers}
               disabled={selectedNumbers.size >= quantityToSelect}
-              className="border-gold/30 hover:bg-gold/10 hover:border-gold bg-transparent"
+              className="flex-1 border-gold/30 hover:bg-gold/10 hover:border-gold bg-transparent text-xs sm:text-sm"
             >
-              <Shuffle className="w-4 h-4 mr-2 text-gold" />
-              Gerar Automático
+              <Shuffle className="w-4 h-4 mr-1 sm:mr-2 text-gold" />
+              <span className="hidden sm:inline">Gerar Automático</span>
+              <span className="sm:hidden">Automático</span>
             </Button>
             <Button
               variant="ghost"
               onClick={clearSelection}
               disabled={selectedNumbers.size === 0}
-              className="hover:bg-destructive/10 hover:text-destructive"
+              className="hover:bg-destructive/10 hover:text-destructive text-xs sm:text-sm"
             >
-              <X className="w-4 h-4 mr-2" />
+              <X className="w-4 h-4 mr-1 sm:mr-2" />
               Limpar
             </Button>
           </div>
         </div>
 
         {/* Legend */}
-        <div className="flex flex-wrap gap-4 text-sm p-4 rounded-xl card-casino border border-border">
-          <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-lg number-slot-available flex items-center justify-center text-xs">0</div>
+        <div className="flex flex-wrap gap-2 sm:gap-4 text-xs sm:text-sm p-3 sm:p-4 rounded-xl card-casino border border-border">
+          <div className="flex items-center gap-1 sm:gap-2">
+            <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-lg number-slot-available flex items-center justify-center text-[10px] sm:text-xs">0</div>
             <span className="text-muted-foreground">Disponível</span>
           </div>
-          <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-lg number-slot-selected flex items-center justify-center text-xs">0</div>
+          <div className="flex items-center gap-1 sm:gap-2">
+            <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-lg number-slot-selected flex items-center justify-center text-[10px] sm:text-xs">0</div>
             <span className="text-muted-foreground">Selecionado</span>
           </div>
-          <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-lg bg-destructive/30 border border-destructive/50 flex items-center justify-center text-xs text-destructive/70">0</div>
+          <div className="flex items-center gap-1 sm:gap-2">
+            <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-lg bg-destructive/30 border border-destructive/50 flex items-center justify-center text-[10px] sm:text-xs text-destructive/70">0</div>
             <span className="text-muted-foreground">Vendido</span>
           </div>
-          <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-lg bg-warning/30 border border-warning/50 flex items-center justify-center text-xs text-warning/70">0</div>
+          <div className="flex items-center gap-1 sm:gap-2">
+            <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-lg bg-warning/30 border border-warning/50 flex items-center justify-center text-[10px] sm:text-xs text-warning/70">0</div>
             <span className="text-muted-foreground">Reservado</span>
           </div>
         </div>
 
         {/* Selection counter */}
-        <div className="flex justify-between items-center p-4 rounded-xl bg-gradient-to-r from-emerald/10 via-transparent to-gold/10 border border-emerald/20">
-          <span className="text-muted-foreground flex items-center gap-2">
-            <Star className="w-4 h-4 text-gold" />
-            Números selecionados
+        <div className="flex justify-between items-center p-3 sm:p-4 rounded-xl bg-gradient-to-r from-emerald/10 via-transparent to-gold/10 border border-emerald/20">
+          <span className="text-muted-foreground flex items-center gap-1 sm:gap-2 text-sm">
+            <Star className="w-3 h-3 sm:w-4 sm:h-4 text-gold" />
+            Selecionados
           </span>
-          <span className="text-xl font-bold font-display">
+          <span className="text-lg sm:text-xl font-bold font-display">
             <span className={selectedNumbers.size === quantityToSelect ? 'text-success' : 'text-gold'}>
               {selectedNumbers.size}
             </span>
@@ -229,8 +230,8 @@ export function NumberSelector({
         </div>
 
         {/* Numbers grid */}
-        <ScrollArea className="h-[400px] rounded-xl border border-border p-4 card-casino">
-          <div className="grid grid-cols-5 sm:grid-cols-8 md:grid-cols-10 gap-2">
+        <ScrollArea className="h-[300px] sm:h-[400px] rounded-xl border border-border p-2 sm:p-4 card-casino">
+          <div className="grid grid-cols-5 sm:grid-cols-8 md:grid-cols-10 gap-1 sm:gap-2">
             {displayedNumbers.map((num) => {
               const status = getNumberStatus(num);
               return (
@@ -239,7 +240,7 @@ export function NumberSelector({
                   onClick={() => toggleNumber(num)}
                   disabled={status === 'sold' || status === 'pending'}
                   className={cn(
-                    'aspect-square flex items-center justify-center text-xs font-mono rounded-lg transition-all duration-200',
+                    'aspect-square flex items-center justify-center text-[10px] sm:text-xs font-mono rounded-lg transition-all duration-200',
                     'hover:scale-105 focus:outline-none focus:ring-2 focus:ring-gold/50',
                     status === 'available' && 'number-slot-available cursor-pointer',
                     status === 'selected' && 'number-slot-selected shadow-gold animate-number-pop cursor-pointer',
@@ -256,25 +257,25 @@ export function NumberSelector({
 
         {/* Pagination */}
         {!searchTerm && totalPages > 1 && (
-          <div className="flex items-center justify-center gap-2">
+          <div className="flex items-center justify-center gap-1 sm:gap-2">
             <Button
               variant="outline"
               size="sm"
               onClick={() => setCurrentPage((p) => Math.max(0, p - 1))}
               disabled={currentPage === 0}
-              className="border-border hover:bg-secondary"
+              className="border-border hover:bg-secondary text-xs sm:text-sm px-2 sm:px-3"
             >
               Anterior
             </Button>
-            <span className="text-sm text-muted-foreground px-4">
-              Página <span className="text-gold font-bold">{currentPage + 1}</span> de {totalPages}
+            <span className="text-xs sm:text-sm text-muted-foreground px-2 sm:px-4">
+              <span className="text-gold font-bold">{currentPage + 1}</span>/{totalPages}
             </span>
             <Button
               variant="outline"
               size="sm"
               onClick={() => setCurrentPage((p) => Math.min(totalPages - 1, p + 1))}
               disabled={currentPage === totalPages - 1}
-              className="border-border hover:bg-secondary"
+              className="border-border hover:bg-secondary text-xs sm:text-sm px-2 sm:px-3"
             >
               Próxima
             </Button>
@@ -283,18 +284,18 @@ export function NumberSelector({
 
         {/* Selected numbers display */}
         {selectedNumbers.size > 0 && (
-          <div className="p-5 rounded-xl bg-gradient-to-br from-gold/10 via-transparent to-emerald/10 border border-gold/20">
-            <p className="text-sm text-muted-foreground mb-3 flex items-center gap-2">
-              <Sparkles className="w-4 h-4 text-gold" />
+          <div className="p-3 sm:p-5 rounded-xl bg-gradient-to-br from-gold/10 via-transparent to-emerald/10 border border-gold/20">
+            <p className="text-xs sm:text-sm text-muted-foreground mb-2 sm:mb-3 flex items-center gap-2">
+              <Sparkles className="w-3 h-3 sm:w-4 sm:h-4 text-gold" />
               Seus números da sorte:
             </p>
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-1 sm:gap-2">
               {Array.from(selectedNumbers)
                 .sort((a, b) => a - b)
                 .map((num) => (
                   <span
                     key={num}
-                    className="px-3 py-1.5 rounded-lg number-slot-selected text-xs font-mono font-bold"
+                    className="px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg number-slot-selected text-[10px] sm:text-xs font-mono font-bold"
                   >
                     {formatRaffleNumber(num, 5)}
                   </span>
@@ -307,18 +308,18 @@ export function NumberSelector({
         <Button
           onClick={handleConfirm}
           disabled={selectedNumbers.size !== quantityToSelect || isLoading}
-          className="btn-luck w-full py-7 text-lg font-bold uppercase tracking-wider"
+          className="btn-luck w-full py-5 sm:py-7 text-sm sm:text-lg font-bold uppercase tracking-wider"
         >
           {isLoading ? (
             <>
-              <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-              Reservando números...
+              <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 mr-2 animate-spin" />
+              Reservando...
             </>
           ) : (
             <>
               <span className="mr-2">🍀</span>
               Confirmar {quantityToSelect} números
-              <Check className="w-5 h-5 ml-2" />
+              <Check className="w-4 h-4 sm:w-5 sm:h-5 ml-2" />
             </>
           )}
         </Button>

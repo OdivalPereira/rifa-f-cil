@@ -41,26 +41,26 @@ export function BuyerForm({ pricePerNumber, maxNumbers, onSubmit, isLoading }: B
       {/* Decorative header bar */}
       <div className="h-2 bg-gradient-luck" />
       
-      <CardHeader className="text-center space-y-3 pt-8 relative">
-        {/* Corner decorations */}
-        <div className="absolute top-4 left-4 text-gold/20">
+      <CardHeader className="text-center space-y-2 sm:space-y-3 pt-6 sm:pt-8 px-4 sm:px-6 relative">
+        {/* Corner decorations - hidden on small screens */}
+        <div className="absolute top-4 left-4 text-gold/20 hidden sm:block">
           <Star className="w-6 h-6" />
         </div>
-        <div className="absolute top-4 right-4 text-emerald/20">
+        <div className="absolute top-4 right-4 text-emerald/20 hidden sm:block">
           <Sparkles className="w-6 h-6" />
         </div>
         
-        <div className="mx-auto w-16 h-16 rounded-full bg-gradient-luck flex items-center justify-center mb-2 glow-emerald animate-pulse-glow">
-          <span className="text-3xl">🍀</span>
+        <div className="mx-auto w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-gradient-luck flex items-center justify-center mb-2 glow-emerald animate-pulse-glow">
+          <span className="text-2xl sm:text-3xl">🍀</span>
         </div>
-        <CardTitle className="text-3xl font-display text-gradient-luck">Seus Dados</CardTitle>
-        <CardDescription className="text-base">
+        <CardTitle className="text-2xl sm:text-3xl font-display text-gradient-luck">Seus Dados</CardTitle>
+        <CardDescription className="text-sm sm:text-base">
           Preencha seus dados para tentar a sorte! ✨
         </CardDescription>
       </CardHeader>
 
-      <CardContent className="pb-8">
-        <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
+      <CardContent className="pb-6 sm:pb-8 px-4 sm:px-6">
+        <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4 sm:space-y-6">
           {/* Nome */}
           <div className="space-y-2">
             <Label htmlFor="name" className="flex items-center gap-2 text-foreground">
@@ -161,24 +161,24 @@ export function BuyerForm({ pricePerNumber, maxNumbers, onSubmit, isLoading }: B
           </div>
 
           {/* Resumo */}
-          <div className="p-5 rounded-xl bg-gradient-to-br from-gold/10 via-purple/5 to-emerald/10 border border-gold/30 relative overflow-hidden">
-            <div className="absolute top-2 right-2 text-gold/20">
+          <div className="p-4 sm:p-5 rounded-xl bg-gradient-to-br from-gold/10 via-purple/5 to-emerald/10 border border-gold/30 relative overflow-hidden">
+            <div className="absolute top-2 right-2 text-gold/20 hidden sm:block">
               <Coins className="w-8 h-8" />
             </div>
-            <div className="absolute bottom-2 left-2 text-purple/10">
+            <div className="absolute bottom-2 left-2 text-purple/10 hidden sm:block">
               <Zap className="w-6 h-6" />
             </div>
             <div className="flex justify-between items-center relative z-10">
               <div>
-                <p className="text-sm text-muted-foreground flex items-center gap-1">
+                <p className="text-xs sm:text-sm text-muted-foreground flex items-center gap-1">
                   <Sparkles className="w-3 h-3 text-gold" />
                   Total a pagar
                 </p>
-                <p className="text-4xl font-display font-bold text-gradient-gold">{formatCurrency(totalAmount)}</p>
+                <p className="text-2xl sm:text-4xl font-display font-bold text-gradient-gold">{formatCurrency(totalAmount)}</p>
               </div>
               <div className="text-right">
-                <p className="text-sm text-emerald font-medium">{quantity}x números</p>
-                <p className="text-sm text-muted-foreground">{formatCurrency(pricePerNumber)} cada</p>
+                <p className="text-xs sm:text-sm text-emerald font-medium">{quantity}x números</p>
+                <p className="text-xs sm:text-sm text-muted-foreground">{formatCurrency(pricePerNumber)} cada</p>
               </div>
             </div>
           </div>
@@ -187,15 +187,16 @@ export function BuyerForm({ pricePerNumber, maxNumbers, onSubmit, isLoading }: B
           <Button 
             type="submit" 
             disabled={isLoading}
-            className="btn-luck w-full py-7 text-lg text-primary-foreground font-bold uppercase tracking-wider"
+            className="btn-luck w-full py-5 sm:py-7 text-base sm:text-lg text-primary-foreground font-bold uppercase tracking-wider"
           >
             {isLoading ? (
               'Processando...'
             ) : (
               <>
                 <span className="mr-2">🍀</span>
-                Continuar para Pagamento
-                <ArrowRight className="w-5 h-5 ml-2" />
+                <span className="hidden sm:inline">Continuar para Pagamento</span>
+                <span className="sm:hidden">Continuar</span>
+                <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 ml-2" />
               </>
             )}
           </Button>
