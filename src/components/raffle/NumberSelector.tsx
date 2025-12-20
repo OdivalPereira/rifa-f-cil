@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback, useEffect } from 'react';
+import { useState, useMemo, useCallback, useEffect, memo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -18,6 +18,36 @@ interface NumberSelectorProps {
   isLoading?: boolean;
 }
 
+// Optimization: Memoized button component to prevent unnecessary re-renders
+interface NumberButtonProps {
+  num: number;
+  status: 'available' | 'selected' | 'sold' | 'pending';
+  onClick: (num: number) => void;
+}
+
+const NumberButton = memo(({ num, status, onClick }: NumberButtonProps) => {
+  const handleClick = useCallback(() => onClick(num), [onClick, num]);
+
+  return (
+    <button
+      onClick={handleClick}
+      disabled={status === 'sold' || status === 'pending'}
+      className={cn(
+        'aspect-square flex items-center justify-center text-[10px] sm:text-xs font-mono rounded-lg transition-all duration-200',
+        'hover:scale-105 focus:outline-none focus:ring-2 focus:ring-gold/50',
+        status === 'available' && 'number-slot-available cursor-pointer',
+        status === 'selected' && 'number-slot-selected shadow-gold animate-number-pop cursor-pointer',
+        status === 'sold' && 'bg-destructive/20 border border-destructive/30 text-destructive/50 cursor-not-allowed',
+        status === 'pending' && 'bg-warning/20 border border-warning/30 text-warning/50 cursor-not-allowed'
+      )}
+    >
+      {formatRaffleNumber(num, 5)}
+    </button>
+  );
+});
+
+NumberButton.displayName = 'NumberButton';
+
 export function NumberSelector({
   raffleId,
   totalNumbers,
@@ -31,6 +61,10 @@ export function NumberSelector({
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(0);
   const numbersPerPage = 500;
+
+  // Optimization: Create Sets for O(1) lookups instead of O(N) Array.includes()
+  const soldNumbersSet = useMemo(() => new Set(soldNumbers), [soldNumbers]);
+  const pendingNumbersSet = useMemo(() => new Set(pendingNumbers), [pendingNumbers]);
 
   // Subscribe to realtime updates
   useEffect(() => {
@@ -127,9 +161,11 @@ export function NumberSelector({
     onConfirm(Array.from(selectedNumbers).sort((a, b) => a - b));
   };
 
-  const getNumberStatus = (num: number) => {
-    if (soldNumbers.includes(num)) return 'sold';
-    if (pendingNumbers.includes(num)) return 'pending';
+  // Optimization: This function is now mostly used inside the render loop logic
+  // but using sets makes it O(1).
+  const getNumberStatus = (num: number): 'available' | 'selected' | 'sold' | 'pending' => {
+    if (soldNumbersSet.has(num)) return 'sold';
+    if (pendingNumbersSet.has(num)) return 'pending';
     if (selectedNumbers.has(num)) return 'selected';
     return 'available';
   };
@@ -235,21 +271,12 @@ export function NumberSelector({
             {displayedNumbers.map((num) => {
               const status = getNumberStatus(num);
               return (
-                <button
+                <NumberButton
                   key={num}
-                  onClick={() => toggleNumber(num)}
-                  disabled={status === 'sold' || status === 'pending'}
-                  className={cn(
-                    'aspect-square flex items-center justify-center text-[10px] sm:text-xs font-mono rounded-lg transition-all duration-200',
-                    'hover:scale-105 focus:outline-none focus:ring-2 focus:ring-gold/50',
-                    status === 'available' && 'number-slot-available cursor-pointer',
-                    status === 'selected' && 'number-slot-selected shadow-gold animate-number-pop cursor-pointer',
-                    status === 'sold' && 'bg-destructive/20 border border-destructive/30 text-destructive/50 cursor-not-allowed',
-                    status === 'pending' && 'bg-warning/20 border border-warning/30 text-warning/50 cursor-not-allowed'
-                  )}
-                >
-                  {formatRaffleNumber(num, 5)}
-                </button>
+                  num={num}
+                  status={status}
+                  onClick={toggleNumber}
+                />
               );
             })}
           </div>
