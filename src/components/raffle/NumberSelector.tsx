@@ -4,7 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { formatRaffleNumber } from '@/lib/validators';
-import { Search, Shuffle, Check, X, Loader2 } from 'lucide-react';
+import { Search, Shuffle, Check, X, Loader2, Sparkles, Star, Coins, Trophy } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -135,15 +135,29 @@ export function NumberSelector({
   };
 
   return (
-    <Card className="w-full max-w-4xl mx-auto border-gold/20 bg-card/80 backdrop-blur-sm">
-      <CardHeader className="text-center space-y-2">
-        <CardTitle className="text-2xl font-display">Escolha seus Números</CardTitle>
+    <Card className="w-full max-w-4xl mx-auto card-jackpot border-gold/20 overflow-hidden">
+      {/* Decorative header bar */}
+      <div className="h-2 bg-gradient-luck" />
+      
+      <CardHeader className="text-center space-y-2 pt-8 relative">
+        {/* Corner decorations */}
+        <div className="absolute top-4 left-4 text-gold/20">
+          <Trophy className="w-6 h-6" />
+        </div>
+        <div className="absolute top-4 right-4 text-emerald/20">
+          <Coins className="w-6 h-6" />
+        </div>
+        
+        <div className="mx-auto w-16 h-16 rounded-full bg-gradient-luck flex items-center justify-center mb-2 glow-emerald animate-pulse-glow">
+          <span className="text-3xl">🎰</span>
+        </div>
+        <CardTitle className="text-2xl font-display text-gradient-luck">Escolha seus Números</CardTitle>
         <CardDescription>
           Selecione {quantityToSelect} números ou gere automaticamente
         </CardDescription>
       </CardHeader>
 
-      <CardContent className="space-y-6">
+      <CardContent className="space-y-6 pb-8">
         {/* Controls */}
         <div className="flex flex-col sm:flex-row gap-4">
           {/* Search */}
@@ -153,7 +167,7 @@ export function NumberSelector({
               placeholder="Buscar número..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
+              className="pl-10 input-casino"
             />
           </div>
 
@@ -163,15 +177,16 @@ export function NumberSelector({
               variant="outline"
               onClick={generateRandomNumbers}
               disabled={selectedNumbers.size >= quantityToSelect}
-              className="border-gold/30 hover:bg-gold/10"
+              className="border-gold/30 hover:bg-gold/10 hover:border-gold bg-transparent"
             >
-              <Shuffle className="w-4 h-4 mr-2" />
+              <Shuffle className="w-4 h-4 mr-2 text-gold" />
               Gerar Automático
             </Button>
             <Button
               variant="ghost"
               onClick={clearSelection}
               disabled={selectedNumbers.size === 0}
+              className="hover:bg-destructive/10 hover:text-destructive"
             >
               <X className="w-4 h-4 mr-2" />
               Limpar
@@ -180,29 +195,32 @@ export function NumberSelector({
         </div>
 
         {/* Legend */}
-        <div className="flex flex-wrap gap-4 text-sm">
+        <div className="flex flex-wrap gap-4 text-sm p-4 rounded-xl card-casino border border-border">
           <div className="flex items-center gap-2">
-            <div className="w-4 h-4 rounded bg-secondary border border-border" />
+            <div className="w-6 h-6 rounded-lg number-slot-available flex items-center justify-center text-xs">0</div>
             <span className="text-muted-foreground">Disponível</span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-4 h-4 rounded bg-gold" />
+            <div className="w-6 h-6 rounded-lg number-slot-selected flex items-center justify-center text-xs">0</div>
             <span className="text-muted-foreground">Selecionado</span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-4 h-4 rounded bg-destructive/50" />
+            <div className="w-6 h-6 rounded-lg bg-destructive/30 border border-destructive/50 flex items-center justify-center text-xs text-destructive/70">0</div>
             <span className="text-muted-foreground">Vendido</span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-4 h-4 rounded bg-warning/50" />
+            <div className="w-6 h-6 rounded-lg bg-warning/30 border border-warning/50 flex items-center justify-center text-xs text-warning/70">0</div>
             <span className="text-muted-foreground">Reservado</span>
           </div>
         </div>
 
         {/* Selection counter */}
-        <div className="flex justify-between items-center p-3 rounded-lg bg-secondary/50">
-          <span className="text-muted-foreground">Números selecionados</span>
-          <span className="text-lg font-bold">
+        <div className="flex justify-between items-center p-4 rounded-xl bg-gradient-to-r from-emerald/10 via-transparent to-gold/10 border border-emerald/20">
+          <span className="text-muted-foreground flex items-center gap-2">
+            <Star className="w-4 h-4 text-gold" />
+            Números selecionados
+          </span>
+          <span className="text-xl font-bold font-display">
             <span className={selectedNumbers.size === quantityToSelect ? 'text-success' : 'text-gold'}>
               {selectedNumbers.size}
             </span>
@@ -211,7 +229,7 @@ export function NumberSelector({
         </div>
 
         {/* Numbers grid */}
-        <ScrollArea className="h-[400px] rounded-lg border border-border p-4">
+        <ScrollArea className="h-[400px] rounded-xl border border-border p-4 card-casino">
           <div className="grid grid-cols-5 sm:grid-cols-8 md:grid-cols-10 gap-2">
             {displayedNumbers.map((num) => {
               const status = getNumberStatus(num);
@@ -223,10 +241,10 @@ export function NumberSelector({
                   className={cn(
                     'aspect-square flex items-center justify-center text-xs font-mono rounded-lg transition-all duration-200',
                     'hover:scale-105 focus:outline-none focus:ring-2 focus:ring-gold/50',
-                    status === 'available' && 'bg-secondary hover:bg-secondary/80 border border-border cursor-pointer',
-                    status === 'selected' && 'bg-gold text-primary-foreground shadow-gold animate-number-pop cursor-pointer',
-                    status === 'sold' && 'bg-destructive/20 text-destructive/50 cursor-not-allowed',
-                    status === 'pending' && 'bg-warning/20 text-warning/50 cursor-not-allowed'
+                    status === 'available' && 'number-slot-available cursor-pointer',
+                    status === 'selected' && 'number-slot-selected shadow-gold animate-number-pop cursor-pointer',
+                    status === 'sold' && 'bg-destructive/20 border border-destructive/30 text-destructive/50 cursor-not-allowed',
+                    status === 'pending' && 'bg-warning/20 border border-warning/30 text-warning/50 cursor-not-allowed'
                   )}
                 >
                   {formatRaffleNumber(num, 5)}
@@ -244,17 +262,19 @@ export function NumberSelector({
               size="sm"
               onClick={() => setCurrentPage((p) => Math.max(0, p - 1))}
               disabled={currentPage === 0}
+              className="border-border hover:bg-secondary"
             >
               Anterior
             </Button>
             <span className="text-sm text-muted-foreground px-4">
-              Página {currentPage + 1} de {totalPages}
+              Página <span className="text-gold font-bold">{currentPage + 1}</span> de {totalPages}
             </span>
             <Button
               variant="outline"
               size="sm"
               onClick={() => setCurrentPage((p) => Math.min(totalPages - 1, p + 1))}
               disabled={currentPage === totalPages - 1}
+              className="border-border hover:bg-secondary"
             >
               Próxima
             </Button>
@@ -263,15 +283,18 @@ export function NumberSelector({
 
         {/* Selected numbers display */}
         {selectedNumbers.size > 0 && (
-          <div className="p-4 rounded-lg bg-gold/10 border border-gold/20">
-            <p className="text-sm text-muted-foreground mb-2">Seus números:</p>
+          <div className="p-5 rounded-xl bg-gradient-to-br from-gold/10 via-transparent to-emerald/10 border border-gold/20">
+            <p className="text-sm text-muted-foreground mb-3 flex items-center gap-2">
+              <Sparkles className="w-4 h-4 text-gold" />
+              Seus números da sorte:
+            </p>
             <div className="flex flex-wrap gap-2">
               {Array.from(selectedNumbers)
                 .sort((a, b) => a - b)
                 .map((num) => (
                   <span
                     key={num}
-                    className="px-2 py-1 rounded bg-gold text-primary-foreground text-xs font-mono"
+                    className="px-3 py-1.5 rounded-lg number-slot-selected text-xs font-mono font-bold"
                   >
                     {formatRaffleNumber(num, 5)}
                   </span>
@@ -284,7 +307,7 @@ export function NumberSelector({
         <Button
           onClick={handleConfirm}
           disabled={selectedNumbers.size !== quantityToSelect || isLoading}
-          className="w-full py-6 text-lg bg-gradient-gold hover:opacity-90 text-primary-foreground shadow-gold transition-all duration-300 disabled:opacity-50"
+          className="btn-luck w-full py-7 text-lg font-bold uppercase tracking-wider"
         >
           {isLoading ? (
             <>
@@ -293,8 +316,9 @@ export function NumberSelector({
             </>
           ) : (
             <>
-              <Check className="w-5 h-5 mr-2" />
+              <span className="mr-2">🍀</span>
               Confirmar {quantityToSelect} números
+              <Check className="w-5 h-5 ml-2" />
             </>
           )}
         </Button>

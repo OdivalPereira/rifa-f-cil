@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Slider } from '@/components/ui/slider';
 import { buyerSchema, type BuyerFormData, formatCurrency } from '@/lib/validators';
-import { User, Mail, Phone, Hash, ArrowRight, Sparkles, Star, Coins } from 'lucide-react';
+import { User, Mail, Phone, Hash, ArrowRight, Sparkles, Star, Coins, Zap } from 'lucide-react';
 
 interface BuyerFormProps {
   pricePerNumber: number;
@@ -37,11 +37,19 @@ export function BuyerForm({ pricePerNumber, maxNumbers, onSubmit, isLoading }: B
   const quantityPresets = [5, 10, 20, 50, 100];
 
   return (
-    <Card className="w-full max-w-lg mx-auto card-jackpot border-emerald/20 overflow-hidden">
-      {/* Decorative header */}
+    <Card className="w-full max-w-lg mx-auto card-jackpot border-gold/20 overflow-hidden">
+      {/* Decorative header bar */}
       <div className="h-2 bg-gradient-luck" />
       
-      <CardHeader className="text-center space-y-3 pt-8">
+      <CardHeader className="text-center space-y-3 pt-8 relative">
+        {/* Corner decorations */}
+        <div className="absolute top-4 left-4 text-gold/20">
+          <Star className="w-6 h-6" />
+        </div>
+        <div className="absolute top-4 right-4 text-emerald/20">
+          <Sparkles className="w-6 h-6" />
+        </div>
+        
         <div className="mx-auto w-16 h-16 rounded-full bg-gradient-luck flex items-center justify-center mb-2 glow-emerald animate-pulse-glow">
           <span className="text-3xl">🍀</span>
         </div>
@@ -63,7 +71,7 @@ export function BuyerForm({ pricePerNumber, maxNumbers, onSubmit, isLoading }: B
               id="name"
               placeholder="Seu nome completo"
               {...register('name')}
-              className={`bg-secondary/50 border-border focus:border-emerald focus:ring-emerald/20 ${errors.name ? 'border-destructive' : ''}`}
+              className={`input-casino ${errors.name ? 'border-destructive' : ''}`}
             />
             {errors.name && (
               <p className="text-sm text-destructive">{errors.name.message}</p>
@@ -81,7 +89,7 @@ export function BuyerForm({ pricePerNumber, maxNumbers, onSubmit, isLoading }: B
               type="email"
               placeholder="seu@email.com"
               {...register('email')}
-              className={`bg-secondary/50 border-border focus:border-emerald focus:ring-emerald/20 ${errors.email ? 'border-destructive' : ''}`}
+              className={`input-casino ${errors.email ? 'border-destructive' : ''}`}
             />
             {errors.email && (
               <p className="text-sm text-destructive">{errors.email.message}</p>
@@ -98,7 +106,7 @@ export function BuyerForm({ pricePerNumber, maxNumbers, onSubmit, isLoading }: B
               id="phone"
               placeholder="(11) 99999-9999"
               {...register('phone')}
-              className={`bg-secondary/50 border-border focus:border-emerald focus:ring-emerald/20 ${errors.phone ? 'border-destructive' : ''}`}
+              className={`input-casino ${errors.phone ? 'border-destructive' : ''}`}
             />
             {errors.phone && (
               <p className="text-sm text-destructive">{errors.phone.message}</p>
@@ -122,8 +130,8 @@ export function BuyerForm({ pricePerNumber, maxNumbers, onSubmit, isLoading }: B
                   size="sm"
                   onClick={() => setQuantity(preset)}
                   className={quantity === preset 
-                    ? 'bg-emerald hover:bg-emerald-light text-primary-foreground glow-emerald' 
-                    : 'border-emerald/30 hover:border-emerald hover:bg-emerald/10'
+                    ? 'bg-emerald hover:bg-emerald-light text-primary-foreground glow-emerald border-0' 
+                    : 'border-emerald/30 hover:border-emerald hover:bg-emerald/10 bg-transparent'
                   }
                 >
                   {preset}
@@ -144,7 +152,7 @@ export function BuyerForm({ pricePerNumber, maxNumbers, onSubmit, isLoading }: B
               <div className="flex justify-between text-sm text-muted-foreground">
                 <span>1</span>
                 <span className="text-emerald font-bold text-lg flex items-center gap-1">
-                  <Star className="w-4 h-4 text-gold" />
+                  <Star className="w-4 h-4 text-gold animate-sparkle" />
                   {quantity} números
                 </span>
                 <span>{Math.min(500, maxNumbers)}</span>
@@ -153,9 +161,12 @@ export function BuyerForm({ pricePerNumber, maxNumbers, onSubmit, isLoading }: B
           </div>
 
           {/* Resumo */}
-          <div className="p-5 rounded-xl bg-gradient-jackpot border border-gold/30 relative overflow-hidden">
-            <div className="absolute top-2 right-2 text-gold/30">
+          <div className="p-5 rounded-xl bg-gradient-to-br from-gold/10 via-purple/5 to-emerald/10 border border-gold/30 relative overflow-hidden">
+            <div className="absolute top-2 right-2 text-gold/20">
               <Coins className="w-8 h-8" />
+            </div>
+            <div className="absolute bottom-2 left-2 text-purple/10">
+              <Zap className="w-6 h-6" />
             </div>
             <div className="flex justify-between items-center relative z-10">
               <div>

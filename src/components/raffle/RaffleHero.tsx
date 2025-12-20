@@ -1,6 +1,6 @@
 import { formatCurrency } from '@/lib/validators';
 import { Button } from '@/components/ui/button';
-import { Ticket, Gift, Timer, Sparkles, Star, Coins } from 'lucide-react';
+import { Ticket, Gift, Timer, Sparkles, Star, Coins, Trophy, Zap } from 'lucide-react';
 
 interface RaffleHeroProps {
   title: string;
@@ -29,40 +29,33 @@ export function RaffleHero({
   const availableNumbers = totalNumbers - soldNumbers;
 
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden pattern-casino">
+    <section className="relative min-h-screen flex items-center justify-center overflow-hidden py-8">
       {/* Background decorations */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
         {/* Glow orbs */}
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-emerald/10 rounded-full blur-3xl animate-pulse-slow" />
-        <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-purple/15 rounded-full blur-3xl animate-pulse-slow" style={{ animationDelay: '1s' }} />
-        <div className="absolute top-1/2 right-1/3 w-64 h-64 bg-gold/10 rounded-full blur-3xl animate-pulse-slow" style={{ animationDelay: '2s' }} />
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-emerald/5 rounded-full blur-3xl animate-pulse-slow" />
+        <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-purple/10 rounded-full blur-3xl animate-pulse-slow" style={{ animationDelay: '1s' }} />
+        <div className="absolute top-1/2 right-1/3 w-64 h-64 bg-gold/5 rounded-full blur-3xl animate-pulse-slow" style={{ animationDelay: '2s' }} />
         
         {/* Floating decorations */}
-        <div className="absolute top-20 left-10 text-gold/30 animate-float">
+        <div className="absolute top-20 left-10 text-gold/20 animate-float">
           <Coins className="w-12 h-12" />
         </div>
-        <div className="absolute top-40 right-20 text-emerald/30 animate-float" style={{ animationDelay: '1s' }}>
+        <div className="absolute top-40 right-20 text-emerald/20 animate-float" style={{ animationDelay: '1s' }}>
           <Star className="w-8 h-8" />
         </div>
-        <div className="absolute bottom-32 left-20 text-purple/30 animate-float" style={{ animationDelay: '2s' }}>
+        <div className="absolute bottom-32 left-20 text-purple/20 animate-float" style={{ animationDelay: '2s' }}>
           <Sparkles className="w-10 h-10" />
         </div>
-        <div className="absolute bottom-20 right-32 text-gold/20 animate-float" style={{ animationDelay: '0.5s' }}>
-          <Star className="w-6 h-6" />
-        </div>
-        
-        {/* Large decorative clover */}
-        <div className="absolute -top-20 -right-20 text-emerald/5 rotate-12">
-          <svg className="w-96 h-96" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M12 2C9.79 2 8 3.79 8 6c0 1.1.45 2.1 1.17 2.83L12 12l2.83-3.17C15.55 8.1 16 7.1 16 6c0-2.21-1.79-4-4-4zm0 20c2.21 0 4-1.79 4-4 0-1.1-.45-2.1-1.17-2.83L12 12l-2.83 3.17C8.45 15.9 8 16.9 8 18c0 2.21 1.79 4 4 4zM2 12c0 2.21 1.79 4 4 4 1.1 0 2.1-.45 2.83-1.17L12 12 8.83 9.17C8.1 8.45 7.1 8 6 8c-2.21 0-4 1.79-4 4zm20 0c0-2.21-1.79-4-4-4-1.1 0-2.1.45-2.83 1.17L12 12l3.17 2.83c.73.72 1.73 1.17 2.83 1.17 2.21 0 4-1.79 4-4z"/>
-          </svg>
+        <div className="absolute bottom-20 right-32 text-gold/15 animate-float" style={{ animationDelay: '0.5s' }}>
+          <Trophy className="w-8 h-8" />
         </div>
       </div>
 
-      <div className="container mx-auto px-4 py-16 relative z-10">
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
+      <div className="container mx-auto px-4 relative z-10">
+        <div className="grid lg:grid-cols-2 gap-8 items-center">
           {/* Left: Content */}
-          <div className="space-y-8 animate-fade-in">
+          <div className="space-y-6 animate-fade-in">
             {/* Badge */}
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald/10 border border-emerald/30 glow-emerald">
               <span className="text-emerald animate-sparkle">🍀</span>
@@ -82,35 +75,52 @@ export function RaffleHero({
               </p>
             )}
 
-            {/* Prize */}
-            <div className="card-jackpot flex items-start gap-4 p-6 rounded-xl border border-gold/20">
-              <div className="p-3 rounded-lg bg-gradient-gold animate-bounce-soft">
-                <Gift className="w-6 h-6 text-purple-dark" />
+            {/* Prize Card */}
+            <div className="card-jackpot p-6 rounded-xl border border-gold/30 relative overflow-hidden">
+              <div className="absolute top-2 right-2 text-gold/20">
+                <Trophy className="w-12 h-12" />
               </div>
-              <div>
-                <p className="text-sm text-gold font-medium mb-1">🎁 PRÊMIO</p>
-                <p className="text-xl font-bold text-foreground">{prizeDescription}</p>
+              <div className="flex items-start gap-4 relative z-10">
+                <div className="p-3 rounded-lg bg-gradient-gold animate-pulse-glow shrink-0">
+                  <Gift className="w-6 h-6 text-purple-dark" />
+                </div>
+                <div>
+                  <p className="text-sm text-gold font-medium mb-1 flex items-center gap-1">
+                    <Zap className="w-3 h-3" />
+                    GRANDE PRÊMIO
+                  </p>
+                  <p className="text-xl font-bold text-foreground">{prizeDescription}</p>
+                </div>
               </div>
             </div>
 
             {/* Stats */}
-            <div className="grid grid-cols-3 gap-4">
-              <div className="text-center p-4 rounded-lg card-casino border border-emerald/20">
+            <div className="grid grid-cols-3 gap-3">
+              <div className="card-casino text-center p-4 rounded-xl border border-emerald/20">
+                <div className="w-10 h-10 mx-auto mb-2 rounded-lg bg-emerald/10 flex items-center justify-center">
+                  <Ticket className="w-5 h-5 text-emerald" />
+                </div>
                 <p className="text-2xl font-display font-bold text-emerald">{formatCurrency(pricePerNumber)}</p>
                 <p className="text-xs text-muted-foreground">por número</p>
               </div>
-              <div className="text-center p-4 rounded-lg card-casino border border-gold/20">
+              <div className="card-casino text-center p-4 rounded-xl border border-gold/20">
+                <div className="w-10 h-10 mx-auto mb-2 rounded-lg bg-gold/10 flex items-center justify-center">
+                  <Star className="w-5 h-5 text-gold" />
+                </div>
                 <p className="text-2xl font-display font-bold text-gold">{availableNumbers.toLocaleString()}</p>
                 <p className="text-xs text-muted-foreground">disponíveis</p>
               </div>
-              <div className="text-center p-4 rounded-lg card-casino border border-purple/20">
+              <div className="card-casino text-center p-4 rounded-xl border border-purple/20">
+                <div className="w-10 h-10 mx-auto mb-2 rounded-lg bg-purple/10 flex items-center justify-center">
+                  <Coins className="w-5 h-5 text-purple" />
+                </div>
                 <p className="text-2xl font-display font-bold text-purple">{totalNumbers.toLocaleString()}</p>
                 <p className="text-xs text-muted-foreground">total</p>
               </div>
             </div>
 
             {/* Progress bar */}
-            <div className="space-y-3">
+            <div className="card-casino p-4 rounded-xl border border-border space-y-3">
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground flex items-center gap-2">
                   <Ticket className="w-4 h-4 text-emerald" />
@@ -131,8 +141,8 @@ export function RaffleHero({
 
             {/* Draw date */}
             {drawDate && (
-              <div className="flex items-center gap-2 text-muted-foreground bg-secondary/50 px-4 py-2 rounded-lg w-fit">
-                <Timer className="w-4 h-4 text-purple" />
+              <div className="flex items-center gap-2 text-muted-foreground bg-purple/10 border border-purple/20 px-4 py-3 rounded-xl w-fit">
+                <Timer className="w-5 h-5 text-purple" />
                 <span>Sorteio: <span className="text-foreground font-medium">{new Date(drawDate).toLocaleDateString('pt-BR', { 
                   day: '2-digit', 
                   month: 'long', 
@@ -156,8 +166,8 @@ export function RaffleHero({
           </div>
 
           {/* Right: Image */}
-          <div className="relative animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
-            <div className="relative aspect-square rounded-2xl overflow-hidden border-2 border-gold/30 shadow-gold-lg">
+          <div className="relative animate-fade-in" style={{ animationDelay: '0.2s' }}>
+            <div className="relative aspect-square rounded-2xl overflow-hidden border-2 border-gold/30 shadow-gold-lg card-jackpot">
               {imageUrl ? (
                 <img 
                   src={imageUrl} 
@@ -165,9 +175,11 @@ export function RaffleHero({
                   className="w-full h-full object-cover"
                 />
               ) : (
-                <div className="w-full h-full bg-gradient-jackpot flex items-center justify-center">
+                <div className="w-full h-full bg-gradient-to-br from-purple-dark via-background to-emerald-dark flex items-center justify-center">
                   <div className="text-center space-y-4">
-                    <Gift className="w-24 h-24 text-gold/50 mx-auto animate-bounce-soft" />
+                    <div className="w-24 h-24 mx-auto rounded-full bg-gold/10 flex items-center justify-center animate-pulse-glow">
+                      <Gift className="w-12 h-12 text-gold" />
+                    </div>
                     <p className="text-gold/70 font-medium">Prêmio Especial</p>
                   </div>
                 </div>
