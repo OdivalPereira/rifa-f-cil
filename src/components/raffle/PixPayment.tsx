@@ -83,90 +83,90 @@ export function PixPayment({
       {/* Decorative header bar */}
       <div className="h-2 bg-gradient-luck" />
       
-      <CardHeader className="text-center space-y-2 pt-8 relative">
-        {/* Corner decorations */}
-        <div className="absolute top-4 left-4 text-gold/20">
+      <CardHeader className="text-center space-y-2 pt-6 sm:pt-8 px-4 sm:px-6 relative">
+        {/* Corner decorations - hidden on mobile */}
+        <div className="absolute top-4 left-4 text-gold/20 hidden sm:block">
           <Coins className="w-6 h-6" />
         </div>
-        <div className="absolute top-4 right-4 text-emerald/20">
+        <div className="absolute top-4 right-4 text-emerald/20 hidden sm:block">
           <Star className="w-6 h-6" />
         </div>
         
-        <div className="mx-auto w-16 h-16 rounded-full bg-gradient-to-br from-emerald to-gold flex items-center justify-center mb-2 glow-emerald animate-pulse-glow">
-          <QrCode className="w-8 h-8 text-primary-foreground" />
+        <div className="mx-auto w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-gradient-to-br from-emerald to-gold flex items-center justify-center mb-2 glow-emerald animate-pulse-glow">
+          <QrCode className="w-6 h-6 sm:w-8 sm:h-8 text-primary-foreground" />
         </div>
-        <CardTitle className="text-2xl font-display text-gradient-luck">Pagamento PIX</CardTitle>
-        <CardDescription>
+        <CardTitle className="text-xl sm:text-2xl font-display text-gradient-luck">Pagamento PIX</CardTitle>
+        <CardDescription className="text-sm">
           Copie a chave PIX e realize o pagamento
         </CardDescription>
       </CardHeader>
 
-      <CardContent className="space-y-6 pb-8">
+      <CardContent className="space-y-4 sm:space-y-6 pb-6 sm:pb-8 px-4 sm:px-6">
         {/* Timer */}
-        <div className="flex items-center justify-center gap-2 p-4 rounded-xl bg-warning/10 border border-warning/30">
-          <Clock className="w-5 h-5 text-warning animate-pulse" />
-          <span className="text-sm">
-            Tempo para pagamento: <span className="font-bold text-warning text-lg">{timeLeft}</span>
+        <div className="flex items-center justify-center gap-2 p-3 sm:p-4 rounded-xl bg-warning/10 border border-warning/30">
+          <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-warning animate-pulse" />
+          <span className="text-xs sm:text-sm">
+            Tempo: <span className="font-bold text-warning text-base sm:text-lg">{timeLeft}</span>
           </span>
         </div>
 
         {/* Amount */}
-        <div className="text-center p-6 rounded-xl bg-gradient-to-br from-gold/10 via-purple/5 to-emerald/10 border border-gold/30 relative overflow-hidden">
-          <div className="absolute top-2 right-2 text-gold/20">
+        <div className="text-center p-4 sm:p-6 rounded-xl bg-gradient-to-br from-gold/10 via-purple/5 to-emerald/10 border border-gold/30 relative overflow-hidden">
+          <div className="absolute top-2 right-2 text-gold/20 hidden sm:block">
             <Zap className="w-6 h-6" />
           </div>
-          <p className="text-sm text-muted-foreground mb-1 flex items-center justify-center gap-1">
+          <p className="text-xs sm:text-sm text-muted-foreground mb-1 flex items-center justify-center gap-1">
             <Sparkles className="w-3 h-3 text-gold" />
             Valor a pagar
           </p>
-          <p className="text-4xl font-display font-bold text-gradient-gold">{formatCurrency(amount)}</p>
+          <p className="text-3xl sm:text-4xl font-display font-bold text-gradient-gold">{formatCurrency(amount)}</p>
         </div>
 
         {/* PIX Key */}
-        <div className="space-y-3">
+        <div className="space-y-2 sm:space-y-3">
           <div className="flex items-center justify-between">
-            <p className="text-sm text-muted-foreground">
+            <p className="text-xs sm:text-sm text-muted-foreground">
               Chave PIX ({getPixKeyTypeLabel(pixKeyType)})
             </p>
           </div>
           <div className="flex gap-2">
-            <div className="flex-1 p-3 rounded-xl card-casino border border-border font-mono text-sm break-all">
+            <div className="flex-1 p-2 sm:p-3 rounded-xl card-casino border border-border font-mono text-xs sm:text-sm break-all">
               {pixKey}
             </div>
             <Button
               variant="outline"
               size="icon"
               onClick={handleCopyPixKey}
-              className="shrink-0 border-gold/30 hover:bg-gold/10 hover:border-gold h-12 w-12"
+              className="shrink-0 border-gold/30 hover:bg-gold/10 hover:border-gold h-10 w-10 sm:h-12 sm:w-12"
             >
               {copied ? (
-                <Check className="w-5 h-5 text-success" />
+                <Check className="w-4 h-4 sm:w-5 sm:h-5 text-success" />
               ) : (
-                <Copy className="w-5 h-5 text-gold" />
+                <Copy className="w-4 h-4 sm:w-5 sm:h-5 text-gold" />
               )}
             </Button>
           </div>
         </div>
 
         {/* Beneficiary */}
-        <div className="p-4 rounded-xl card-casino border border-border">
-          <p className="text-sm text-muted-foreground">Favorecido</p>
-          <p className="font-medium text-foreground">{beneficiaryName}</p>
+        <div className="p-3 sm:p-4 rounded-xl card-casino border border-border">
+          <p className="text-xs sm:text-sm text-muted-foreground">Favorecido</p>
+          <p className="font-medium text-foreground text-sm sm:text-base">{beneficiaryName}</p>
         </div>
 
         {/* Purchase ID */}
-        <div className="p-4 rounded-xl card-casino border border-border">
-          <p className="text-sm text-muted-foreground">Código da compra</p>
-          <p className="font-mono text-sm text-emerald font-bold">{purchaseId.slice(0, 8).toUpperCase()}</p>
+        <div className="p-3 sm:p-4 rounded-xl card-casino border border-border">
+          <p className="text-xs sm:text-sm text-muted-foreground">Código da compra</p>
+          <p className="font-mono text-xs sm:text-sm text-emerald font-bold">{purchaseId.slice(0, 8).toUpperCase()}</p>
         </div>
 
         {/* Instructions */}
-        <div className="space-y-3 p-5 rounded-xl card-casino border border-emerald/20">
-          <p className="font-medium flex items-center gap-2 text-foreground">
+        <div className="space-y-2 sm:space-y-3 p-3 sm:p-5 rounded-xl card-casino border border-emerald/20">
+          <p className="font-medium flex items-center gap-2 text-foreground text-sm sm:text-base">
             <AlertCircle className="w-4 h-4 text-gold" />
             Instruções
           </p>
-          <ol className="text-sm text-muted-foreground space-y-2 list-decimal list-inside">
+          <ol className="text-xs sm:text-sm text-muted-foreground space-y-1 sm:space-y-2 list-decimal list-inside">
             <li>Copie a chave PIX acima</li>
             <li>Abra o aplicativo do seu banco</li>
             <li>Faça um PIX usando a chave copiada</li>
@@ -176,10 +176,10 @@ export function PixPayment({
         </div>
 
         {/* Note */}
-        <p className="text-xs text-center text-muted-foreground flex items-center justify-center gap-1">
-          <Sparkles className="w-3 h-3 text-emerald" />
-          Após a confirmação do pagamento, você receberá um e-mail para escolher seus números.
-          <Sparkles className="w-3 h-3 text-emerald" />
+        <p className="text-[10px] sm:text-xs text-center text-muted-foreground flex items-center justify-center gap-1">
+          <Sparkles className="w-2 h-2 sm:w-3 sm:h-3 text-emerald" />
+          Após a confirmação, você receberá um e-mail para escolher seus números.
+          <Sparkles className="w-2 h-2 sm:w-3 sm:h-3 text-emerald" />
         </p>
       </CardContent>
     </Card>

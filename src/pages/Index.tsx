@@ -131,21 +131,22 @@ export default function Index() {
     <SlotMachineFrame showDecorations={step === 'hero' || step === 'success'}>
       {/* Header */}
       <header className="sticky top-0 z-50 bg-card/80 backdrop-blur-md border-b border-gold/20">
-        <div className="container mx-auto px-4 h-14 flex items-center justify-between">
+        <div className="container mx-auto px-3 sm:px-4 h-12 sm:h-14 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Clover className="w-6 h-6 text-emerald clover-icon" />
-            <span className="font-display font-bold text-lg text-gradient-gold">Rifa da Sorte</span>
+            <Clover className="w-5 h-5 sm:w-6 sm:h-6 text-emerald clover-icon" />
+            <span className="font-display font-bold text-base sm:text-lg text-gradient-gold">Rifa da Sorte</span>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1 sm:gap-3">
             <Link to="/meus-numeros">
-              <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-gold hover:bg-gold/10">
-                <Search className="w-4 h-4 mr-2" />
-                Meus Números
+              <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-gold hover:bg-gold/10 px-2 sm:px-3">
+                <Search className="w-4 h-4 sm:mr-2" />
+                <span className="hidden sm:inline">Meus Números</span>
               </Button>
             </Link>
             <Link to="/admin">
-              <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-purple hover:bg-purple/10">
-                Admin
+              <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-purple hover:bg-purple/10 px-2 sm:px-3">
+                <span className="hidden sm:inline">Admin</span>
+                <span className="sm:hidden text-xs">Admin</span>
               </Button>
             </Link>
           </div>
@@ -168,7 +169,7 @@ export default function Index() {
         )}
 
         {step === 'form' && (
-          <div className="min-h-[calc(100vh-3.5rem)] flex items-center justify-center p-4">
+          <div className="min-h-[calc(100vh-3rem)] sm:min-h-[calc(100vh-3.5rem)] flex items-center justify-center p-3 sm:p-4">
             <BuyerForm
               pricePerNumber={Number(raffle.price_per_number)}
               maxNumbers={raffle.total_numbers - soldNumbers.length}
@@ -179,8 +180,8 @@ export default function Index() {
         )}
 
         {step === 'payment' && purchaseData && raffle.pix_key && (
-          <div className="min-h-[calc(100vh-3.5rem)] flex items-center justify-center p-4">
-            <div className="space-y-6">
+          <div className="min-h-[calc(100vh-3rem)] sm:min-h-[calc(100vh-3.5rem)] flex items-center justify-center p-3 sm:p-4">
+            <div className="space-y-4 sm:space-y-6 w-full max-w-lg">
               <PixPayment
                 amount={purchaseData.amount}
                 pixKey={raffle.pix_key}
@@ -189,13 +190,14 @@ export default function Index() {
                 purchaseId={purchaseData.id}
                 expiresAt={purchaseData.expiresAt}
               />
-              <div className="text-center">
+              <div className="text-center px-4">
                 <Button 
                   onClick={() => setStep('numbers')}
-                  className="btn-luck text-primary-foreground font-bold"
+                  className="btn-luck text-primary-foreground font-bold w-full sm:w-auto text-sm sm:text-base py-4 sm:py-5"
                 >
                   <Sparkles className="w-4 h-4 mr-2" />
-                  Já paguei - Escolher meus números da sorte
+                  <span className="hidden sm:inline">Já paguei - Escolher meus números</span>
+                  <span className="sm:hidden">Já paguei - Escolher números</span>
                 </Button>
               </div>
             </div>
@@ -203,7 +205,7 @@ export default function Index() {
         )}
 
         {step === 'numbers' && purchaseData && (
-          <div className="min-h-[calc(100vh-3.5rem)] flex items-center justify-center p-4">
+          <div className="min-h-[calc(100vh-3rem)] sm:min-h-[calc(100vh-3.5rem)] flex items-center justify-center p-2 sm:p-4">
             <NumberSelector
               raffleId={raffle.id}
               totalNumbers={raffle.total_numbers}
@@ -217,35 +219,35 @@ export default function Index() {
         )}
 
         {step === 'success' && (
-          <div className="min-h-[calc(100vh-3.5rem)] flex items-center justify-center p-4">
-            <div className="text-center space-y-8 max-w-md">
+          <div className="min-h-[calc(100vh-3rem)] sm:min-h-[calc(100vh-3.5rem)] flex items-center justify-center p-4">
+            <div className="text-center space-y-6 sm:space-y-8 max-w-md">
               {/* Animated success icon */}
               <div className="relative inline-block">
-                <div className="w-32 h-32 rounded-full bg-gradient-to-br from-emerald to-emerald-light flex items-center justify-center mx-auto glow-emerald animate-pulse-glow">
-                  <Clover className="w-16 h-16 text-primary-foreground" />
+                <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-full bg-gradient-to-br from-emerald to-emerald-light flex items-center justify-center mx-auto glow-emerald animate-pulse-glow">
+                  <Clover className="w-12 h-12 sm:w-16 sm:h-16 text-primary-foreground" />
                 </div>
-                <Star className="w-10 h-10 text-gold absolute -top-2 -right-2 animate-sparkle" />
-                <Sparkles className="w-8 h-8 text-gold absolute -bottom-1 -left-1 animate-sparkle" style={{ animationDelay: '0.5s' }} />
+                <Star className="w-8 h-8 sm:w-10 sm:h-10 text-gold absolute -top-2 -right-2 animate-sparkle" />
+                <Sparkles className="w-6 h-6 sm:w-8 sm:h-8 text-gold absolute -bottom-1 -left-1 animate-sparkle" style={{ animationDelay: '0.5s' }} />
               </div>
               
-              <div className="space-y-3">
-                <h1 className="text-4xl font-display font-bold text-gradient-gold">Números Reservados!</h1>
-                <p className="text-xl text-emerald font-medium">Boa sorte no sorteio! 🎰</p>
+              <div className="space-y-2 sm:space-y-3">
+                <h1 className="text-2xl sm:text-4xl font-display font-bold text-gradient-gold">Números Reservados!</h1>
+                <p className="text-lg sm:text-xl text-emerald font-medium">Boa sorte no sorteio! 🎰</p>
               </div>
               
-              <p className="text-muted-foreground">
+              <p className="text-sm sm:text-base text-muted-foreground px-4">
                 Seus números da sorte foram reservados. Após a confirmação do pagamento, você receberá um e-mail de confirmação.
               </p>
               
-              <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <div className="flex flex-col gap-3 justify-center px-4">
                 <Button 
                   onClick={() => setStep('hero')} 
-                  className="btn-luck text-primary-foreground font-bold"
+                  className="btn-luck text-primary-foreground font-bold w-full"
                 >
-                  <Clover className="w-5 h-5 mr-2" />
+                  <Clover className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
                   Voltar ao início
                 </Button>
-                <Link to="/meus-numeros">
+                <Link to="/meus-numeros" className="w-full">
                   <Button variant="outline" className="border-gold/30 hover:border-gold hover:bg-gold/10 w-full">
                     <Star className="w-4 h-4 mr-2 text-gold" />
                     Ver meus números
