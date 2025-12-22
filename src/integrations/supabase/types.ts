@@ -175,6 +175,63 @@ export type Database = {
         }
         Relationships: []
       }
+      spin_balance: {
+        Row: {
+          created_at: string
+          email: string | null
+          id: string
+          phone: string | null
+          spins_available: number
+          total_spins: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          phone?: string | null
+          spins_available?: number
+          total_spins?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          phone?: string | null
+          spins_available?: number
+          total_spins?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      spin_history: {
+        Row: {
+          created_at: string
+          email: string | null
+          id: string
+          phone: string | null
+          prize_type: string
+          prize_value: Json
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          phone?: string | null
+          prize_type: string
+          prize_value: Json
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          phone?: string | null
+          prize_type?: string
+          prize_value?: Json
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
