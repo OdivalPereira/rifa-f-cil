@@ -154,6 +154,11 @@ export type Database = {
           pix_key_type: string | null
           price_per_number: number
           prize_description: string
+          prize_top_buyer: string | null
+          prize_top_buyer_details: string | null
+          prize_second_top_buyer: string | null
+          prize_second_top_buyer_details: string | null
+          prize_draw_details: string | null
           status: Database["public"]["Enums"]["raffle_status"]
           title: string
           total_numbers: number
@@ -172,6 +177,11 @@ export type Database = {
           pix_key_type?: string | null
           price_per_number?: number
           prize_description: string
+          prize_top_buyer?: string | null
+          prize_top_buyer_details?: string | null
+          prize_second_top_buyer?: string | null
+          prize_second_top_buyer_details?: string | null
+          prize_draw_details?: string | null
           status?: Database["public"]["Enums"]["raffle_status"]
           title: string
           total_numbers?: number
@@ -190,6 +200,11 @@ export type Database = {
           pix_key_type?: string | null
           price_per_number?: number
           prize_description?: string
+          prize_top_buyer?: string | null
+          prize_top_buyer_details?: string | null
+          prize_second_top_buyer?: string | null
+          prize_second_top_buyer_details?: string | null
+          prize_draw_details?: string | null
           status?: Database["public"]["Enums"]["raffle_status"]
           title?: string
           total_numbers?: number
