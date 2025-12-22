@@ -1,9 +1,22 @@
+/**
+ * Lucky Wheel Feature - DISABLED
+ * 
+ * This component was disabled on 2024-12-22.
+ * To re-enable, move this file back to src/components/spin-wheel/PrizeWheel.tsx
+ * and restore the imports in MyNumbers.tsx
+ * 
+ * Dependencies:
+ * - useSpinRewards hook (src/_disabled/lucky-wheel/useSpinRewards.ts)
+ * - spin-wheel edge function (supabase/functions/spin-wheel/index.ts)
+ * - spin_balance table (database)
+ * - spin_history table (database)
+ */
 
 import React, { useEffect, useRef, useState } from 'react';
 import confetti from 'canvas-confetti';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
-import { useSpinRewards } from '@/hooks/useSpinRewards';
+import { useSpinRewards } from './useSpinRewards';
 import { Loader2, Sparkles, Trophy } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -172,10 +185,6 @@ export function PrizeWheel({ email, phone, onSpinComplete }: PrizeWheelProps) {
       }
 
       const { prize } = result;
-      // Find the target segment index
-      // Since there are multiple segments with same prize, pick one randomly or specific one?
-      // Visual distribution has multiple '+1', etc.
-      // We should pick one that matches the prize type and value.
       const matchingIndices = SEGMENTS.map((s, i) =>
         (s.type === prize.type && s.value == prize.value) ? i : -1
       ).filter(i => i !== -1);
@@ -189,56 +198,18 @@ export function PrizeWheel({ email, phone, onSpinComplete }: PrizeWheelProps) {
       // Pick random matching segment to vary visual result
       const targetIndex = matchingIndices[Math.floor(Math.random() * matchingIndices.length)];
 
-      // Calculate rotation to land on targetIndex
-      // The pointer is at TOP (-90 deg or 270 deg).
-      // Each segment is `arcSize`.
-      // Segment i starts at `i * arcSize - PI/2`.
-      // Center of segment i is `i * arcSize - PI/2 + arcSize/2`.
-      // We want this angle to align with PI/2 (Bottom) ? No, pointer is at Top (3*PI/2 or -PI/2).
-      // Actually, if we rotate the CANVAS/WHEEL, the pointer stays static.
-      // If we rotate the wheel by R, the segment at angle A moves to A + R.
-      // We want A + R = PointerAngle.
-      // Pointer is at Top (270 degrees or -90). Let's use 270 (3PI/2).
-      // A = targetIndex * arcSize. (Assuming 0 is at 3 o'clock in canvas arc).
-      // In my draw code: `i * arcSize - Math.PI / 2`.
-      // So segment 0 is at -90 deg (Top).
-      // So if targetIndex is 0, we want rotation to be 0 (or 360).
-      // If targetIndex is 1, it's at -90 + arcSize. We need to rotate it BACK by arcSize to reach -90.
-      // So Rotation = - (targetIndex * arcSize).
-      // Add multiple full rotations (e.g. 5 * 360).
-
       const arcSize = 360 / SEGMENTS.length;
-      // Target angle relative to 0 index.
-      // If index 0 is at top, and we want index 5 to be at top.
-      // We need to rotate the wheel counter-clockwise by 5 * arcSize.
-      // Or clockwise by (Total - 5) * arcSize.
-
-      // Calculate rotation
-      // Current rotation modulo 360 gives us current position.
-      // But we just want to ADD rotation.
-
       const currentRotation = rotation;
-      // We want to end up at (360 - (targetIndex * arcSize)).
-      // Let's say TargetAngle = 360 - (targetIndex * arcSize).
-      // We want nextRotation = currentRotation + (some spins) + diff.
-      // nextRotation % 360 = TargetAngle.
-
       const TargetAngle = (360 - (targetIndex * arcSize));
-      // diff = TargetAngle - (currentRotation % 360)
       let diff = TargetAngle - (currentRotation % 360);
       if (diff < 0) diff += 360;
 
       const targetRotation = currentRotation + (360 * 5) + diff;
-
-      // Animate
-      // We can use CSS transition for rotation
       setRotation(targetRotation);
 
       // Wait for animation to finish (e.g. 5s)
       setTimeout(() => {
         setIsSpinning(false);
-        // Do not reset rotation to 0 to avoid jump. Just keep it.
-        // setRotation(0);
 
         if (prize.type === 'retry') {
            setWinMessage("Tente Novamente!");
@@ -299,7 +270,6 @@ export function PrizeWheel({ email, phone, onSpinComplete }: PrizeWheelProps) {
 export function SpinRewardModal({ open, onOpenChange, email, phone }: { open: boolean, onOpenChange: (open: boolean) => void, email?: string, phone?: string }) {
     const handleComplete = () => {
         // Refresh or just stay open?
-        // Maybe close after a delay?
     }
 
     return (

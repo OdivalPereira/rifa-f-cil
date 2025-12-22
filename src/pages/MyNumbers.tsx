@@ -3,34 +3,20 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useMyPurchases } from '@/hooks/useRaffle';
 import { formatCurrency, formatRaffleNumber } from '@/lib/validators';
-import { Search, ArrowLeft, Clover, Sparkles, Star, Trophy, Gift } from 'lucide-react';
+import { Search, ArrowLeft, Clover, Sparkles, Star, Trophy } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { SlotMachineFrame } from '@/components/SlotMachineFrame';
-import { SpinRewardModal } from '@/components/spin-wheel/PrizeWheel';
-import { useSpinRewards } from '@/hooks/useSpinRewards';
-import { useEffect } from 'react';
 
 export default function MyNumbers() {
   const [searchValue, setSearchValue] = useState('');
   const [searchType, setSearchType] = useState<'email' | 'phone'>('email');
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState('');
-  const [showWheel, setShowWheel] = useState(false);
-  const [spinsAvailable, setSpinsAvailable] = useState(0);
 
   const email = searchType === 'email' && submitted ? searchValue : '';
   const phone = searchType === 'phone' && submitted ? searchValue : '';
 
   const { data: purchases, isLoading } = useMyPurchases(email, phone);
-  const { getBalance } = useSpinRewards();
-
-  useEffect(() => {
-    if (submitted && (email || phone)) {
-      getBalance(email || undefined, phone || undefined).then(balance => {
-        setSpinsAvailable(balance?.spins_available ?? 0);
-      });
-    }
-  }, [submitted, email, phone]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -76,19 +62,6 @@ export default function MyNumbers() {
 
         {/* Main content */}
         <main className="container mx-auto px-3 sm:px-4 py-4 sm:py-8 max-w-2xl">
-
-          {spinsAvailable > 0 && (
-            <div className="mb-6 animate-bounce">
-               <Button
-                 onClick={() => setShowWheel(true)}
-                 className="w-full bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 text-white font-bold py-8 text-xl shadow-lg border-2 border-white/20"
-               >
-                  <Gift className="w-8 h-8 mr-3 animate-pulse" />
-                  VOCÊ TEM {spinsAvailable} GIROS GRÁTIS!
-                  <Sparkles className="w-6 h-6 ml-3 text-yellow-300 animate-spin" />
-               </Button>
-            </div>
-          )}
 
           <div className="card-jackpot p-4 sm:p-6">
             {/* Header */}
@@ -245,21 +218,6 @@ export default function MyNumbers() {
           </div>
         </main>
       </div>
-
-      <SpinRewardModal
-        open={showWheel}
-        onOpenChange={(open) => {
-            setShowWheel(open);
-            // Refresh balance when closed
-            if (!open && (email || phone)) {
-                getBalance(email || undefined, phone || undefined).then(balance => {
-                    setSpinsAvailable(balance?.spins_available ?? 0);
-                });
-            }
-        }}
-        email={email || undefined}
-        phone={phone || undefined}
-      />
     </SlotMachineFrame>
   );
 }

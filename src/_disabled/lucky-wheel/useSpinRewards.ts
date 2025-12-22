@@ -1,3 +1,10 @@
+/**
+ * Lucky Wheel Feature - DISABLED
+ * 
+ * This hook was disabled on 2024-12-22.
+ * To re-enable, move this file back to src/hooks/useSpinRewards.ts
+ */
+
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
