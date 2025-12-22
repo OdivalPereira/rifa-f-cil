@@ -14,6 +14,30 @@ export type Database = {
   }
   public: {
     Tables: {
+      customer_accounts: {
+        Row: {
+          created_at: string
+          id: string
+          phone: string
+          pin_hash: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          phone: string
+          pin_hash: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          phone?: string
+          pin_hash?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       purchases: {
         Row: {
           approved_at: string | null

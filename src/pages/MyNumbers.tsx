@@ -1,31 +1,27 @@
-import { useState } from 'react';
+import { useEffect } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { useMyPurchases } from '@/hooks/useRaffle';
 import { formatCurrency, formatRaffleNumber } from '@/lib/validators';
-import { Search, ArrowLeft, Clover, Sparkles, Star, Trophy } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { ArrowLeft, Clover, Sparkles, Star, Trophy, LogOut } from 'lucide-react';
 import { SlotMachineFrame } from '@/components/SlotMachineFrame';
+import { useCustomerAuth } from '@/hooks/useCustomerAuth';
 
 export default function MyNumbers() {
-  const [searchValue, setSearchValue] = useState('');
-  const [searchType, setSearchType] = useState<'email' | 'phone'>('email');
-  const [submitted, setSubmitted] = useState(false);
-  const [error, setError] = useState('');
+  const navigate = useNavigate();
+  const { isAuthenticated, phone, isLoading: authLoading, logout } = useCustomerAuth();
 
-  const email = searchType === 'email' && submitted ? searchValue : '';
-  const phone = searchType === 'phone' && submitted ? searchValue : '';
-
-  const { data: purchases, isLoading } = useMyPurchases(email, phone);
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!searchValue.trim()) {
-      setError('Por favor, preencha este campo.');
-      return;
+  // Redirect to /conta if not authenticated
+  useEffect(() => {
+    if (!authLoading && !isAuthenticated) {
+      navigate('/conta');
     }
-    setSubmitted(true);
-  };
+  }, [authLoading, isAuthenticated, navigate]);
+
+  // Fetch purchases using the authenticated phone
+  const { data: purchases, isLoading: purchasesLoading } = useMyPurchases('', phone || '');
+
+  const isLoading = authLoading || purchasesLoading;
 
   const getStatusLabel = (status: string) => {
     const labels: Record<string, { text: string; color: string; icon: React.ReactNode }> = {
@@ -37,26 +33,69 @@ export default function MyNumbers() {
     return labels[status] || { text: status, color: '', icon: null };
   };
 
+  const handleLogout = () => {
+    logout();
+    navigate('/conta');
+  };
+
+  // Format phone for display
+  const formatPhoneDisplay = (phoneNumber: string) => {
+    if (!phoneNumber) return '';
+    const digits = phoneNumber.replace(/\D/g, '');
+    if (digits.length === 11) {
+      return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
+    }
+    if (digits.length === 10) {
+      return `(${digits.slice(0, 2)}) ${digits.slice(2, 6)}-${digits.slice(6)}`;
+    }
+    return phoneNumber;
+  };
+
+  if (authLoading) {
+    return (
+      <SlotMachineFrame>
+        <div className="min-h-screen flex items-center justify-center">
+          <Clover className="w-10 h-10 animate-spin text-gold" />
+        </div>
+      </SlotMachineFrame>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return null; // Will redirect
+  }
+
   return (
     <SlotMachineFrame>
       <div className="min-h-screen">
         {/* Header */}
         <header className="relative z-10 border-b border-gold/20 bg-card/50 backdrop-blur-sm">
-          <div className="container mx-auto px-3 sm:px-4 h-14 sm:h-16 flex items-center gap-2 sm:gap-4">
-            <Link to="/">
-              <Button
-                variant="ghost"
-                size="icon"
-                className="hover:bg-gold/10 hover:text-gold h-9 w-9 sm:h-10 sm:w-10"
-                aria-label="Voltar para início"
-              >
-                <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />
-              </Button>
-            </Link>
-            <div className="flex items-center gap-2 sm:gap-3">
-              <Clover className="w-5 h-5 sm:w-6 sm:h-6 text-emerald clover-icon" />
-              <span className="font-display font-semibold text-base sm:text-lg text-gradient-gold">Meus Números</span>
+          <div className="container mx-auto px-3 sm:px-4 h-14 sm:h-16 flex items-center justify-between">
+            <div className="flex items-center gap-2 sm:gap-4">
+              <Link to="/">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="hover:bg-gold/10 hover:text-gold h-9 w-9 sm:h-10 sm:w-10"
+                  aria-label="Voltar para início"
+                >
+                  <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />
+                </Button>
+              </Link>
+              <div className="flex items-center gap-2 sm:gap-3">
+                <Clover className="w-5 h-5 sm:w-6 sm:h-6 text-emerald clover-icon" />
+                <span className="font-display font-semibold text-base sm:text-lg text-gradient-gold">Meus Números</span>
+              </div>
             </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleLogout}
+              className="text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+            >
+              <LogOut className="w-4 h-4 mr-2" />
+              <span className="hidden sm:inline">Sair</span>
+            </Button>
           </div>
         </header>
 
@@ -71,92 +110,34 @@ export default function MyNumbers() {
                 <Trophy className="w-6 h-6 sm:w-8 sm:h-8 text-gold" />
                 <Star className="w-4 h-4 sm:w-5 sm:h-5 text-gold animate-sparkle" style={{ animationDelay: '0.5s' }} />
               </div>
-              <h1 className="text-xl sm:text-2xl font-display text-gradient-gold">Consultar Meus Números</h1>
-              <p className="text-muted-foreground mt-1 sm:mt-2 text-sm">Busque suas compras por e-mail ou telefone</p>
+              <h1 className="text-xl sm:text-2xl font-display text-gradient-gold">Meus Números da Sorte</h1>
+              <p className="text-muted-foreground mt-1 sm:mt-2 text-sm">
+                Telefone: {formatPhoneDisplay(phone || '')}
+              </p>
             </div>
-            
-            {/* Search form */}
-            <form onSubmit={handleSearch} className="space-y-3 sm:space-y-4 relative z-10">
-              <div className="flex gap-2">
-                <Button
-                  type="button"
-                  variant="ghost"
-                  onClick={() => { setSearchType('email'); setSubmitted(false); setError(''); }}
-                  className={`flex-1 h-10 sm:h-11 font-medium transition-all text-sm ${
-                    searchType === 'email' 
-                      ? 'bg-gold/20 text-gold border border-gold/40 hover:bg-gold/30' 
-                      : 'border border-border/50 hover:bg-muted/50'
-                  }`}
-                >
-                  E-mail
-                </Button>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  onClick={() => { setSearchType('phone'); setSubmitted(false); setError(''); }}
-                  className={`flex-1 h-10 sm:h-11 font-medium transition-all text-sm ${
-                    searchType === 'phone' 
-                      ? 'bg-gold/20 text-gold border border-gold/40 hover:bg-gold/30' 
-                      : 'border border-border/50 hover:bg-muted/50'
-                  }`}
-                >
-                  Telefone
-                </Button>
-              </div>
-              <div className="relative">
-                <div className="flex gap-2">
-                  <Input
-                    type={searchType === 'email' ? 'email' : 'tel'}
-                    inputMode={searchType === 'email' ? 'email' : 'tel'}
-                    placeholder={searchType === 'email' ? 'seu@email.com' : '(11) 99999-9999'}
-                    value={searchValue}
-                    onChange={(e) => {
-                      setSearchValue(e.target.value);
-                      setSubmitted(false);
-                      setError('');
-                    }}
-                    className={`input-casino h-10 sm:h-12 flex-1 text-sm ${error ? 'border-destructive' : ''}`}
-                    aria-invalid={!!error}
-                  />
-                  <Button
-                    type="submit"
-                    className="btn-luck h-10 sm:h-12 px-4 sm:px-6"
-                    disabled={isLoading}
-                    aria-label="Buscar números"
-                  >
-                    {isLoading ? (
-                      <Clover className="w-5 h-5 animate-spin" />
-                    ) : (
-                      <Search className="w-4 h-4 sm:w-5 sm:h-5" />
-                    )}
-                  </Button>
-                </div>
-                {error && (
-                  <p className="text-destructive text-xs mt-1 absolute -bottom-5 left-0">{error}</p>
-                )}
-              </div>
-            </form>
 
             {/* Loading */}
             {isLoading && (
               <div className="flex flex-col items-center justify-center py-8 sm:py-12 gap-3">
                 <Clover className="w-8 h-8 sm:w-10 sm:h-10 animate-spin text-gold" />
-                <p className="text-muted-foreground text-sm">Buscando seus números...</p>
+                <p className="text-muted-foreground text-sm">Carregando seus números...</p>
               </div>
             )}
 
             {/* No results */}
-            {submitted && !isLoading && purchases?.length === 0 && (
+            {!isLoading && purchases?.length === 0 && (
               <div className="text-center py-8 sm:py-12">
                 <Clover className="w-10 h-10 sm:w-12 sm:h-12 text-muted-foreground/30 mx-auto mb-3" />
                 <p className="text-muted-foreground text-sm">Nenhuma compra encontrada.</p>
-                <p className="text-xs sm:text-sm text-muted-foreground/70 mt-1">Verifique os dados e tente novamente.</p>
+                <p className="text-xs sm:text-sm text-muted-foreground/70 mt-1">
+                  Compre números usando este telefone para vê-los aqui.
+                </p>
               </div>
             )}
 
             {/* Results */}
             {purchases && purchases.length > 0 && (
-              <div className="space-y-3 sm:space-y-4 mt-4 sm:mt-6 relative z-10">
+              <div className="space-y-3 sm:space-y-4 relative z-10">
                 {purchases.map((purchase) => {
                   const status = getStatusLabel(purchase.payment_status);
                   return (

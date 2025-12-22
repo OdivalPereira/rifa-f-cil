@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import Index from "./pages/Index";
 import MyNumbers from "./pages/MyNumbers";
+import CustomerAccount from "./pages/CustomerAccount";
 import AdminAuth from "./pages/admin/AdminAuth";
 import AdminLayout from "./pages/admin/AdminLayout";
 import AdminDashboard from "./pages/admin/AdminDashboard";
@@ -26,6 +27,7 @@ const App = () => (
           <Routes>
             {/* Public routes */}
             <Route path="/" element={<Index />} />
+            <Route path="/conta" element={<CustomerAccount />} />
             <Route path="/meus-numeros" element={<MyNumbers />} />
             
             {/* Admin auth */}
