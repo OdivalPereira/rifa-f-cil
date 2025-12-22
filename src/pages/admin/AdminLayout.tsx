@@ -23,7 +23,8 @@ import {
   Home,
   Sparkles,
   Clover,
-  Star
+  Star,
+  Users
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { SlotMachineFrame } from '@/components/SlotMachineFrame';
@@ -33,6 +34,7 @@ const menuItems = [
   { title: 'Gerenciar Rifa', url: '/admin/rifa', icon: Ticket },
   { title: 'Pagamentos', url: '/admin/pagamentos', icon: CreditCard },
   { title: 'Sorteio', url: '/admin/sorteio', icon: Trophy },
+  { title: 'Clientes', url: '/admin/clientes', icon: Users },
 ];
 
 export default function AdminLayout() {
