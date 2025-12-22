@@ -159,6 +159,11 @@ export default function Index() {
             title={raffle.title}
             description={raffle.description}
             prizeDescription={raffle.prize_description}
+            prizeDrawDetails={raffle.prize_draw_details}
+            prizeTopBuyer={raffle.prize_top_buyer}
+            prizeTopBuyerDetails={raffle.prize_top_buyer_details}
+            prizeSecondTopBuyer={raffle.prize_second_top_buyer}
+            prizeSecondTopBuyerDetails={raffle.prize_second_top_buyer_details}
             imageUrl={raffle.image_url}
             pricePerNumber={Number(raffle.price_per_number)}
             totalNumbers={raffle.total_numbers}

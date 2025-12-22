@@ -1,11 +1,24 @@
 import { formatCurrency } from '@/lib/validators';
 import { Button } from '@/components/ui/button';
-import { Ticket, Gift, Timer, Sparkles, Star, Coins, Trophy, Zap } from 'lucide-react';
+import { Ticket, Gift, Timer, Sparkles, Star, Coins, Trophy, Zap, Medal, Crown } from 'lucide-react';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from '@/components/ui/dialog';
+import { useState } from 'react';
 
 interface RaffleHeroProps {
   title: string;
   description: string | null;
   prizeDescription: string;
+  prizeDrawDetails?: string | null;
+  prizeTopBuyer?: string | null;
+  prizeTopBuyerDetails?: string | null;
+  prizeSecondTopBuyer?: string | null;
+  prizeSecondTopBuyerDetails?: string | null;
   imageUrl: string | null;
   pricePerNumber: number;
   totalNumbers: number;
@@ -18,6 +31,11 @@ export function RaffleHero({
   title,
   description,
   prizeDescription,
+  prizeDrawDetails,
+  prizeTopBuyer,
+  prizeTopBuyerDetails,
+  prizeSecondTopBuyer,
+  prizeSecondTopBuyerDetails,
   imageUrl,
   pricePerNumber,
   totalNumbers,
@@ -27,6 +45,19 @@ export function RaffleHero({
 }: RaffleHeroProps) {
   const progressPercentage = (soldNumbers / totalNumbers) * 100;
   const availableNumbers = totalNumbers - soldNumbers;
+  const [selectedPrize, setSelectedPrize] = useState<{
+    title: string;
+    details: string;
+    icon: React.ReactNode;
+  } | null>(null);
+
+  const handlePrizeClick = (title: string, details: string | null, icon: React.ReactNode) => {
+    setSelectedPrize({
+      title,
+      details: details || 'Sem detalhes adicionais disponíveis.',
+      icon,
+    });
+  };
 
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden py-6 px-4">
@@ -75,21 +106,62 @@ export function RaffleHero({
               </p>
             )}
 
-            {/* Prize Card */}
-            <div className="card-jackpot p-4 sm:p-6 rounded-xl border border-gold/30 relative overflow-hidden">
-              <div className="absolute top-2 right-2 text-gold/20 hidden sm:block">
-                <Trophy className="w-12 h-12" />
-              </div>
-              <div className="flex items-start gap-3 sm:gap-4 relative z-10">
-                <div className="p-2 sm:p-3 rounded-lg bg-gradient-gold animate-pulse-glow shrink-0">
-                  <Gift className="w-5 h-5 sm:w-6 sm:h-6 text-purple-dark" />
+            {/* Prize Cards Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              {/* Main Prize */}
+              <div
+                onClick={() => handlePrizeClick(prizeDescription, prizeDrawDetails || null, <Gift className="w-8 h-8 text-purple-dark" />)}
+                className="card-jackpot p-3 rounded-xl border border-gold/30 relative overflow-hidden cursor-pointer hover:border-gold/60 transition-colors group"
+              >
+                <div className="flex flex-col items-center text-center gap-2 relative z-10">
+                  <div className="p-2 rounded-lg bg-gradient-gold animate-pulse-glow shrink-0 group-hover:scale-110 transition-transform">
+                    <Gift className="w-5 h-5 text-purple-dark" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[10px] uppercase tracking-wider text-gold font-bold mb-1">
+                      1º Prêmio
+                    </p>
+                    <p className="text-sm font-bold text-foreground line-clamp-2 leading-tight">{prizeDescription}</p>
+                    <p className="text-[10px] text-muted-foreground mt-1 underline">Ver detalhes</p>
+                  </div>
                 </div>
-                <div className="min-w-0 flex-1">
-                  <p className="text-xs sm:text-sm text-gold font-medium mb-1 flex items-center gap-1">
-                    <Zap className="w-3 h-3" />
-                    GRANDE PRÊMIO
-                  </p>
-                  <p className="text-base sm:text-xl font-bold text-foreground break-words">{prizeDescription}</p>
+              </div>
+
+              {/* Top Buyer */}
+              <div
+                onClick={() => handlePrizeClick(prizeTopBuyer || 'Top Comprador', prizeTopBuyerDetails || null, <Crown className="w-8 h-8 text-gold" />)}
+                className={`card-jackpot p-3 rounded-xl border border-emerald/30 relative overflow-hidden cursor-pointer hover:border-emerald/60 transition-colors group ${!prizeTopBuyer ? 'opacity-50 pointer-events-none' : ''}`}
+              >
+                <div className="flex flex-col items-center text-center gap-2 relative z-10">
+                  <div className="p-2 rounded-lg bg-emerald/20 shrink-0 group-hover:scale-110 transition-transform">
+                    <Crown className="w-5 h-5 text-emerald" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[10px] uppercase tracking-wider text-emerald font-bold mb-1">
+                      Top Comprador
+                    </p>
+                    <p className="text-sm font-bold text-foreground line-clamp-2 leading-tight">{prizeTopBuyer || 'Em breve'}</p>
+                    {prizeTopBuyer && <p className="text-[10px] text-muted-foreground mt-1 underline">Ver detalhes</p>}
+                  </div>
+                </div>
+              </div>
+
+              {/* 2nd Top Buyer */}
+              <div
+                onClick={() => handlePrizeClick(prizeSecondTopBuyer || '2º Top Comprador', prizeSecondTopBuyerDetails || null, <Medal className="w-8 h-8 text-purple" />)}
+                className={`card-jackpot p-3 rounded-xl border border-purple/30 relative overflow-hidden cursor-pointer hover:border-purple/60 transition-colors group ${!prizeSecondTopBuyer ? 'opacity-50 pointer-events-none' : ''}`}
+              >
+                <div className="flex flex-col items-center text-center gap-2 relative z-10">
+                  <div className="p-2 rounded-lg bg-purple/20 shrink-0 group-hover:scale-110 transition-transform">
+                    <Medal className="w-5 h-5 text-purple" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[10px] uppercase tracking-wider text-purple font-bold mb-1">
+                      2º Top Comprador
+                    </p>
+                    <p className="text-sm font-bold text-foreground line-clamp-2 leading-tight">{prizeSecondTopBuyer || 'Em breve'}</p>
+                    {prizeSecondTopBuyer && <p className="text-[10px] text-muted-foreground mt-1 underline">Ver detalhes</p>}
+                  </div>
                 </div>
               </div>
             </div>
@@ -211,6 +283,26 @@ export function RaffleHero({
           </div>
         </div>
       </div>
+
+      <Dialog open={!!selectedPrize} onOpenChange={() => setSelectedPrize(null)}>
+        <DialogContent className="sm:max-w-md border-gold/20 bg-card/95 backdrop-blur-xl">
+          <DialogHeader>
+            <div className="mx-auto w-16 h-16 rounded-full bg-secondary/20 flex items-center justify-center mb-4 animate-pulse-glow">
+              {selectedPrize?.icon}
+            </div>
+            <DialogTitle className="text-center text-xl font-display text-gold">
+              {selectedPrize?.title}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="px-4 pb-4">
+            <div className="p-4 rounded-lg bg-secondary/10 border border-border">
+              <p className="text-center text-muted-foreground whitespace-pre-wrap">
+                {selectedPrize?.details}
+              </p>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </section>
   );
 }

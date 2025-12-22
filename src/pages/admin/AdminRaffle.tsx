@@ -16,6 +16,11 @@ const raffleSchema = z.object({
   title: z.string().min(3, 'Título muito curto'),
   description: z.string().optional(),
   prize_description: z.string().min(3, 'Descrição do prêmio obrigatória'),
+  prize_draw_details: z.string().optional(),
+  prize_top_buyer: z.string().optional(),
+  prize_top_buyer_details: z.string().optional(),
+  prize_second_top_buyer: z.string().optional(),
+  prize_second_top_buyer_details: z.string().optional(),
   image_url: z.string().url('URL inválida').optional().or(z.literal('')),
   price_per_number: z.coerce.number().min(0.01, 'Preço deve ser maior que 0'),
   total_numbers: z.coerce.number().min(10, 'Mínimo 10 números').max(100000, 'Máximo 100.000 números'),
@@ -59,6 +64,11 @@ export default function AdminRaffle() {
         title: '',
         description: '',
         prize_description: '',
+        prize_draw_details: '',
+        prize_top_buyer: '',
+        prize_top_buyer_details: '',
+        prize_second_top_buyer: '',
+        prize_second_top_buyer_details: '',
         image_url: '',
         price_per_number: 0.50,
         total_numbers: 10000,
@@ -76,6 +86,11 @@ export default function AdminRaffle() {
           title: raffle.title,
           description: raffle.description || '',
           prize_description: raffle.prize_description,
+          prize_draw_details: raffle.prize_draw_details || '',
+          prize_top_buyer: raffle.prize_top_buyer || '',
+          prize_top_buyer_details: raffle.prize_top_buyer_details || '',
+          prize_second_top_buyer: raffle.prize_second_top_buyer || '',
+          prize_second_top_buyer_details: raffle.prize_second_top_buyer_details || '',
           image_url: raffle.image_url || '',
           price_per_number: Number(raffle.price_per_number),
           total_numbers: raffle.total_numbers,
@@ -95,6 +110,11 @@ export default function AdminRaffle() {
         id: selectedRaffleId || undefined,
         title: data.title,
         prize_description: data.prize_description,
+        prize_draw_details: data.prize_draw_details || undefined,
+        prize_top_buyer: data.prize_top_buyer || undefined,
+        prize_top_buyer_details: data.prize_top_buyer_details || undefined,
+        prize_second_top_buyer: data.prize_second_top_buyer || undefined,
+        prize_second_top_buyer_details: data.prize_second_top_buyer_details || undefined,
         price_per_number: data.price_per_number,
         total_numbers: data.total_numbers,
         description: data.description,
@@ -191,14 +211,53 @@ export default function AdminRaffle() {
               </div>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="prize_description">Prêmio *</Label>
-              <Input id="prize_description" placeholder="Ex: iPhone 15 Pro Max" {...register('prize_description')} />
-              {errors.prize_description && <p className="text-sm text-destructive">{errors.prize_description.message}</p>}
+            <div className="border-t border-border pt-6">
+              <h3 className="font-semibold mb-4">Prêmio Principal (Sorteio)</h3>
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="prize_description">Título do Prêmio *</Label>
+                  <Input id="prize_description" placeholder="Ex: iPhone 15 Pro Max" {...register('prize_description')} />
+                  {errors.prize_description && <p className="text-sm text-destructive">{errors.prize_description.message}</p>}
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="prize_draw_details">Detalhes do Prêmio</Label>
+                  <Textarea id="prize_draw_details" placeholder="Especificações, cor, memória, etc..." {...register('prize_draw_details')} />
+                </div>
+              </div>
+            </div>
+
+            <div className="border-t border-border pt-6">
+              <h3 className="font-semibold mb-4">Prêmios de Ranking</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-4">
+                  <h4 className="text-sm font-medium text-muted-foreground">Top Comprador (1º Lugar)</h4>
+                  <div className="space-y-2">
+                    <Label htmlFor="prize_top_buyer">Título</Label>
+                    <Input id="prize_top_buyer" placeholder="Ex: R$ 1.000 no PIX" {...register('prize_top_buyer')} />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="prize_top_buyer_details">Detalhes</Label>
+                    <Textarea id="prize_top_buyer_details" placeholder="Descrição detalhada..." {...register('prize_top_buyer_details')} />
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <h4 className="text-sm font-medium text-muted-foreground">2º Top Comprador</h4>
+                  <div className="space-y-2">
+                    <Label htmlFor="prize_second_top_buyer">Título</Label>
+                    <Input id="prize_second_top_buyer" placeholder="Ex: R$ 500 no PIX" {...register('prize_second_top_buyer')} />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="prize_second_top_buyer_details">Detalhes</Label>
+                    <Textarea id="prize_second_top_buyer_details" placeholder="Descrição detalhada..." {...register('prize_second_top_buyer_details')} />
+                  </div>
+                </div>
+              </div>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="description">Descrição</Label>
+              <Label htmlFor="description">Descrição Geral da Rifa</Label>
               <Textarea id="description" placeholder="Descrição da rifa e seu motivo..." {...register('description')} />
             </div>
 
