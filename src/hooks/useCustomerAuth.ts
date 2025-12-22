@@ -41,12 +41,6 @@ export function useCustomerAuth() {
 
   const verifyToken = async (tokenToVerify: string): Promise<boolean> => {
     try {
-      const { data, error } = await supabase.functions.invoke('customer-auth', {
-        body: { token: tokenToVerify },
-        method: 'POST',
-      });
-
-      // Add action as query param workaround - call with full URL
       const response = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/customer-auth?action=verify`,
         {
