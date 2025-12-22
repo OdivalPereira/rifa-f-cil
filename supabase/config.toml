@@ -2,3 +2,6 @@ project_id = "nfoynvjxkhlytcdzgpla"
 
 [functions.spin-wheel]
 verify_jwt = false
+
+[functions.customer-auth]
+verify_jwt = false
