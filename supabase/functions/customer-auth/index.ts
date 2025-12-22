@@ -149,9 +149,46 @@ serve(async (req) => {
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
 
+    } else if (action === 'reset-pin') {
+      // Admin reset PIN - update pin_hash for phone
+      const { data: account, error: findError } = await supabase
+        .from('customer_accounts')
+        .select('id')
+        .eq('phone', cleanPhone)
+        .single();
+
+      if (findError || !account) {
+        return new Response(
+          JSON.stringify({ error: 'Conta não encontrada' }),
+          { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      // Hash new PIN
+      const pinHash = await hashPin(pin, cleanPhone);
+
+      // Update PIN
+      const { error: updateError } = await supabase
+        .from('customer_accounts')
+        .update({ pin_hash: pinHash })
+        .eq('phone', cleanPhone);
+
+      if (updateError) {
+        console.error('Update error:', updateError);
+        return new Response(
+          JSON.stringify({ error: 'Erro ao atualizar PIN' }),
+          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      return new Response(
+        JSON.stringify({ success: true, message: 'PIN atualizado com sucesso' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+
     } else {
       return new Response(
-        JSON.stringify({ error: 'Ação inválida. Use: register, login ou verify' }),
+        JSON.stringify({ error: 'Ação inválida. Use: register, login, verify ou reset-pin' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }

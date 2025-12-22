@@ -13,6 +13,7 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminRaffle from "./pages/admin/AdminRaffle";
 import AdminPayments from "./pages/admin/AdminPayments";
 import AdminDraw from "./pages/admin/AdminDraw";
+import AdminCustomers from "./pages/admin/AdminCustomers";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -39,6 +40,7 @@ const App = () => (
               <Route path="rifa" element={<AdminRaffle />} />
               <Route path="pagamentos" element={<AdminPayments />} />
               <Route path="sorteio" element={<AdminDraw />} />
+              <Route path="clientes" element={<AdminCustomers />} />
             </Route>
             
             {/* Catch-all */}
