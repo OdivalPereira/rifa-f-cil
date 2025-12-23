@@ -154,17 +154,21 @@ export type Database = {
           pix_key_type: string | null
           price_per_number: number
           prize_description: string
-          prize_top_buyer: string | null
-          prize_top_buyer_details: string | null
+          prize_draw_details: string | null
           prize_second_top_buyer: string | null
           prize_second_top_buyer_details: string | null
-          prize_draw_details: string | null
+          prize_top_buyer: string | null
+          prize_top_buyer_details: string | null
           status: Database["public"]["Enums"]["raffle_status"]
           title: string
           total_numbers: number
           updated_at: string
           winner_name: string | null
           winner_number: number | null
+          winner_second_top_buyer_name: string | null
+          winner_second_top_buyer_number: number | null
+          winner_top_buyer_name: string | null
+          winner_top_buyer_number: number | null
         }
         Insert: {
           created_at?: string
@@ -177,17 +181,21 @@ export type Database = {
           pix_key_type?: string | null
           price_per_number?: number
           prize_description: string
-          prize_top_buyer?: string | null
-          prize_top_buyer_details?: string | null
+          prize_draw_details?: string | null
           prize_second_top_buyer?: string | null
           prize_second_top_buyer_details?: string | null
-          prize_draw_details?: string | null
+          prize_top_buyer?: string | null
+          prize_top_buyer_details?: string | null
           status?: Database["public"]["Enums"]["raffle_status"]
           title: string
           total_numbers?: number
           updated_at?: string
           winner_name?: string | null
           winner_number?: number | null
+          winner_second_top_buyer_name?: string | null
+          winner_second_top_buyer_number?: number | null
+          winner_top_buyer_name?: string | null
+          winner_top_buyer_number?: number | null
         }
         Update: {
           created_at?: string
@@ -200,17 +208,21 @@ export type Database = {
           pix_key_type?: string | null
           price_per_number?: number
           prize_description?: string
-          prize_top_buyer?: string | null
-          prize_top_buyer_details?: string | null
+          prize_draw_details?: string | null
           prize_second_top_buyer?: string | null
           prize_second_top_buyer_details?: string | null
-          prize_draw_details?: string | null
+          prize_top_buyer?: string | null
+          prize_top_buyer_details?: string | null
           status?: Database["public"]["Enums"]["raffle_status"]
           title?: string
           total_numbers?: number
           updated_at?: string
           winner_name?: string | null
           winner_number?: number | null
+          winner_second_top_buyer_name?: string | null
+          winner_second_top_buyer_number?: number | null
+          winner_top_buyer_name?: string | null
+          winner_top_buyer_number?: number | null
         }
         Relationships: []
       }

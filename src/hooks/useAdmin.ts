@@ -120,6 +120,11 @@ export function useUpsertRaffle() {
       title: string;
       description?: string;
       prize_description: string;
+      prize_draw_details?: string;
+      prize_top_buyer?: string;
+      prize_top_buyer_details?: string;
+      prize_second_top_buyer?: string;
+      prize_second_top_buyer_details?: string;
       image_url?: string;
       price_per_number: number;
       total_numbers: number;
@@ -195,7 +200,7 @@ export function useAdminStats(raffleId?: string) {
   });
 }
 
-// Hook para realizar sorteio
+// Hook para realizar sorteio principal (entre todos os números)
 export function useDrawWinner() {
   const queryClient = useQueryClient();
 
@@ -232,6 +237,128 @@ export function useDrawWinner() {
 
       if (error) throw error;
       return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['all-raffles'] });
+      queryClient.invalidateQueries({ queryKey: ['active-raffle'] });
+    },
+  });
+}
+
+// Hook para buscar ranking de compradores
+export function useTopBuyers(raffleId: string | undefined, limit: number = 30) {
+  return useQuery({
+    queryKey: ['top-buyers', raffleId, limit],
+    queryFn: async () => {
+      if (!raffleId) return [];
+
+      const { data: purchases, error } = await supabase
+        .from('purchases')
+        .select('buyer_name, buyer_email, buyer_phone, quantity')
+        .eq('raffle_id', raffleId)
+        .eq('payment_status', 'approved');
+
+      if (error) throw error;
+
+      // Agrupa por comprador (usando phone como identificador único)
+      const buyerMap = new Map<string, { name: string; phone: string; email: string; total: number }>();
+      
+      purchases?.forEach(p => {
+        const key = p.buyer_phone;
+        const existing = buyerMap.get(key);
+        if (existing) {
+          existing.total += p.quantity;
+        } else {
+          buyerMap.set(key, {
+            name: p.buyer_name,
+            phone: p.buyer_phone,
+            email: p.buyer_email,
+            total: p.quantity,
+          });
+        }
+      });
+
+      // Ordena por quantidade e retorna o top N
+      return Array.from(buyerMap.values())
+        .sort((a, b) => b.total - a.total)
+        .slice(0, limit);
+    },
+    enabled: !!raffleId,
+  });
+}
+
+// Hook para sortear entre top compradores
+export function useDrawTopBuyerWinner() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ 
+      raffleId, 
+      topN, 
+      prizeType 
+    }: { 
+      raffleId: string; 
+      topN: number; 
+      prizeType: 'top_buyer' | 'second_top_buyer';
+    }) => {
+      // Get all approved purchases
+      const { data: purchases, error: purchasesError } = await supabase
+        .from('purchases')
+        .select('buyer_name, buyer_phone, quantity')
+        .eq('raffle_id', raffleId)
+        .eq('payment_status', 'approved');
+
+      if (purchasesError) throw purchasesError;
+      if (!purchases || purchases.length === 0) throw new Error('Nenhuma compra aprovada');
+
+      // Agrupa por comprador
+      const buyerMap = new Map<string, { name: string; phone: string; total: number }>();
+      
+      purchases.forEach(p => {
+        const key = p.buyer_phone;
+        const existing = buyerMap.get(key);
+        if (existing) {
+          existing.total += p.quantity;
+        } else {
+          buyerMap.set(key, {
+            name: p.buyer_name,
+            phone: p.buyer_phone,
+            total: p.quantity,
+          });
+        }
+      });
+
+      // Pega os top N compradores
+      const topBuyers = Array.from(buyerMap.values())
+        .sort((a, b) => b.total - a.total)
+        .slice(0, topN);
+
+      if (topBuyers.length === 0) throw new Error(`Não há compradores suficientes para sortear`);
+
+      // Sorteia um ganhador entre os top N
+      const winnerIndex = Math.floor(Math.random() * topBuyers.length);
+      const winner = topBuyers[winnerIndex];
+
+      // Atualiza a rifa com o ganhador do prêmio de ranking
+      const updateData = prizeType === 'top_buyer' 
+        ? { 
+            winner_top_buyer_name: winner.name,
+            winner_top_buyer_number: winner.total,
+          }
+        : {
+            winner_second_top_buyer_name: winner.name,
+            winner_second_top_buyer_number: winner.total,
+          };
+
+      const { data, error } = await supabase
+        .from('raffles')
+        .update(updateData)
+        .eq('id', raffleId)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return { ...data, winner };
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['all-raffles'] });
