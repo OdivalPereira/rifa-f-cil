@@ -108,8 +108,8 @@ export function RaffleHero({
             )}
 
             {/* Prize Cards Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              {/* Main Prize */}
+            <div className="grid grid-cols-1 sm:grid-cols-[1fr_1.2fr_1fr] gap-3 items-end">
+              {/* 1º Prêmio - Sorteio Principal */}
               <div
                 onClick={() => handlePrizeClick(prizeDescription, prizeDrawDetails || null, <Gift className="w-8 h-8 text-purple-dark" />)}
                 className="card-jackpot p-3 rounded-xl border border-gold/30 relative overflow-hidden cursor-pointer hover:border-gold/60 transition-colors group"
@@ -128,23 +128,29 @@ export function RaffleHero({
                 </div>
               </div>
 
-              {/* 2º Prêmio - Top 10 Compradores */}
+              {/* 2º Prêmio - Top 10 Compradores - DESTAQUE */}
               <div
                 onClick={() => handlePrizeClick(prizeTopBuyer || 'Top 10 Compradores', prizeTopBuyerDetails || null, <Crown className="w-8 h-8 text-gold" />)}
-                className={`card-jackpot p-3 rounded-xl border border-emerald/30 relative overflow-hidden cursor-pointer hover:border-emerald/60 transition-colors group ${!prizeTopBuyer ? 'opacity-50 pointer-events-none' : ''}`}
+                className={`card-jackpot p-4 sm:p-5 rounded-xl border-2 border-emerald/50 relative overflow-hidden cursor-pointer hover:border-emerald transition-all group shadow-lg shadow-emerald/20 sm:-mt-2 ${!prizeTopBuyer ? 'opacity-50 pointer-events-none' : ''}`}
               >
+                {/* Destaque badge */}
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 px-3 py-0.5 bg-emerald rounded-full text-[9px] font-bold text-primary-foreground uppercase tracking-wider">
+                  ✨ Destaque
+                </div>
                 <div className="flex flex-col items-center text-center gap-2 relative z-10">
-                  <div className="p-2 rounded-lg bg-emerald/20 shrink-0 group-hover:scale-110 transition-transform">
-                    <Crown className="w-5 h-5 text-emerald" />
+                  <div className="p-3 rounded-lg bg-gradient-to-br from-emerald to-emerald-light animate-pulse-glow shrink-0 group-hover:scale-110 transition-transform">
+                    <Crown className="w-6 h-6 text-primary-foreground" />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="text-[10px] uppercase tracking-wider text-emerald font-bold mb-1">
+                    <p className="text-[11px] uppercase tracking-wider text-emerald font-bold mb-1">
                       2º Prêmio • Top 10
                     </p>
-                    <p className="text-sm font-bold text-foreground line-clamp-2 leading-tight">{prizeTopBuyer || 'Em breve'}</p>
+                    <p className="text-base font-bold text-foreground line-clamp-2 leading-tight">{prizeTopBuyer || 'Em breve'}</p>
                     {prizeTopBuyer && <p className="text-[10px] text-muted-foreground mt-1 underline">Ver detalhes</p>}
                   </div>
                 </div>
+                {/* Glow effect */}
+                <div className="absolute inset-0 bg-gradient-to-t from-emerald/10 to-transparent pointer-events-none" />
               </div>
 
               {/* 3º Prêmio - Top 30 Compradores */}
