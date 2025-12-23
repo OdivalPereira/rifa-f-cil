@@ -131,6 +131,19 @@ export default {
           "0%, 100%": { boxShadow: "0 0 20px hsl(var(--emerald-glow) / 0.4)" },
           "50%": { boxShadow: "0 0 40px hsl(var(--emerald-glow) / 0.6)" },
         },
+        "heartbeat-text": {
+          "0%, 45%": { opacity: "1", transform: "scale(1)" },
+          "50%, 95%": { opacity: "0", transform: "scale(0.8)" },
+          "100%": { opacity: "1", transform: "scale(1)" },
+        },
+        "heartbeat-icon": {
+          "0%, 45%": { opacity: "0", transform: "scale(0.8)" },
+          "50%, 95%": { opacity: "1", transform: "scale(1.1)" },
+          "55%, 60%": { transform: "scale(1)" },
+          "65%, 70%": { transform: "scale(1.15)" },
+          "75%, 90%": { transform: "scale(1)" },
+          "100%": { opacity: "0", transform: "scale(0.8)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
