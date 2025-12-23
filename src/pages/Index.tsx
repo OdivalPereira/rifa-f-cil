@@ -132,15 +132,15 @@ export default function Index() {
       {/* Header */}
       <header className="sticky top-0 z-50 bg-card/80 backdrop-blur-md border-b border-gold/20">
         <div className="container mx-auto px-3 sm:px-4 h-12 sm:h-14 flex items-center justify-between">
-          <div className="flex items-center gap-1">
+          <div className="flex items-center">
             <span className="font-display font-bold text-base sm:text-lg text-gradient-gold">OD</span>
-            <span className="relative w-6 h-6 sm:w-7 sm:h-7 flex items-center justify-center">
+            <span className="relative w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center -ml-0.5">
               {/* S2 text - fades out */}
               <span className="absolute inset-0 flex items-center justify-center font-display font-bold text-base sm:text-lg text-red-500 animate-[heartbeat-text_2s_ease-in-out_infinite]">
                 S2
               </span>
               {/* Heart icon - fades in */}
-              <Heart className="absolute w-5 h-5 sm:w-6 sm:h-6 text-red-500 fill-red-500 animate-[heartbeat-icon_2s_ease-in-out_infinite]" />
+              <Heart className="absolute w-4 h-4 sm:w-5 sm:h-5 text-red-500 fill-red-500 animate-[heartbeat-icon_2s_ease-in-out_infinite]" />
             </span>
           </div>
           <div className="flex items-center gap-1 sm:gap-3">
