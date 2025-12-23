@@ -87,9 +87,9 @@ export function RaffleHero({
       <div className="w-full max-w-6xl mx-auto relative z-10">
         <div className="flex flex-col lg:grid lg:grid-cols-2 gap-6 lg:gap-8 items-center">
           {/* Left: Content */}
-          <div className="space-y-4 sm:space-y-6 animate-fade-in w-full">
+          <div className="space-y-4 sm:space-y-6 animate-fade-in w-full text-center lg:text-left">
             {/* Badge */}
-            <div className="inline-flex items-center gap-2 px-3 sm:px-4 py-2 rounded-full bg-emerald/10 border border-emerald/30 glow-emerald">
+            <div className="inline-flex items-center gap-2 px-3 sm:px-4 py-2 rounded-full bg-emerald/10 border border-emerald/30 glow-emerald mx-auto lg:mx-0">
               <span className="text-emerald animate-sparkle">🍀</span>
               <span className="text-xs sm:text-sm font-semibold text-emerald">Rifa da Sorte</span>
               <Sparkles className="w-3 h-3 sm:w-4 sm:h-4 text-gold animate-sparkle" />
@@ -102,7 +102,7 @@ export function RaffleHero({
 
             {/* Description */}
             {description && (
-              <p className="text-sm sm:text-lg text-muted-foreground max-w-xl">
+              <p className="text-sm sm:text-lg text-muted-foreground max-w-xl mx-auto lg:mx-0">
                 {description}
               </p>
             )}
