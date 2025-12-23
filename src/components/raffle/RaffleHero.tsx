@@ -9,6 +9,7 @@ import {
   DialogDescription,
 } from '@/components/ui/dialog';
 import { useState } from 'react';
+import rafflePrizesHero from '@/assets/raffle-prizes-hero.jpg';
 
 interface RaffleHeroProps {
   title: string;
@@ -240,22 +241,11 @@ export function RaffleHero({
           {/* Right: Image - Hidden on mobile since there's no image */}
           <div className="relative animate-fade-in hidden lg:block" style={{ animationDelay: '0.2s' }}>
             <div className="relative aspect-square rounded-2xl overflow-hidden border-2 border-gold/30 shadow-gold-lg card-jackpot">
-              {imageUrl ? (
-                <img 
-                  src={imageUrl} 
-                  alt={prizeDescription}
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <div className="w-full h-full bg-gradient-to-br from-purple-dark via-background to-emerald-dark flex items-center justify-center">
-                  <div className="text-center space-y-4">
-                    <div className="w-24 h-24 mx-auto rounded-full bg-gold/10 flex items-center justify-center animate-pulse-glow">
-                      <Gift className="w-12 h-12 text-gold" />
-                    </div>
-                    <p className="text-gold/70 font-medium">Prêmio Especial</p>
-                  </div>
-                </div>
-              )}
+              <img 
+                src={imageUrl || rafflePrizesHero} 
+                alt={prizeDescription}
+                className="w-full h-full object-cover"
+              />
               {/* Overlay decoration */}
               <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-transparent to-transparent" />
               
