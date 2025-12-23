@@ -128,9 +128,9 @@ export function RaffleHero({
                 </div>
               </div>
 
-              {/* Top Buyer */}
+              {/* 2º Prêmio - Top 10 Compradores */}
               <div
-                onClick={() => handlePrizeClick(prizeTopBuyer || 'Top Comprador', prizeTopBuyerDetails || null, <Crown className="w-8 h-8 text-gold" />)}
+                onClick={() => handlePrizeClick(prizeTopBuyer || 'Top 10 Compradores', prizeTopBuyerDetails || null, <Crown className="w-8 h-8 text-gold" />)}
                 className={`card-jackpot p-3 rounded-xl border border-emerald/30 relative overflow-hidden cursor-pointer hover:border-emerald/60 transition-colors group ${!prizeTopBuyer ? 'opacity-50 pointer-events-none' : ''}`}
               >
                 <div className="flex flex-col items-center text-center gap-2 relative z-10">
@@ -139,7 +139,7 @@ export function RaffleHero({
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="text-[10px] uppercase tracking-wider text-emerald font-bold mb-1">
-                      Top Comprador
+                      2º Prêmio • Top 10
                     </p>
                     <p className="text-sm font-bold text-foreground line-clamp-2 leading-tight">{prizeTopBuyer || 'Em breve'}</p>
                     {prizeTopBuyer && <p className="text-[10px] text-muted-foreground mt-1 underline">Ver detalhes</p>}
@@ -147,9 +147,9 @@ export function RaffleHero({
                 </div>
               </div>
 
-              {/* 2nd Top Buyer */}
+              {/* 3º Prêmio - Top 30 Compradores */}
               <div
-                onClick={() => handlePrizeClick(prizeSecondTopBuyer || '2º Top Comprador', prizeSecondTopBuyerDetails || null, <Medal className="w-8 h-8 text-purple" />)}
+                onClick={() => handlePrizeClick(prizeSecondTopBuyer || 'Top 30 Compradores', prizeSecondTopBuyerDetails || null, <Medal className="w-8 h-8 text-purple" />)}
                 className={`card-jackpot p-3 rounded-xl border border-purple/30 relative overflow-hidden cursor-pointer hover:border-purple/60 transition-colors group ${!prizeSecondTopBuyer ? 'opacity-50 pointer-events-none' : ''}`}
               >
                 <div className="flex flex-col items-center text-center gap-2 relative z-10">
@@ -158,7 +158,7 @@ export function RaffleHero({
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="text-[10px] uppercase tracking-wider text-purple font-bold mb-1">
-                      2º Top Comprador
+                      3º Prêmio • Top 30
                     </p>
                     <p className="text-sm font-bold text-foreground line-clamp-2 leading-tight">{prizeSecondTopBuyer || 'Em breve'}</p>
                     {prizeSecondTopBuyer && <p className="text-[10px] text-muted-foreground mt-1 underline">Ver detalhes</p>}
