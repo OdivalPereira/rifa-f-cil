@@ -131,10 +131,10 @@ export function RaffleHero({
               {/* 2º Prêmio - Top 10 Compradores - DESTAQUE */}
               <div
                 onClick={() => handlePrizeClick(prizeTopBuyer || 'Top 10 Compradores', prizeTopBuyerDetails || null, <Crown className="w-8 h-8 text-gold" />)}
-                className={`card-jackpot p-4 sm:p-5 rounded-xl border-2 border-emerald/50 relative overflow-hidden cursor-pointer hover:border-emerald transition-all group shadow-lg shadow-emerald/20 sm:-mt-2 ${!prizeTopBuyer ? 'opacity-50 pointer-events-none' : ''}`}
+                className={`card-jackpot p-4 sm:p-5 pt-6 sm:pt-7 rounded-xl border-2 border-emerald/50 relative cursor-pointer hover:border-emerald transition-all group shadow-lg shadow-emerald/20 ${!prizeTopBuyer ? 'opacity-50 pointer-events-none' : ''}`}
               >
                 {/* Destaque badge */}
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 px-3 py-0.5 bg-emerald rounded-full text-[9px] font-bold text-primary-foreground uppercase tracking-wider">
+                <div className="absolute top-2 left-1/2 -translate-x-1/2 px-3 py-0.5 bg-emerald rounded-full text-[9px] font-bold text-primary-foreground uppercase tracking-wider z-20">
                   ✨ Destaque
                 </div>
                 <div className="flex flex-col items-center text-center gap-2 relative z-10">
@@ -150,7 +150,7 @@ export function RaffleHero({
                   </div>
                 </div>
                 {/* Glow effect */}
-                <div className="absolute inset-0 bg-gradient-to-t from-emerald/10 to-transparent pointer-events-none" />
+                <div className="absolute inset-0 bg-gradient-to-t from-emerald/10 to-transparent pointer-events-none rounded-xl" />
               </div>
 
               {/* 3º Prêmio - Top 30 Compradores */}
