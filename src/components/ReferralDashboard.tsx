@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Progress } from '@/components/ui/progress';
 import { toast } from '@/components/ui/use-toast';
-import { Copy, Sparkles, Lock, Trophy } from 'lucide-react';
+import { Copy, Sparkles, Lock, Trophy, Share2 } from 'lucide-react';
 
 export default function ReferralDashboard() {
   const [isUnlocked, setIsUnlocked] = useState(false);
@@ -27,6 +27,29 @@ export default function ReferralDashboard() {
         variant: "destructive",
       });
     }
+  };
+
+  const handleShare = () => {
+    // Get settings from localStorage (mock backend)
+    const savedSettings = localStorage.getItem('admin_referral_settings');
+    let shareMessage = "Olá! Estou participando dessa rifa incrível. Compre seus números através do meu link e me ajude a ganhar: {{link}}";
+
+    if (savedSettings) {
+      try {
+        const parsed = JSON.parse(savedSettings);
+        if (parsed.shareMessage) shareMessage = parsed.shareMessage;
+      } catch (e) {
+        console.error("Error parsing share settings", e);
+      }
+    }
+
+    // Mock name since this component doesn't have it in this version
+    const name = "Amigo";
+    const text = shareMessage
+      .replace('{{link}}', referralLink)
+      .replace('{{nome}}', name);
+
+    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
   };
 
   return (
@@ -112,6 +135,15 @@ export default function ReferralDashboard() {
                 Copiar
               </Button>
             </div>
+
+            <Button
+              onClick={handleShare}
+              variant="outline"
+              className="w-full mt-2 border-[#25D366]/30 text-[#25D366] hover:bg-[#25D366]/10 hover:text-[#25D366] h-11"
+            >
+              <Share2 className="w-4 h-4 mr-2" />
+              Compartilhar no WhatsApp
+            </Button>
           </div>
         )}
       </div>
