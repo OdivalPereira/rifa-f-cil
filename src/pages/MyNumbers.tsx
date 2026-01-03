@@ -6,6 +6,7 @@ import { formatCurrency, formatRaffleNumber } from '@/lib/validators';
 import { ArrowLeft, Clover, Sparkles, Star, Trophy, LogOut } from 'lucide-react';
 import { SlotMachineFrame } from '@/components/SlotMachineFrame';
 import { useCustomerAuth } from '@/hooks/useCustomerAuth';
+import ReferralDashboard from '@/components/ReferralDashboard';
 
 export default function MyNumbers() {
   const navigate = useNavigate();
@@ -101,6 +102,8 @@ export default function MyNumbers() {
 
         {/* Main content */}
         <main className="container mx-auto px-3 sm:px-4 py-4 sm:py-8 max-w-2xl">
+
+          <ReferralDashboard />
 
           <div className="card-jackpot p-4 sm:p-6">
             {/* Header */}
