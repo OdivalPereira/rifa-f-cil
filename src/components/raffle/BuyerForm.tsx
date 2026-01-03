@@ -87,6 +87,7 @@ export function BuyerForm({ pricePerNumber, maxNumbers, onSubmit, isLoading }: B
             <Input
               id="email"
               type="email"
+              inputMode="email"
               placeholder="seu@email.com"
               {...register('email')}
               className={`input-casino ${errors.email ? 'border-destructive' : ''}`}
@@ -104,6 +105,8 @@ export function BuyerForm({ pricePerNumber, maxNumbers, onSubmit, isLoading }: B
             </Label>
             <Input
               id="phone"
+              type="tel"
+              inputMode="tel"
               placeholder="(11) 99999-9999"
               {...register('phone')}
               className={`input-casino ${errors.phone ? 'border-destructive' : ''}`}
@@ -129,6 +132,7 @@ export function BuyerForm({ pricePerNumber, maxNumbers, onSubmit, isLoading }: B
                   variant={quantity === preset ? 'default' : 'outline'}
                   size="sm"
                   onClick={() => setQuantity(preset)}
+                  aria-label={`Selecionar ${preset} números`}
                   className={quantity === preset 
                     ? 'bg-emerald hover:bg-emerald-light text-primary-foreground glow-emerald border-0' 
                     : 'border-emerald/30 hover:border-emerald hover:bg-emerald/10 bg-transparent'
@@ -148,6 +152,7 @@ export function BuyerForm({ pricePerNumber, maxNumbers, onSubmit, isLoading }: B
                 max={Math.min(500, maxNumbers)}
                 step={1}
                 className="py-4"
+                aria-label="Selecionar quantidade de números"
               />
               <div className="flex justify-between text-sm text-muted-foreground">
                 <span>1</span>

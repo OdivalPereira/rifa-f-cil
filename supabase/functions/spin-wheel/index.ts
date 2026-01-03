@@ -27,7 +27,7 @@ Deno.serve(async (req) => {
     // 1. Check AND Decrement balance Atomically (or verify balance first then update if > 0)
     // Actually, simple UPDATE ... SET spins = spins - 1 WHERE spins > 0 returning * works best.
 
-    let balanceQuery = supabase.from('spin_balance')
+    const balanceQuery = supabase.from('spin_balance')
       .update({ spins_available: undefined }) // dummy to trigger update builder
 
     // We cannot construct raw SQL easily with JS client for decrement unless we use RPC or carefully structured query?
