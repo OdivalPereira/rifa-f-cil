@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { RaffleHero } from '@/components/raffle/RaffleHero';
 import { BuyerForm } from '@/components/raffle/BuyerForm';
 import { PixPayment } from '@/components/raffle/PixPayment';
@@ -28,8 +28,24 @@ export default function Index() {
   const createPurchase = useCreatePurchase();
   const reserveNumbers = useReserveNumbers();
 
-  const soldNumbers = soldNumbersData?.filter(n => n.confirmed_at).map(n => n.number) || [];
-  const pendingNumbers = soldNumbersData?.filter(n => !n.confirmed_at).map(n => n.number) || [];
+  const { soldNumbers, pendingNumbers } = useMemo(() => {
+    if (!soldNumbersData) return { soldNumbers: [], pendingNumbers: [] };
+
+    const sold: number[] = [];
+    const pending: number[] = [];
+
+    // O(N) single-pass iteration to split numbers into sold/pending arrays
+    // More efficient than filtering independently (approx O(4N)) inside render
+    for (const n of soldNumbersData) {
+      if (n.confirmed_at) {
+        sold.push(n.number);
+      } else {
+        pending.push(n.number);
+      }
+    }
+
+    return { soldNumbers: sold, pendingNumbers: pending };
+  }, [soldNumbersData]);
 
   const handleParticipate = () => setStep('form');
 
