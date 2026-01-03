@@ -21,6 +21,7 @@ export type Database = {
           phone: string
           pin_hash: string
           updated_at: string
+          referral_code: string | null
         }
         Insert: {
           created_at?: string
@@ -28,6 +29,7 @@ export type Database = {
           phone: string
           pin_hash: string
           updated_at?: string
+          referral_code?: string | null
         }
         Update: {
           created_at?: string
@@ -35,6 +37,7 @@ export type Database = {
           phone?: string
           pin_hash?: string
           updated_at?: string
+          referral_code?: string | null
         }
         Relationships: []
       }
@@ -54,6 +57,7 @@ export type Database = {
           raffle_id: string
           total_amount: number
           updated_at: string
+          referrer_id: string | null
         }
         Insert: {
           approved_at?: string | null
@@ -70,6 +74,7 @@ export type Database = {
           raffle_id: string
           total_amount: number
           updated_at?: string
+          referrer_id?: string | null
         }
         Update: {
           approved_at?: string | null
@@ -86,6 +91,7 @@ export type Database = {
           raffle_id?: string
           total_amount?: number
           updated_at?: string
+          referrer_id?: string | null
         }
         Relationships: [
           {
@@ -93,6 +99,13 @@ export type Database = {
             columns: ["raffle_id"]
             isOneToOne: false
             referencedRelation: "raffles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "purchases_referrer_id_fkey"
+            columns: ["referrer_id"]
+            isOneToOne: false
+            referencedRelation: "customer_accounts"
             referencedColumns: ["id"]
           },
         ]
@@ -306,9 +319,52 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      referral_ranking: {
+        Row: {
+          referrer_id: string
+          raffle_id: string
+          sales_count: number
+          tickets_sold: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "referral_ranking_referrer_id_fkey"
+            columns: ["referrer_id"]
+            isOneToOne: false
+            referencedRelation: "customer_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "referral_ranking_raffle_id_fkey"
+            columns: ["raffle_id"]
+            isOneToOne: false
+            referencedRelation: "raffles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      top_buyers_ranking: {
+        Row: {
+          buyer_phone: string
+          raffle_id: string
+          tickets_bought: number
+        }
+        Relationships: [
+           {
+            foreignKeyName: "top_buyers_ranking_raffle_id_fkey"
+            columns: ["raffle_id"]
+            isOneToOne: false
+            referencedRelation: "raffles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
+      generate_unique_referral_code: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
