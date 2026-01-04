@@ -6,16 +6,20 @@ import { PixPayment } from '@/components/raffle/PixPayment';
 import { NumberSelector } from '@/components/raffle/NumberSelector';
 import { useActiveRaffle, useSoldNumbers, useCreatePurchase, useReserveNumbers } from '@/hooks/useRaffle';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Search, Sparkles, Star, Clover, Heart } from 'lucide-react';
+import { Loader2, Search, Sparkles, Star, Clover, Heart, User, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { SlotMachineFrame } from '@/components/SlotMachineFrame';
 import type { BuyerFormData } from '@/lib/validators';
+import { useAuth } from '@/hooks/useAuth';
+import { useCustomerAuth } from '@/hooks/useCustomerAuth';
 
 type Step = 'hero' | 'form' | 'payment' | 'numbers' | 'success';
 
 export default function Index() {
   const { toast } = useToast();
+  const { isAdmin } = useAuth();
+  const { isAuthenticated: isCustomerAuthenticated, logout: customerLogout } = useCustomerAuth();
   const [step, setStep] = useState<Step>('hero');
   const [purchaseData, setPurchaseData] = useState<{
     id: string;
@@ -161,18 +165,43 @@ export default function Index() {
             </span>
           </div>
           <div className="flex items-center gap-1 sm:gap-3">
-            <Link to="/meus-numeros">
-              <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-gold hover:bg-gold/10 px-2 sm:px-3">
-                <Search className="w-4 h-4 sm:mr-2" />
-                <span className="hidden sm:inline">Meus Números</span>
-              </Button>
-            </Link>
-            <Link to="/admin">
-              <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-purple hover:bg-purple/10 px-2 sm:px-3">
-                <span className="hidden sm:inline">Admin</span>
-                <span className="sm:hidden text-xs">Admin</span>
-              </Button>
-            </Link>
+            {isCustomerAuthenticated ? (
+              <>
+                <Link to="/meus-numeros">
+                  <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-gold hover:bg-gold/10 px-2 sm:px-3">
+                    <User className="w-4 h-4 sm:mr-2" />
+                    <span className="hidden sm:inline">Ir para Minha Conta</span>
+                    <span className="sm:hidden">Conta</span>
+                  </Button>
+                </Link>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => customerLogout()}
+                  className="text-muted-foreground hover:text-destructive hover:bg-destructive/10 px-2 sm:px-3"
+                >
+                  <LogOut className="w-4 h-4 sm:mr-2" />
+                  <span className="hidden sm:inline">Sair</span>
+                </Button>
+              </>
+            ) : (
+              <Link to="/meus-numeros">
+                <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-gold hover:bg-gold/10 px-2 sm:px-3">
+                  <User className="w-4 h-4 sm:mr-2" />
+                  <span className="hidden sm:inline">Entrar / Meus Números</span>
+                  <span className="sm:hidden">Entrar</span>
+                </Button>
+              </Link>
+            )}
+
+            {isAdmin && (
+              <Link to="/admin">
+                <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-purple hover:bg-purple/10 px-2 sm:px-3">
+                  <span className="hidden sm:inline">Admin</span>
+                  <span className="sm:hidden text-xs">Admin</span>
+                </Button>
+              </Link>
+            )}
           </div>
         </div>
       </header>

@@ -19,13 +19,6 @@ export default function CustomerAccount() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [activeTab, setActiveTab] = useState('login');
 
-  // Redirect if already authenticated
-  useEffect(() => {
-    if (!isLoading && isAuthenticated) {
-      navigate('/meus-numeros');
-    }
-  }, [isAuthenticated, isLoading, navigate]);
-
   // Format phone as user types
   const formatPhone = (value: string) => {
     const digits = value.replace(/\D/g, '');
