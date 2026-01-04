@@ -121,6 +121,11 @@ export function useUpsertRaffle() {
       description?: string;
       prize_description: string;
       prize_draw_details?: string;
+      prize_referral_1st?: string;
+      referral_threshold?: number;
+      prize_buyer_1st?: string;
+      prize_referral_runners?: string;
+      prize_buyer_runners?: string;
       prize_top_buyer?: string;
       prize_top_buyer_details?: string;
       prize_second_top_buyer?: string;

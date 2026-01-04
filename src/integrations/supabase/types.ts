@@ -168,6 +168,11 @@ export type Database = {
           price_per_number: number
           prize_description: string
           prize_draw_details: string | null
+          prize_referral_1st: string | null
+          referral_threshold: number | null
+          prize_buyer_1st: string | null
+          prize_referral_runners: string | null
+          prize_buyer_runners: string | null
           prize_second_top_buyer: string | null
           prize_second_top_buyer_details: string | null
           prize_top_buyer: string | null
@@ -195,6 +200,11 @@ export type Database = {
           price_per_number?: number
           prize_description: string
           prize_draw_details?: string | null
+          prize_referral_1st?: string | null
+          referral_threshold?: number | null
+          prize_buyer_1st?: string | null
+          prize_referral_runners?: string | null
+          prize_buyer_runners?: string | null
           prize_second_top_buyer?: string | null
           prize_second_top_buyer_details?: string | null
           prize_top_buyer?: string | null
@@ -222,6 +232,11 @@ export type Database = {
           price_per_number?: number
           prize_description?: string
           prize_draw_details?: string | null
+          prize_referral_1st?: string | null
+          referral_threshold?: number | null
+          prize_buyer_1st?: string | null
+          prize_referral_runners?: string | null
+          prize_buyer_runners?: string | null
           prize_second_top_buyer?: string | null
           prize_second_top_buyer_details?: string | null
           prize_top_buyer?: string | null
