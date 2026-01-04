@@ -40,7 +40,6 @@ export default function Index() {
     const pending: number[] = [];
 
     // O(N) single-pass iteration to split numbers into sold/pending arrays
-    // More efficient than filtering independently (approx O(4N)) inside render
     for (const n of soldNumbersData) {
       if (n.confirmed_at) {
         sold.push(n.number);
@@ -108,10 +107,10 @@ export default function Index() {
     }
   };
 
-  if (raffleLoading) {
-    return (
-      <SlotMachineFrame>
-        <div className="min-h-screen flex items-center justify-center">
+  const renderContent = () => {
+    if (raffleLoading) {
+      return (
+        <div className="min-h-[60vh] flex items-center justify-center">
           <div className="text-center space-y-4">
             <div className="relative">
               <Loader2 className="w-14 h-14 animate-spin text-gold mx-auto" />
@@ -121,14 +120,12 @@ export default function Index() {
             <p className="text-gold/80 font-medium">Carregando sua sorte...</p>
           </div>
         </div>
-      </SlotMachineFrame>
-    );
-  }
+      );
+    }
 
-  if (!raffle) {
-    return (
-      <SlotMachineFrame>
-        <div className="min-h-screen flex flex-col items-center justify-center p-4">
+    if (!raffle) {
+      return (
+        <div className="min-h-[60vh] flex flex-col items-center justify-center p-4">
           <div className="text-center space-y-6 max-w-md">
             <div className="relative inline-block">
               <Clover className="w-24 h-24 text-emerald/40 clover-icon animate-pulse-slow" />
@@ -144,68 +141,10 @@ export default function Index() {
             </Link>
           </div>
         </div>
-      </SlotMachineFrame>
-    );
-  }
+      );
+    }
 
-  return (
-    <SlotMachineFrame showDecorations={step === 'hero' || step === 'success'}>
-      {/* Header */}
-      <header className="sticky top-0 z-50 bg-card/80 backdrop-blur-md border-b border-gold/20">
-        <div className="container mx-auto px-3 sm:px-4 h-12 sm:h-14 flex items-center justify-between">
-          <div className="flex items-center">
-            <span className="font-display font-bold text-base sm:text-lg text-gradient-gold">OD</span>
-            <span className="relative w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center -ml-0.5">
-              {/* S2 text - fades out */}
-              <span className="absolute inset-0 flex items-center justify-center font-display font-bold text-base sm:text-lg text-red-500 animate-[heartbeat-text_2s_ease-in-out_infinite]">
-                S2
-              </span>
-              {/* Heart icon - fades in */}
-              <Heart className="absolute w-4 h-4 sm:w-5 sm:h-5 text-red-500 fill-red-500 animate-[heartbeat-icon_2s_ease-in-out_infinite]" />
-            </span>
-          </div>
-          <div className="flex items-center gap-1 sm:gap-3">
-            {isCustomerAuthenticated ? (
-              <>
-                <Link to="/meus-numeros">
-                  <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-gold hover:bg-gold/10 px-2 sm:px-3">
-                    <User className="w-4 h-4 sm:mr-2" />
-                    <span className="hidden sm:inline">Ir para Minha Conta</span>
-                    <span className="sm:hidden">Conta</span>
-                  </Button>
-                </Link>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => customerLogout()}
-                  className="text-muted-foreground hover:text-destructive hover:bg-destructive/10 px-2 sm:px-3"
-                >
-                  <LogOut className="w-4 h-4 sm:mr-2" />
-                  <span className="hidden sm:inline">Sair</span>
-                </Button>
-              </>
-            ) : (
-              <Link to="/meus-numeros">
-                <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-gold hover:bg-gold/10 px-2 sm:px-3">
-                  <User className="w-4 h-4 sm:mr-2" />
-                  <span className="hidden sm:inline">Entrar / Meus Números</span>
-                  <span className="sm:hidden">Entrar</span>
-                </Button>
-              </Link>
-            )}
-
-            {isAdmin && (
-              <Link to="/admin">
-                <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-purple hover:bg-purple/10 px-2 sm:px-3">
-                  <span className="hidden sm:inline">Painel Admin</span>
-                  <span className="sm:hidden text-xs">Admin</span>
-                </Button>
-              </Link>
-            )}
-          </div>
-        </div>
-      </header>
-
+    return (
       <div>
         {step === 'hero' && (
           <>
@@ -218,6 +157,14 @@ export default function Index() {
               prizeTopBuyerDetails={raffle.prize_top_buyer_details}
               prizeSecondTopBuyer={raffle.prize_second_top_buyer}
               prizeSecondTopBuyerDetails={raffle.prize_second_top_buyer_details}
+
+              // New Gamification Props
+              prizeReferral1st={raffle.prize_referral_1st}
+              referralThreshold={raffle.referral_threshold}
+              prizeBuyer1st={raffle.prize_buyer_1st}
+              prizeReferralRunners={raffle.prize_referral_runners}
+              prizeBuyerRunners={raffle.prize_buyer_runners}
+
               imageUrl={raffle.image_url}
               pricePerNumber={Number(raffle.price_per_number)}
               totalNumbers={raffle.total_numbers}
@@ -319,6 +266,68 @@ export default function Index() {
           </div>
         )}
       </div>
+    );
+  };
+
+  return (
+    <SlotMachineFrame showDecorations={step === 'hero' || step === 'success'}>
+      {/* Header */}
+      <header className="sticky top-0 z-50 bg-card/80 backdrop-blur-md border-b border-gold/20">
+        <div className="container mx-auto px-3 sm:px-4 h-12 sm:h-14 flex items-center justify-between">
+          <div className="flex items-center">
+            <span className="font-display font-bold text-base sm:text-lg text-gradient-gold">OD</span>
+            <span className="relative w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center -ml-0.5">
+              {/* S2 text - fades out */}
+              <span className="absolute inset-0 flex items-center justify-center font-display font-bold text-base sm:text-lg text-red-500 animate-[heartbeat-text_2s_ease-in-out_infinite]">
+                S2
+              </span>
+              {/* Heart icon - fades in */}
+              <Heart className="absolute w-4 h-4 sm:w-5 sm:h-5 text-red-500 fill-red-500 animate-[heartbeat-icon_2s_ease-in-out_infinite]" />
+            </span>
+          </div>
+          <div className="flex items-center gap-1 sm:gap-3">
+            {isCustomerAuthenticated ? (
+              <>
+                <Link to="/meus-numeros">
+                  <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-gold hover:bg-gold/10 px-2 sm:px-3">
+                    <User className="w-4 h-4 sm:mr-2" />
+                    <span className="hidden sm:inline">Ir para Minha Conta</span>
+                    <span className="sm:hidden">Conta</span>
+                  </Button>
+                </Link>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => customerLogout()}
+                  className="text-muted-foreground hover:text-destructive hover:bg-destructive/10 px-2 sm:px-3"
+                >
+                  <LogOut className="w-4 h-4 sm:mr-2" />
+                  <span className="hidden sm:inline">Sair</span>
+                </Button>
+              </>
+            ) : (
+              <Link to="/meus-numeros">
+                <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-gold hover:bg-gold/10 px-2 sm:px-3">
+                  <User className="w-4 h-4 sm:mr-2" />
+                  <span className="hidden sm:inline">Entrar / Meus Números</span>
+                  <span className="sm:hidden">Entrar</span>
+                </Button>
+              </Link>
+            )}
+
+            {isAdmin && (
+              <Link to="/admin">
+                <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-purple hover:bg-purple/10 px-2 sm:px-3">
+                  <span className="hidden sm:inline">Painel Admin</span>
+                  <span className="sm:hidden text-xs">Admin</span>
+                </Button>
+              </Link>
+            )}
+          </div>
+        </div>
+      </header>
+
+      {renderContent()}
     </SlotMachineFrame>
   );
 }
