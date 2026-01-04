@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { formatCurrency } from '@/lib/validators';
 import { Copy, Check, Clock, QrCode, AlertCircle, Sparkles, Star, Coins, Zap } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { PurchaseSuccessCelebration } from './PurchaseSuccessCelebration';
 
 interface PixPaymentProps {
   amount: number;
@@ -26,6 +27,10 @@ export function PixPayment({
   const { toast } = useToast();
   const [copied, setCopied] = useState(false);
   const [timeLeft, setTimeLeft] = useState<string>('');
+
+  // Dev simulation state
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [mockTotalQuantity, setMockTotalQuantity] = useState(0);
 
   // Countdown timer
   useEffect(() => {
@@ -77,6 +82,21 @@ export function PixPayment({
     };
     return types[type] || type;
   };
+
+  if (showSuccess) {
+    return (
+      <div className="w-full max-w-lg mx-auto space-y-4">
+        <PurchaseSuccessCelebration purchasedQuantity={5} totalQuantity={mockTotalQuantity} />
+        <Button
+          variant="outline"
+          className="w-full"
+          onClick={() => setShowSuccess(false)}
+        >
+          Voltar para Pagamento (Dev)
+        </Button>
+      </div>
+    );
+  }
 
   return (
     <Card className="w-full max-w-lg mx-auto card-jackpot border-gold/20 overflow-hidden">
@@ -181,6 +201,29 @@ export function PixPayment({
           Após a confirmação, você receberá um e-mail para escolher seus números.
           <Sparkles className="w-2 h-2 sm:w-3 sm:h-3 text-emerald" />
         </p>
+
+        {/* Dev Simulation Area */}
+        <div className="mt-6 p-4 border border-dashed border-emerald/30 rounded-lg bg-emerald/5 text-center space-y-2">
+          <p className="text-xs text-emerald font-bold uppercase tracking-wider">Simulação (Dev Only)</p>
+          <div className="flex flex-wrap gap-2 justify-center">
+            <Button
+              variant="secondary"
+              size="sm"
+              className="bg-emerald/20 hover:bg-emerald/30 text-emerald-100 border border-emerald/30"
+              onClick={() => { setMockTotalQuantity(5); setShowSuccess(true); }}
+            >
+              Simular Sucesso (&lt;10)
+            </Button>
+            <Button
+              variant="secondary"
+              size="sm"
+              className="bg-gold/20 hover:bg-gold/30 text-gold-100 border border-gold/30"
+              onClick={() => { setMockTotalQuantity(15); setShowSuccess(true); }}
+            >
+              Simular Sucesso (&ge;10)
+            </Button>
+          </div>
+        </div>
       </CardContent>
     </Card>
   );
