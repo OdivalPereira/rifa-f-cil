@@ -17,6 +17,7 @@ import AdminDraw from "./pages/admin/AdminDraw";
 import AdminCustomers from "./pages/admin/AdminCustomers";
 import AdminReferralSettings from "./pages/admin/AdminReferralSettings";
 import NotFound from "./pages/NotFound";
+import { ReferralTracker } from "@/components/ReferralTracker";
 
 const queryClient = new QueryClient();
 
@@ -27,6 +28,7 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
+          <ReferralTracker />
           <Routes>
             {/* Public routes */}
             <Route path="/" element={<Index />} />
