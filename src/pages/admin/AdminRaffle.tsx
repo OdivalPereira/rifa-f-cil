@@ -44,6 +44,8 @@ const raffleSchema = z.object({
 
 type RaffleFormData = z.infer<typeof raffleSchema>;
 
+type RaffleStatus = 'draft' | 'active' | 'completed' | 'cancelled';
+
 export default function AdminRaffle() {
   const { toast } = useToast();
   const { data: raffles, isLoading } = useAllRaffles();
@@ -98,39 +100,31 @@ export default function AdminRaffle() {
       const raffle = raffles?.find(r => r.id === id);
       if (raffle) {
         setSelectedRaffleId(id);
-        // Type assertion for new fields not yet in generated types
-        const r = raffle as typeof raffle & {
-          prize_referral_1st?: string | null;
-          referral_threshold?: number | null;
-          prize_buyer_1st?: string | null;
-          prize_referral_runners?: string | null;
-          prize_buyer_runners?: string | null;
-        };
         reset({
-          title: r.title,
-          description: r.description || '',
-          prize_description: r.prize_description,
-          prize_draw_details: r.prize_draw_details || '',
+          title: raffle.title,
+          description: raffle.description || '',
+          prize_description: raffle.prize_description,
+          prize_draw_details: raffle.prize_draw_details || '',
 
-          prize_referral_1st: r.prize_referral_1st || '',
-          referral_threshold: r.referral_threshold || undefined,
-          prize_buyer_1st: r.prize_buyer_1st || '',
-          prize_referral_runners: r.prize_referral_runners || '',
-          prize_buyer_runners: r.prize_buyer_runners || '',
+          prize_referral_1st: raffle.prize_referral_1st || '',
+          referral_threshold: raffle.referral_threshold || undefined,
+          prize_buyer_1st: raffle.prize_buyer_1st || '',
+          prize_referral_runners: raffle.prize_referral_runners || '',
+          prize_buyer_runners: raffle.prize_buyer_runners || '',
 
-          prize_top_buyer: r.prize_top_buyer || '',
-          prize_top_buyer_details: r.prize_top_buyer_details || '',
-          prize_second_top_buyer: r.prize_second_top_buyer || '',
-          prize_second_top_buyer_details: r.prize_second_top_buyer_details || '',
+          prize_top_buyer: raffle.prize_top_buyer || '',
+          prize_top_buyer_details: raffle.prize_top_buyer_details || '',
+          prize_second_top_buyer: raffle.prize_second_top_buyer || '',
+          prize_second_top_buyer_details: raffle.prize_second_top_buyer_details || '',
 
-          image_url: r.image_url || '',
-          price_per_number: Number(r.price_per_number),
-          total_numbers: r.total_numbers,
-          pix_key: r.pix_key || '',
-          pix_key_type: r.pix_key_type || '',
-          pix_beneficiary_name: r.pix_beneficiary_name || '',
-          status: r.status as any,
-          draw_date: r.draw_date ? r.draw_date.slice(0, 16) : '',
+          image_url: raffle.image_url || '',
+          price_per_number: Number(raffle.price_per_number),
+          total_numbers: raffle.total_numbers,
+          pix_key: raffle.pix_key || '',
+          pix_key_type: raffle.pix_key_type || '',
+          pix_beneficiary_name: raffle.pix_beneficiary_name || '',
+          status: raffle.status as RaffleStatus,
+          draw_date: raffle.draw_date ? raffle.draw_date.slice(0, 16) : '',
         });
       }
     }
@@ -245,7 +239,7 @@ export default function AdminRaffle() {
                     <Label htmlFor="status">Status</Label>
                     <Select
                       value={watch('status')}
-                      onValueChange={(v: any) => setValue('status', v)}
+                      onValueChange={(v: RaffleStatus) => setValue('status', v)}
                     >
                       <SelectTrigger>
                         <SelectValue />
