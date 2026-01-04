@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, Save, Plus } from 'lucide-react';
 
@@ -17,10 +18,20 @@ const raffleSchema = z.object({
   description: z.string().optional(),
   prize_description: z.string().min(3, 'Descrição do prêmio obrigatória'),
   prize_draw_details: z.string().optional(),
+
+  // New Gamification Fields
+  prize_referral_1st: z.string().optional(),
+  referral_threshold: z.coerce.number().optional(),
+  prize_buyer_1st: z.string().optional(),
+  prize_referral_runners: z.string().optional(),
+  prize_buyer_runners: z.string().optional(),
+
+  // Legacy fields (kept for compatibility or hidden)
   prize_top_buyer: z.string().optional(),
   prize_top_buyer_details: z.string().optional(),
   prize_second_top_buyer: z.string().optional(),
   prize_second_top_buyer_details: z.string().optional(),
+
   image_url: z.string().url('URL inválida').optional().or(z.literal('')),
   price_per_number: z.coerce.number().min(0.01, 'Preço deve ser maior que 0'),
   total_numbers: z.coerce.number().min(10, 'Mínimo 10 números').max(100000, 'Máximo 100.000 números'),
@@ -65,6 +76,11 @@ export default function AdminRaffle() {
         description: '',
         prize_description: '',
         prize_draw_details: '',
+        prize_referral_1st: '',
+        referral_threshold: undefined,
+        prize_buyer_1st: '',
+        prize_referral_runners: '',
+        prize_buyer_runners: '',
         prize_top_buyer: '',
         prize_top_buyer_details: '',
         prize_second_top_buyer: '',
@@ -87,10 +103,18 @@ export default function AdminRaffle() {
           description: raffle.description || '',
           prize_description: raffle.prize_description,
           prize_draw_details: raffle.prize_draw_details || '',
+
+          prize_referral_1st: raffle.prize_referral_1st || '',
+          referral_threshold: raffle.referral_threshold || undefined,
+          prize_buyer_1st: raffle.prize_buyer_1st || '',
+          prize_referral_runners: raffle.prize_referral_runners || '',
+          prize_buyer_runners: raffle.prize_buyer_runners || '',
+
           prize_top_buyer: raffle.prize_top_buyer || '',
           prize_top_buyer_details: raffle.prize_top_buyer_details || '',
           prize_second_top_buyer: raffle.prize_second_top_buyer || '',
           prize_second_top_buyer_details: raffle.prize_second_top_buyer_details || '',
+
           image_url: raffle.image_url || '',
           price_per_number: Number(raffle.price_per_number),
           total_numbers: raffle.total_numbers,
@@ -109,15 +133,23 @@ export default function AdminRaffle() {
       await upsertRaffle.mutateAsync({
         id: selectedRaffleId || undefined,
         title: data.title,
+        description: data.description,
         prize_description: data.prize_description,
         prize_draw_details: data.prize_draw_details || undefined,
+
+        prize_referral_1st: data.prize_referral_1st || undefined,
+        referral_threshold: data.referral_threshold,
+        prize_buyer_1st: data.prize_buyer_1st || undefined,
+        prize_referral_runners: data.prize_referral_runners || undefined,
+        prize_buyer_runners: data.prize_buyer_runners || undefined,
+
         prize_top_buyer: data.prize_top_buyer || undefined,
         prize_top_buyer_details: data.prize_top_buyer_details || undefined,
         prize_second_top_buyer: data.prize_second_top_buyer || undefined,
         prize_second_top_buyer_details: data.prize_second_top_buyer_details || undefined,
+
         price_per_number: data.price_per_number,
         total_numbers: data.total_numbers,
-        description: data.description,
         image_url: data.image_url || undefined,
         pix_key: data.pix_key,
         pix_key_type: data.pix_key_type,
@@ -151,10 +183,9 @@ export default function AdminRaffle() {
     <div className="space-y-6 max-w-3xl">
       <div>
         <h1 className="text-3xl font-display font-bold">Gerenciar Rifa</h1>
-        <p className="text-muted-foreground">Crie ou edite suas rifas</p>
+        <p className="text-muted-foreground">Crie ou edite suas rifas e configure todos os prêmios.</p>
       </div>
 
-      {/* Raffle selector */}
       <div className="flex gap-2">
         <Select value={selectedRaffleId || 'new'} onValueChange={handleSelectRaffle}>
           <SelectTrigger className="w-64">
@@ -180,150 +211,211 @@ export default function AdminRaffle() {
         <CardHeader>
           <CardTitle>{selectedRaffleId ? 'Editar Rifa' : 'Nova Rifa'}</CardTitle>
           <CardDescription>
-            Preencha os dados da rifa
+            Configure os detalhes da rifa e regras de premiação.
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="title">Título *</Label>
-                <Input id="title" {...register('title')} />
-                {errors.title && <p className="text-sm text-destructive">{errors.title.message}</p>}
-              </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="status">Status</Label>
-                <Select 
-                  value={watch('status')} 
-                  onValueChange={(v: any) => setValue('status', v)}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="draft">Rascunho</SelectItem>
-                    <SelectItem value="active">Ativa</SelectItem>
-                    <SelectItem value="completed">Concluída</SelectItem>
-                    <SelectItem value="cancelled">Cancelada</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
+            <Tabs defaultValue="geral" className="w-full">
+              <TabsList className="grid w-full grid-cols-3">
+                <TabsTrigger value="geral">Geral & Sorteio</TabsTrigger>
+                <TabsTrigger value="indicacoes">Indicações</TabsTrigger>
+                <TabsTrigger value="compradores">Compradores</TabsTrigger>
+              </TabsList>
 
-            <div className="border-t border-border pt-6">
-              <h3 className="font-semibold mb-4">Prêmio Principal (Sorteio)</h3>
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="prize_description">Título do Prêmio *</Label>
-                  <Input id="prize_description" placeholder="Ex: iPhone 15 Pro Max" {...register('prize_description')} />
-                  {errors.prize_description && <p className="text-sm text-destructive">{errors.prize_description.message}</p>}
+              {/* ABA GERAL & SORTEIO */}
+              <TabsContent value="geral" className="space-y-4 pt-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="title">Título da Rifa *</Label>
+                    <Input id="title" {...register('title')} />
+                    {errors.title && <p className="text-sm text-destructive">{errors.title.message}</p>}
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="status">Status</Label>
+                    <Select
+                      value={watch('status')}
+                      onValueChange={(v: any) => setValue('status', v)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="draft">Rascunho</SelectItem>
+                        <SelectItem value="active">Ativa</SelectItem>
+                        <SelectItem value="completed">Concluída</SelectItem>
+                        <SelectItem value="cancelled">Cancelada</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="prize_draw_details">Detalhes do Prêmio</Label>
-                  <Textarea id="prize_draw_details" placeholder="Especificações, cor, memória, etc..." {...register('prize_draw_details')} />
+                  <Label htmlFor="description">Descrição Geral</Label>
+                  <Textarea id="description" placeholder="Descrição da rifa e seu motivo..." {...register('description')} />
                 </div>
-              </div>
-            </div>
 
-            <div className="border-t border-border pt-6">
-              <h3 className="font-semibold mb-4">Prêmios de Ranking</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="border p-4 rounded-md space-y-4 bg-muted/20">
+                  <h3 className="font-semibold text-gold">Prêmio Principal (Sorteio)</h3>
+                  <div className="space-y-2">
+                    <Label htmlFor="prize_description">Título do Prêmio Principal *</Label>
+                    <Input id="prize_description" placeholder="Ex: iPhone 15 Pro Max" {...register('prize_description')} />
+                    {errors.prize_description && <p className="text-sm text-destructive">{errors.prize_description.message}</p>}
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="prize_draw_details">Detalhes do Prêmio</Label>
+                    <Textarea id="prize_draw_details" placeholder="Especificações, cor, memória, etc..." {...register('prize_draw_details')} />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="price_per_number">Preço (R$) *</Label>
+                    <Input id="price_per_number" type="number" step="0.01" {...register('price_per_number')} />
+                    {errors.price_per_number && <p className="text-sm text-destructive">{errors.price_per_number.message}</p>}
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="total_numbers">Total de Números *</Label>
+                    <Input id="total_numbers" type="number" {...register('total_numbers')} />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="draw_date">Data do Sorteio</Label>
+                    <Input id="draw_date" type="datetime-local" {...register('draw_date')} />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="image_url">URL da Imagem</Label>
+                  <Input id="image_url" type="url" placeholder="https://..." {...register('image_url')} />
+                </div>
+
+                 <div className="border-t border-border pt-6">
+                  <h3 className="font-semibold mb-4">Configurações de PIX</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="pix_key">Chave PIX</Label>
+                      <Input id="pix_key" {...register('pix_key')} />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="pix_key_type">Tipo da Chave</Label>
+                      <Select
+                        value={watch('pix_key_type') || ''}
+                        onValueChange={(v) => setValue('pix_key_type', v)}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="cpf">CPF</SelectItem>
+                          <SelectItem value="cnpj">CNPJ</SelectItem>
+                          <SelectItem value="email">E-mail</SelectItem>
+                          <SelectItem value="phone">Telefone</SelectItem>
+                          <SelectItem value="random">Chave Aleatória</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="pix_beneficiary_name">Nome do Beneficiário</Label>
+                      <Input id="pix_beneficiary_name" {...register('pix_beneficiary_name')} />
+                    </div>
+                  </div>
+                </div>
+              </TabsContent>
+
+              {/* ABA GAMIFICAÇÃO - INDICAÇÕES */}
+              <TabsContent value="indicacoes" className="space-y-6 pt-4">
                 <div className="space-y-4">
-                  <h4 className="text-sm font-medium text-muted-foreground">Top Comprador (1º Lugar)</h4>
-                  <div className="space-y-2">
-                    <Label htmlFor="prize_top_buyer">Título</Label>
-                    <Input id="prize_top_buyer" placeholder="Ex: R$ 1.000 no PIX" {...register('prize_top_buyer')} />
+                  <div className="border p-4 rounded-md space-y-4 bg-muted/20">
+                    <h3 className="font-semibold text-gold">Top Indicador (1º Lugar)</h3>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="prize_referral_1st">Descrição do Prêmio</Label>
+                      <Textarea
+                        id="prize_referral_1st"
+                        placeholder="Ex: R$ 500 no PIX para quem mais indicar."
+                        {...register('prize_referral_1st')}
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="referral_threshold">Gatilho de Vendas (Quantidade)</Label>
+                      <Input
+                        id="referral_threshold"
+                        type="number"
+                        placeholder="Ex: 6000"
+                        {...register('referral_threshold')}
+                      />
+                      <p className="text-sm text-muted-foreground">
+                        Entregar prêmio imediatamente ao atingir X vendas totais da rifa.
+                      </p>
+                    </div>
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="prize_top_buyer_details">Detalhes</Label>
-                    <Textarea id="prize_top_buyer_details" placeholder="Descrição detalhada..." {...register('prize_top_buyer_details')} />
+
+                  <div className="border p-4 rounded-md space-y-4 bg-muted/20">
+                    <h3 className="font-semibold text-gold">Indicadores (2º ao 5º Lugar)</h3>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="prize_referral_runners">Descrição do Prêmio</Label>
+                      <Textarea
+                        id="prize_referral_runners"
+                        placeholder="Ex: R$ 50 para o 2º, R$ 30 para o 3º..."
+                        {...register('prize_referral_runners')}
+                      />
+                    </div>
                   </div>
                 </div>
+              </TabsContent>
 
-                <div className="space-y-4">
-                  <h4 className="text-sm font-medium text-muted-foreground">2º Top Comprador</h4>
-                  <div className="space-y-2">
-                    <Label htmlFor="prize_second_top_buyer">Título</Label>
-                    <Input id="prize_second_top_buyer" placeholder="Ex: R$ 500 no PIX" {...register('prize_second_top_buyer')} />
+              {/* ABA GAMIFICAÇÃO - COMPRADORES */}
+              <TabsContent value="compradores" className="space-y-6 pt-4">
+                 <div className="space-y-4">
+                  <div className="border p-4 rounded-md space-y-4 bg-muted/20">
+                    <h3 className="font-semibold text-gold">Maior Comprador (1º Lugar)</h3>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="prize_buyer_1st">Descrição do Prêmio</Label>
+                      <Textarea
+                        id="prize_buyer_1st"
+                        placeholder="Ex: R$ 1000 no PIX"
+                        {...register('prize_buyer_1st')}
+                      />
+                    </div>
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="prize_second_top_buyer_details">Detalhes</Label>
-                    <Textarea id="prize_second_top_buyer_details" placeholder="Descrição detalhada..." {...register('prize_second_top_buyer_details')} />
+
+                  <div className="border p-4 rounded-md space-y-4 bg-muted/20">
+                    <h3 className="font-semibold text-gold">Compradores (2º ao 5º Lugar)</h3>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="prize_buyer_runners">Descrição do Prêmio</Label>
+                      <Textarea
+                        id="prize_buyer_runners"
+                        placeholder="Ex: R$ 200 para o 2º, R$ 100 para o 3º..."
+                        {...register('prize_buyer_runners')}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Legacy fields warning (optional, for developer context) */}
+                  <div className="mt-8 pt-4 border-t border-border/50">
+                    <p className="text-xs text-muted-foreground italic">
+                      Nota: Os campos antigos de "Top Comprador" foram migrados para esta nova estrutura.
+                    </p>
                   </div>
                 </div>
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="description">Descrição Geral da Rifa</Label>
-              <Textarea id="description" placeholder="Descrição da rifa e seu motivo..." {...register('description')} />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="image_url">URL da Imagem</Label>
-              <Input id="image_url" type="url" placeholder="https://..." {...register('image_url')} />
-              {errors.image_url && <p className="text-sm text-destructive">{errors.image_url.message}</p>}
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="price_per_number">Preço por Número (R$) *</Label>
-                <Input id="price_per_number" type="number" step="0.01" {...register('price_per_number')} />
-                {errors.price_per_number && <p className="text-sm text-destructive">{errors.price_per_number.message}</p>}
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="total_numbers">Total de Números *</Label>
-                <Input id="total_numbers" type="number" {...register('total_numbers')} />
-                {errors.total_numbers && <p className="text-sm text-destructive">{errors.total_numbers.message}</p>}
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="draw_date">Data do Sorteio</Label>
-                <Input id="draw_date" type="datetime-local" {...register('draw_date')} />
-              </div>
-            </div>
-
-            <div className="border-t border-border pt-6">
-              <h3 className="font-semibold mb-4">Configurações de PIX</h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="pix_key">Chave PIX</Label>
-                  <Input id="pix_key" {...register('pix_key')} />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="pix_key_type">Tipo da Chave</Label>
-                  <Select 
-                    value={watch('pix_key_type') || ''} 
-                    onValueChange={(v) => setValue('pix_key_type', v)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecione..." />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="cpf">CPF</SelectItem>
-                      <SelectItem value="cnpj">CNPJ</SelectItem>
-                      <SelectItem value="email">E-mail</SelectItem>
-                      <SelectItem value="phone">Telefone</SelectItem>
-                      <SelectItem value="random">Chave Aleatória</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="pix_beneficiary_name">Nome do Beneficiário</Label>
-                  <Input id="pix_beneficiary_name" {...register('pix_beneficiary_name')} />
-                </div>
-              </div>
-            </div>
+              </TabsContent>
+            </Tabs>
 
             <Button 
               type="submit" 
               disabled={upsertRaffle.isPending}
-              className="bg-gradient-gold text-primary-foreground hover:opacity-90"
+              className="w-full bg-gradient-gold text-primary-foreground hover:opacity-90 mt-6"
             >
               {upsertRaffle.isPending ? (
                 <Loader2 className="w-4 h-4 animate-spin mr-2" />
