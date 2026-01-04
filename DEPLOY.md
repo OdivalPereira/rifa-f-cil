@@ -20,33 +20,16 @@ Este guia explica como configurar o ambiente de produção usando **Supabase** (
 
 2. **Obter Credenciais:**
    - Após criar o projeto, vá em **Project Settings > API**.
-   - Copie a **Project URL** e a **anon public key**. Você precisará delas no Passo 2.
+   - Copie a **Project URL** e a **Publishable API Key** (pode começar com `sb_publishable_` ou `anon`). Você precisará delas no Passo 2.
 
 3. **Aplicar Migrations (Banco de Dados):**
-   - As tabelas e configurações do banco já estão definidas na pasta `supabase/migrations`.
-   - Para aplicar essas configurações no seu novo projeto Supabase, você usará a CLI do Supabase.
+   - Para criar as tabelas e configurações no seu novo projeto, você pode usar o arquivo consolidado `supabase/full_schema.sql` gerado neste repositório.
 
-   **Opção A: Usando a CLI (Recomendado)**
-
-   1. Faça login na CLI do Supabase:
-      ```bash
-      npx supabase login
-      ```
-   2. Vincule seu projeto local ao projeto remoto que você acabou de criar. Você precisará do `Reference ID` do projeto (encontrado em Project Settings > General, ou na URL do dashboard `https://supabase.com/dashboard/project/<REFERENCE_ID>`):
-      ```bash
-      npx supabase link --project-ref <SEU_REFERENCE_ID>
-      ```
-      *Quando pedir a senha do banco de dados, insira a senha que você criou no passo 1.1.*
-
-   3. Envie as migrations para o banco remoto:
-      ```bash
-      npx supabase db push
-      ```
-      Isso criará todas as tabelas, funções e triggers necessárias automaticamente.
-
-   **Opção B: Manualmente (SQL Editor)**
-   - Se preferir não usar a CLI, você pode copiar o conteúdo de cada arquivo `.sql` dentro de `supabase/migrations/` e rodar no **SQL Editor** do dashboard do Supabase.
-   - **IMPORTANTE:** Execute os arquivos na ordem cronológica (do mais antigo para o mais recente).
+   **Como aplicar:**
+   1. Abra o arquivo `supabase/full_schema.sql` neste repositório e copie todo o seu conteúdo.
+   2. Vá para o [Dashboard do Supabase](https://supabase.com/dashboard/project/_/sql).
+   3. Clique em **SQL Editor** no menu lateral.
+   4. Cole o conteúdo no editor e clique em **Run**.
 
 ---
 
@@ -61,7 +44,7 @@ Este guia explica como configurar o ambiente de produção usando **Supabase** (
    - O Render detectará automaticamente o arquivo `render.yaml` e mostrará os detalhes do serviço `rifa-facil-app`.
    - Na seção de variáveis de ambiente ("Environment Variables"), preencha os valores com as credenciais do Supabase (Passo 1.2):
      - `VITE_SUPABASE_URL`: Cole a **Project URL**.
-     - `VITE_SUPABASE_ANON_KEY`: Cole a **anon public key**.
+     - `VITE_SUPABASE_PUBLISHABLE_KEY`: Cole a **Publishable API Key**.
 
 3. **Deploy:**
    - Clique em **Apply** ou **Create Web Service**.
