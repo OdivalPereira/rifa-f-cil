@@ -7,6 +7,7 @@ import { AuthProvider } from "@/hooks/useAuth";
 import { Suspense, lazy } from "react";
 import Index from "./pages/Index";
 import { ReferralTracker } from "@/components/ReferralTracker";
+import { AdminRoute } from "@/components/AdminRoute";
 import { Loader2 } from "lucide-react";
 
 // Lazy load pages
@@ -53,13 +54,15 @@ const App = () => (
               <Route path="/admin/login" element={<AdminAuth />} />
 
               {/* Admin protected routes */}
-              <Route path="/admin" element={<AdminLayout />}>
-                <Route index element={<AdminDashboard />} />
-                <Route path="rifa" element={<AdminRaffle />} />
-                <Route path="pagamentos" element={<AdminPayments />} />
-                <Route path="sorteio" element={<AdminDraw />} />
-                <Route path="clientes" element={<AdminCustomers />} />
-                <Route path="referral-settings" element={<AdminReferralSettings />} />
+              <Route element={<AdminRoute />}>
+                <Route path="/admin" element={<AdminLayout />}>
+                  <Route index element={<AdminDashboard />} />
+                  <Route path="rifa" element={<AdminRaffle />} />
+                  <Route path="pagamentos" element={<AdminPayments />} />
+                  <Route path="sorteio" element={<AdminDraw />} />
+                  <Route path="clientes" element={<AdminCustomers />} />
+                  <Route path="referral-settings" element={<AdminReferralSettings />} />
+                </Route>
               </Route>
 
               {/* Catch-all */}
