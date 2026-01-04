@@ -65,10 +65,11 @@ export function BuyerForm({ pricePerNumber, maxNumbers, onSubmit, isLoading }: B
           <div className="space-y-2">
             <Label htmlFor="name" className="flex items-center gap-2 text-foreground">
               <User className="w-4 h-4 text-emerald" />
-              Nome completo
+              Nome completo <span className="text-destructive">*</span>
             </Label>
             <Input
               id="name"
+              autoComplete="name"
               placeholder="Seu nome completo"
               {...register('name')}
               className={`input-casino ${errors.name ? 'border-destructive' : ''}`}
@@ -82,12 +83,13 @@ export function BuyerForm({ pricePerNumber, maxNumbers, onSubmit, isLoading }: B
           <div className="space-y-2">
             <Label htmlFor="email" className="flex items-center gap-2 text-foreground">
               <Mail className="w-4 h-4 text-emerald" />
-              E-mail
+              E-mail <span className="text-destructive">*</span>
             </Label>
             <Input
               id="email"
               type="email"
               inputMode="email"
+              autoComplete="email"
               placeholder="seu@email.com"
               {...register('email')}
               className={`input-casino ${errors.email ? 'border-destructive' : ''}`}
@@ -101,12 +103,13 @@ export function BuyerForm({ pricePerNumber, maxNumbers, onSubmit, isLoading }: B
           <div className="space-y-2">
             <Label htmlFor="phone" className="flex items-center gap-2 text-foreground">
               <Phone className="w-4 h-4 text-emerald" />
-              Telefone (WhatsApp)
+              Telefone (WhatsApp) <span className="text-destructive">*</span>
             </Label>
             <Input
               id="phone"
               type="tel"
               inputMode="tel"
+              autoComplete="tel"
               placeholder="(11) 99999-9999"
               {...register('phone')}
               className={`input-casino ${errors.phone ? 'border-destructive' : ''}`}
@@ -133,6 +136,7 @@ export function BuyerForm({ pricePerNumber, maxNumbers, onSubmit, isLoading }: B
                   size="sm"
                   onClick={() => setQuantity(preset)}
                   aria-label={`Selecionar ${preset} números`}
+                  aria-pressed={quantity === preset}
                   className={quantity === preset 
                     ? 'bg-emerald hover:bg-emerald-light text-primary-foreground glow-emerald border-0' 
                     : 'border-emerald/30 hover:border-emerald hover:bg-emerald/10 bg-transparent'
