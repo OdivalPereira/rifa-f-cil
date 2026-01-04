@@ -24,7 +24,8 @@ import {
   Sparkles,
   Clover,
   Star,
-  Users
+  Users,
+  MessageSquareShare
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { SlotMachineFrame } from '@/components/SlotMachineFrame';
@@ -35,6 +36,7 @@ const menuItems = [
   { title: 'Pagamentos', url: '/admin/pagamentos', icon: CreditCard },
   { title: 'Sorteio', url: '/admin/sorteio', icon: Trophy },
   { title: 'Clientes', url: '/admin/clientes', icon: Users },
+  { title: 'Indicações', url: '/admin/referral-settings', icon: MessageSquareShare },
 ];
 
 export default function AdminLayout() {
