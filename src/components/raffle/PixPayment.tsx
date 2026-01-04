@@ -30,7 +30,7 @@ export function PixPayment({
 
   // Dev simulation state
   const [showSuccess, setShowSuccess] = useState(false);
-  const [mockTotalQuantity, setMockTotalQuantity] = useState(0);
+  const [mockBuyerPhone, setMockBuyerPhone] = useState('11999999999');
 
   // Countdown timer
   useEffect(() => {
@@ -86,7 +86,10 @@ export function PixPayment({
   if (showSuccess) {
     return (
       <div className="w-full max-w-lg mx-auto space-y-4">
-        <PurchaseSuccessCelebration purchasedQuantity={5} totalQuantity={mockTotalQuantity} />
+        <PurchaseSuccessCelebration 
+          purchasedQuantity={5} 
+          buyerPhone={mockBuyerPhone} 
+        />
         <Button
           variant="outline"
           className="w-full"
@@ -210,17 +213,17 @@ export function PixPayment({
               variant="secondary"
               size="sm"
               className="bg-emerald/20 hover:bg-emerald/30 text-emerald-100 border border-emerald/30"
-              onClick={() => { setMockTotalQuantity(5); setShowSuccess(true); }}
+              onClick={() => { setMockBuyerPhone('11988887777'); setShowSuccess(true); }}
             >
-              Simular Sucesso (&lt;10)
+              Simular Sucesso (Novo Usuário)
             </Button>
             <Button
               variant="secondary"
               size="sm"
               className="bg-gold/20 hover:bg-gold/30 text-gold-100 border border-gold/30"
-              onClick={() => { setMockTotalQuantity(15); setShowSuccess(true); }}
+              onClick={() => { setMockBuyerPhone('11999999999'); setShowSuccess(true); }}
             >
-              Simular Sucesso (&ge;10)
+              Simular Sucesso (Usuário Existente)
             </Button>
           </div>
         </div>
