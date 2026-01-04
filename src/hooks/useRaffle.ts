@@ -74,7 +74,7 @@ export function useMyPurchases(email: string, phone: string) {
   });
 }
 
-// Hook para criar uma compra
+// Hook para criar uma compra (com suporte a referrer_id)
 export function useCreatePurchase() {
   const queryClient = useQueryClient();
 
@@ -95,17 +95,41 @@ export function useCreatePurchase() {
       pricePerNumber: number;
     }) => {
       const totalAmount = quantity * pricePerNumber;
+      
+      // Check for referral code in localStorage
+      const referrerCode = localStorage.getItem('rifa_referrer');
+      let referrerId: string | null = null;
+
+      if (referrerCode) {
+        // Look up the referrer's customer_accounts.id
+        const { data: referrerAccount } = await supabase
+          .from('customer_accounts')
+          .select('id')
+          .eq('referral_code', referrerCode)
+          .maybeSingle();
+        
+        if (referrerAccount) {
+          referrerId = referrerAccount.id;
+        }
+        
+        // Clear localStorage after use (one-time attribution)
+        localStorage.removeItem('rifa_referrer');
+      }
+
+      // Build insert data
+      const insertData = {
+        raffle_id: raffleId,
+        buyer_name: buyerName,
+        buyer_email: buyerEmail,
+        buyer_phone: buyerPhone.replace(/\D/g, ''),
+        quantity,
+        total_amount: totalAmount,
+        ...(referrerId ? { referrer_id: referrerId } : {}),
+      };
 
       const { data, error } = await supabase
         .from('purchases')
-        .insert({
-          raffle_id: raffleId,
-          buyer_name: buyerName,
-          buyer_email: buyerEmail,
-          buyer_phone: buyerPhone.replace(/\D/g, ''),
-          quantity,
-          total_amount: totalAmount,
-        })
+        .insert(insertData as any)
         .select()
         .single();
 
@@ -185,5 +209,173 @@ export function useRaffleStats(raffleId: string | undefined) {
       };
     },
     enabled: !!raffleId,
+  });
+}
+
+// Hook para buscar ranking de indicadores (referral_ranking view)
+export function useReferralRanking(raffleId: string | undefined, limit: number = 10) {
+  return useQuery({
+    queryKey: ['referral-ranking', raffleId, limit],
+    queryFn: async () => {
+      if (!raffleId) return [];
+      
+      // Query the view - cast to any since view types not yet generated
+      const { data, error } = await supabase
+        .from('referral_ranking' as any)
+        .select('*')
+        .eq('raffle_id', raffleId)
+        .limit(limit);
+
+      if (error) {
+        console.error('Referral ranking query error:', error);
+        return [];
+      }
+      
+      return (data || []) as unknown as Array<{
+        referrer_id: string;
+        referrer_phone: string;
+        referral_code: string;
+        raffle_id: string;
+        sales_count: number;
+        tickets_sold: number;
+        total_revenue: number;
+      }>;
+    },
+    enabled: !!raffleId,
+  });
+}
+
+// Hook para buscar ranking de compradores (top_buyers_ranking view)
+export function useTopBuyersRanking(raffleId: string | undefined, limit: number = 10) {
+  return useQuery({
+    queryKey: ['top-buyers-ranking', raffleId, limit],
+    queryFn: async () => {
+      if (!raffleId) return [];
+      
+      // Query the view - cast to any since view types not yet generated
+      const { data, error } = await supabase
+        .from('top_buyers_ranking' as any)
+        .select('*')
+        .eq('raffle_id', raffleId)
+        .limit(limit);
+
+      if (error) {
+        console.error('Top buyers ranking query error:', error);
+        return [];
+      }
+      
+      return (data || []) as unknown as Array<{
+        buyer_phone: string;
+        buyer_name: string;
+        raffle_id: string;
+        purchase_count: number;
+        tickets_bought: number;
+        total_spent: number;
+      }>;
+    },
+    enabled: !!raffleId,
+  });
+}
+
+// Hook para buscar/gerar código de indicação do usuário
+export function useUserReferralCode(phone: string | null) {
+  return useQuery({
+    queryKey: ['user-referral-code', phone],
+    queryFn: async () => {
+      if (!phone) return null;
+      
+      const cleanPhone = phone.replace(/\D/g, '');
+      
+      // Get user's customer account
+      const { data: account, error } = await supabase
+        .from('customer_accounts')
+        .select('id, referral_code')
+        .eq('phone', cleanPhone)
+        .maybeSingle();
+
+      if (error) {
+        console.error('Error fetching customer account:', error);
+        return null;
+      }
+      
+      return account;
+    },
+    enabled: !!phone,
+  });
+}
+
+// Hook para gerar código de indicação
+export function useGenerateReferralCode() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (accountId: string) => {
+      // Generate a unique 8-character code
+      const generateCode = () => {
+        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+        let code = '';
+        for (let i = 0; i < 8; i++) {
+          code += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        return code;
+      };
+
+      let code = generateCode();
+      let attempts = 0;
+      const maxAttempts = 10;
+
+      // Try to find a unique code
+      while (attempts < maxAttempts) {
+        const { data: existing } = await supabase
+          .from('customer_accounts')
+          .select('id')
+          .eq('referral_code', code)
+          .maybeSingle();
+
+        if (!existing) break;
+        code = generateCode();
+        attempts++;
+      }
+
+      // Update the account with the new code
+      const { data, error } = await supabase
+        .from('customer_accounts')
+        .update({ referral_code: code } as any)
+        .eq('id', accountId)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['user-referral-code'] });
+    },
+  });
+}
+
+// Hook para buscar total de números comprados por um usuário
+export function useUserTotalNumbers(phone: string | null) {
+  return useQuery({
+    queryKey: ['user-total-numbers', phone],
+    queryFn: async () => {
+      if (!phone) return 0;
+      
+      const cleanPhone = phone.replace(/\D/g, '');
+      
+      const { data, error } = await supabase
+        .from('purchases')
+        .select('quantity')
+        .eq('buyer_phone', cleanPhone)
+        .eq('payment_status', 'approved');
+
+      if (error) {
+        console.error('Error fetching user purchases:', error);
+        return 0;
+      }
+      
+      return data?.reduce((sum, p) => sum + p.quantity, 0) || 0;
+    },
+    enabled: !!phone,
   });
 }

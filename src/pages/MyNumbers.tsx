@@ -103,7 +103,7 @@ export default function MyNumbers() {
         {/* Main content */}
         <main className="container mx-auto px-3 sm:px-4 py-4 sm:py-8 max-w-2xl">
 
-          <ReferralDashboard />
+          <ReferralDashboard phone={phone} />
 
           <div className="card-jackpot p-4 sm:p-6">
             {/* Header */}

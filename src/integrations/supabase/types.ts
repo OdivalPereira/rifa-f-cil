@@ -20,24 +20,24 @@ export type Database = {
           id: string
           phone: string
           pin_hash: string
-          updated_at: string
           referral_code: string | null
+          updated_at: string
         }
         Insert: {
           created_at?: string
           id?: string
           phone: string
           pin_hash: string
-          updated_at?: string
           referral_code?: string | null
+          updated_at?: string
         }
         Update: {
           created_at?: string
           id?: string
           phone?: string
           pin_hash?: string
-          updated_at?: string
           referral_code?: string | null
+          updated_at?: string
         }
         Relationships: []
       }
@@ -55,9 +55,9 @@ export type Database = {
           pix_transaction_id: string | null
           quantity: number
           raffle_id: string
+          referrer_id: string | null
           total_amount: number
           updated_at: string
-          referrer_id: string | null
         }
         Insert: {
           approved_at?: string | null
@@ -72,9 +72,9 @@ export type Database = {
           pix_transaction_id?: string | null
           quantity: number
           raffle_id: string
+          referrer_id?: string | null
           total_amount: number
           updated_at?: string
-          referrer_id?: string | null
         }
         Update: {
           approved_at?: string | null
@@ -89,9 +89,9 @@ export type Database = {
           pix_transaction_id?: string | null
           quantity?: number
           raffle_id?: string
+          referrer_id?: string | null
           total_amount?: number
           updated_at?: string
-          referrer_id?: string | null
         }
         Relationships: [
           {
@@ -107,6 +107,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "customer_accounts"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "purchases_referrer_id_fkey"
+            columns: ["referrer_id"]
+            isOneToOne: false
+            referencedRelation: "referral_ranking"
+            referencedColumns: ["referrer_id"]
           },
         ]
       }
@@ -166,17 +173,17 @@ export type Database = {
           pix_key: string | null
           pix_key_type: string | null
           price_per_number: number
+          prize_buyer_1st: string | null
+          prize_buyer_runners: string | null
           prize_description: string
           prize_draw_details: string | null
           prize_referral_1st: string | null
-          referral_threshold: number | null
-          prize_buyer_1st: string | null
           prize_referral_runners: string | null
-          prize_buyer_runners: string | null
           prize_second_top_buyer: string | null
           prize_second_top_buyer_details: string | null
           prize_top_buyer: string | null
           prize_top_buyer_details: string | null
+          referral_threshold: number | null
           status: Database["public"]["Enums"]["raffle_status"]
           title: string
           total_numbers: number
@@ -198,17 +205,17 @@ export type Database = {
           pix_key?: string | null
           pix_key_type?: string | null
           price_per_number?: number
+          prize_buyer_1st?: string | null
+          prize_buyer_runners?: string | null
           prize_description: string
           prize_draw_details?: string | null
           prize_referral_1st?: string | null
-          referral_threshold?: number | null
-          prize_buyer_1st?: string | null
           prize_referral_runners?: string | null
-          prize_buyer_runners?: string | null
           prize_second_top_buyer?: string | null
           prize_second_top_buyer_details?: string | null
           prize_top_buyer?: string | null
           prize_top_buyer_details?: string | null
+          referral_threshold?: number | null
           status?: Database["public"]["Enums"]["raffle_status"]
           title: string
           total_numbers?: number
@@ -230,17 +237,17 @@ export type Database = {
           pix_key?: string | null
           pix_key_type?: string | null
           price_per_number?: number
+          prize_buyer_1st?: string | null
+          prize_buyer_runners?: string | null
           prize_description?: string
           prize_draw_details?: string | null
           prize_referral_1st?: string | null
-          referral_threshold?: number | null
-          prize_buyer_1st?: string | null
           prize_referral_runners?: string | null
-          prize_buyer_runners?: string | null
           prize_second_top_buyer?: string | null
           prize_second_top_buyer_details?: string | null
           prize_top_buyer?: string | null
           prize_top_buyer_details?: string | null
+          referral_threshold?: number | null
           status?: Database["public"]["Enums"]["raffle_status"]
           title?: string
           total_numbers?: number
@@ -336,21 +343,17 @@ export type Database = {
     Views: {
       referral_ranking: {
         Row: {
-          referrer_id: string
-          raffle_id: string
-          sales_count: number
-          tickets_sold: number
+          raffle_id: string | null
+          referral_code: string | null
+          referrer_id: string | null
+          referrer_phone: string | null
+          sales_count: number | null
+          tickets_sold: number | null
+          total_revenue: number | null
         }
         Relationships: [
           {
-            foreignKeyName: "referral_ranking_referrer_id_fkey"
-            columns: ["referrer_id"]
-            isOneToOne: false
-            referencedRelation: "customer_accounts"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "referral_ranking_raffle_id_fkey"
+            foreignKeyName: "purchases_raffle_id_fkey"
             columns: ["raffle_id"]
             isOneToOne: false
             referencedRelation: "raffles"
@@ -360,13 +363,16 @@ export type Database = {
       }
       top_buyers_ranking: {
         Row: {
-          buyer_phone: string
-          raffle_id: string
-          tickets_bought: number
+          buyer_name: string | null
+          buyer_phone: string | null
+          purchase_count: number | null
+          raffle_id: string | null
+          tickets_bought: number | null
+          total_spent: number | null
         }
         Relationships: [
-           {
-            foreignKeyName: "top_buyers_ranking_raffle_id_fkey"
+          {
+            foreignKeyName: "purchases_raffle_id_fkey"
             columns: ["raffle_id"]
             isOneToOne: false
             referencedRelation: "raffles"
@@ -376,10 +382,7 @@ export type Database = {
       }
     }
     Functions: {
-      generate_unique_referral_code: {
-        Args: Record<PropertyKey, never>
-        Returns: string
-      }
+      generate_unique_referral_code: { Args: never; Returns: string }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
