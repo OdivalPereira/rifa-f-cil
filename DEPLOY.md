@@ -75,3 +75,20 @@ Este guia explica como configurar o ambiente de produção usando **Supabase** (
 - Acesse a URL do seu site no Render.
 - Teste o login/cadastro e a criação de rifas para garantir que a conexão com o Supabase está funcionando corretamente.
 - Se houver problemas de "Página não encontrada" ao atualizar a página, verifique se o arquivo `public/_redirects` foi copiado corretamente (o script de build já deve lidar com isso).
+
+## Solução de Problemas Comuns
+
+### Erro: "Publish directory dist does not exist!" ou Build usando Bun
+
+Se você ver logs indicando `Using Bun version...` ou o erro acima, verifique as configurações do seu serviço no Dashboard do Render:
+
+1. Vá em **Settings** > **Build & Deploy**.
+2. Verifique o **Build Command**. Ele DEVE ser:
+   ```bash
+   pnpm install && pnpm run build
+   ```
+   *Se estiver como `bun install` ou `npm install`, o build falhará.*
+3. Verifique o **Publish Directory**. Ele DEVE ser:
+   ```bash
+   dist
+   ```
