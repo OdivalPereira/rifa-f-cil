@@ -111,6 +111,10 @@ export default function Index() {
   if (raffleLoading) {
     return (
       <SlotMachineFrame>
+        {/* ADICIONE ESTA BARRA DE TESTE */}
+        <div className="bg-red-600 text-white text-center py-4 font-bold text-xl z-50 relative border-b-4 border-yellow-400">
+          🚧 VERSÃO DE DEBUG V10 - SE VOCÊ VÊ ISSO, O DEPLOY FUNCIONOU 🚧
+        </div>
         <div className="min-h-screen flex items-center justify-center">
           <div className="text-center space-y-4">
             <div className="relative">
@@ -128,6 +132,10 @@ export default function Index() {
   if (!raffle) {
     return (
       <SlotMachineFrame>
+        {/* ADICIONE ESTA BARRA DE TESTE */}
+        <div className="bg-red-600 text-white text-center py-4 font-bold text-xl z-50 relative border-b-4 border-yellow-400">
+          🚧 VERSÃO DE DEBUG V10 - SE VOCÊ VÊ ISSO, O DEPLOY FUNCIONOU 🚧
+        </div>
         <div className="min-h-screen flex flex-col items-center justify-center p-4">
           <div className="text-center space-y-6 max-w-md">
             <div className="relative inline-block">
@@ -150,6 +158,11 @@ export default function Index() {
 
   return (
     <SlotMachineFrame showDecorations={step === 'hero' || step === 'success'}>
+      {/* ADICIONE ESTA BARRA DE TESTE */}
+      <div className="bg-red-600 text-white text-center py-4 font-bold text-xl z-50 relative border-b-4 border-yellow-400">
+        🚧 VERSÃO DE DEBUG V10 - SE VOCÊ VÊ ISSO, O DEPLOY FUNCIONOU 🚧
+      </div>
+
       {/* Header */}
       <header className="sticky top-0 z-50 bg-card/80 backdrop-blur-md border-b border-gold/20">
         <div className="container mx-auto px-3 sm:px-4 h-12 sm:h-14 flex items-center justify-between">
