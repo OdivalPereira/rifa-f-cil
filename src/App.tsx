@@ -6,12 +6,14 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { Suspense, lazy } from "react";
 import Index from "./pages/Index";
-import MyNumbers from "./pages/MyNumbers";
-import Rankings from "./pages/Rankings";
-import CustomerAccount from "./pages/CustomerAccount";
-import NotFound from "./pages/NotFound";
 import { ReferralTracker } from "@/components/ReferralTracker";
 import { Loader2 } from "lucide-react";
+
+// Lazy load pages
+const MyNumbers = lazy(() => import("./pages/MyNumbers"));
+const Rankings = lazy(() => import("./pages/Rankings"));
+const CustomerAccount = lazy(() => import("./pages/CustomerAccount"));
+const NotFound = lazy(() => import("./pages/NotFound"));
 
 // Lazy load admin pages
 const AdminAuth = lazy(() => import("./pages/admin/AdminAuth"));
