@@ -197,7 +197,7 @@ export default function Index() {
             {isAdmin && (
               <Link to="/admin">
                 <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-purple hover:bg-purple/10 px-2 sm:px-3">
-                  <span className="hidden sm:inline">Admin</span>
+                  <span className="hidden sm:inline">Painel Admin</span>
                   <span className="sm:hidden text-xs">Admin</span>
                 </Button>
               </Link>
