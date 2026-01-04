@@ -1,0 +1,59 @@
+import { Link } from 'react-router-dom';
+import { Trophy, ArrowRight, HelpCircle, Sparkles } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+
+export function ReferralPromo() {
+  return (
+    <section className="container mx-auto px-4 my-8 sm:my-12">
+      <div className="card-jackpot relative overflow-hidden p-6 sm:p-8 text-center border-gold/30">
+        {/* Background Effects */}
+        <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-transparent to-black/40 pointer-events-none" />
+        <div className="absolute -top-10 -right-10 w-32 h-32 bg-gold/10 rounded-full blur-3xl animate-pulse-slow" />
+        <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-emerald/10 rounded-full blur-3xl animate-pulse-slow" style={{ animationDelay: '1s' }} />
+
+        <div className="relative z-10 flex flex-col items-center gap-4 sm:gap-6">
+          {/* Animated Icon */}
+          <div className="relative">
+            <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-gold to-gold-dark rounded-full flex items-center justify-center shadow-gold-lg animate-bounce-soft">
+              <Trophy className="w-8 h-8 sm:w-10 sm:h-10 text-black fill-current" />
+            </div>
+            <Sparkles className="absolute -top-2 -right-2 w-6 h-6 text-emerald animate-sparkle" />
+            <Sparkles className="absolute -bottom-1 -left-2 w-4 h-4 text-emerald animate-sparkle" style={{ animationDelay: '0.5s' }} />
+          </div>
+
+          {/* Text Content */}
+          <div className="space-y-2 sm:space-y-3 max-w-2xl">
+            <h2 className="text-2xl sm:text-3xl font-display font-bold text-gradient-gold leading-tight">
+              🏆 Desafio do Indicador: Ganhe uma Viagem Extra!
+            </h2>
+            <p className="text-base sm:text-lg text-muted-foreground/90 leading-relaxed">
+              Quer ir para Porto de Galinhas com tudo pago? Além do sorteio principal, <span className="text-emerald font-bold">quem mais indicar amigos ganha uma viagem exclusiva!</span> Compre seus números para entrar no jogo.
+            </p>
+          </div>
+
+          {/* Actions */}
+          <div className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto mt-2">
+            <Link to="/rankings" className="w-full sm:w-auto">
+              <Button
+                size="lg"
+                className="w-full sm:w-auto bg-gold hover:bg-gold/80 text-black font-bold text-base sm:text-lg shadow-gold hover:shadow-gold-lg transition-all transform hover:-translate-y-1"
+              >
+                Ver Ranking em Tempo Real
+                <ArrowRight className="w-5 h-5 ml-2" />
+              </Button>
+            </Link>
+
+            <button
+              type="button"
+              className="text-sm text-muted-foreground hover:text-gold flex items-center gap-2 transition-colors py-2"
+              onClick={(e) => e.preventDefault()}
+            >
+              <HelpCircle className="w-4 h-4" />
+              Como funciona?
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
