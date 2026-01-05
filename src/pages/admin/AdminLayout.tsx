@@ -45,51 +45,15 @@ export default function AdminLayout() {
 
   if (isLoading) {
     return (
-      <SlotMachineFrame>
-        <div className="min-h-screen flex items-center justify-center">
-          <div className="text-center space-y-4">
-            <Loader2 className="w-12 h-12 animate-spin text-gold mx-auto" />
-            <p className="text-gold/70">Carregando...</p>
-          </div>
-        </div>
-      </SlotMachineFrame>
+      <div className="h-screen w-full flex items-center justify-center">
+        <Loader2 className="animate-spin w-10 h-10 text-gold" />
+      </div>
     );
   }
 
-  if (!user) {
+  if (!user || !isAdmin) {
+    // Redireciona para o login de admin, NÃO para a home pública
     return <Navigate to="/admin/login" replace />;
-  }
-
-  if (!isAdmin) {
-    return (
-      <SlotMachineFrame>
-        <div className="min-h-screen flex flex-col items-center justify-center p-4">
-          <div className="text-center space-y-6 max-w-md">
-            <div className="relative inline-block">
-              <div className="w-24 h-24 rounded-full bg-muted flex items-center justify-center">
-                <span className="text-5xl">🔒</span>
-              </div>
-            </div>
-            <h1 className="text-2xl font-display font-bold text-gradient-gold">Acesso Restrito</h1>
-            <p className="text-muted-foreground">
-              Você não tem permissão de administrador. Entre em contato com o responsável para solicitar acesso.
-            </p>
-            <div className="flex gap-3 justify-center">
-              <Link to="/">
-                <Button className="btn-luck text-primary-foreground">
-                  <Home className="w-4 h-4 mr-2" />
-                  Voltar ao site
-                </Button>
-              </Link>
-              <Button onClick={signOut} variant="ghost" className="text-muted-foreground hover:text-destructive">
-                <LogOut className="w-4 h-4 mr-2" />
-                Sair
-              </Button>
-            </div>
-          </div>
-        </div>
-      </SlotMachineFrame>
-    );
   }
 
   return (
