@@ -31,7 +31,7 @@ export function useSoldNumbers(raffleId: string | undefined) {
     queryKey: ['sold-numbers', raffleId],
     queryFn: async () => {
       if (!raffleId) return [];
-      
+
       const { data, error } = await supabase
         .from('raffle_numbers')
         .select('number, confirmed_at')
@@ -95,7 +95,7 @@ export function useCreatePurchase() {
       pricePerNumber: number;
     }) => {
       const totalAmount = quantity * pricePerNumber;
-      
+
       // Check for referral code in localStorage
       const referrerCode = localStorage.getItem('rifa_referrer');
       let referrerId: string | null = null;
@@ -107,11 +107,11 @@ export function useCreatePurchase() {
           .select('id')
           .eq('referral_code', referrerCode)
           .maybeSingle();
-        
+
         if (referrerAccount) {
           referrerId = referrerAccount.id;
         }
-        
+
         // Clear localStorage after use (one-time attribution)
         localStorage.removeItem('rifa_referrer');
       }
@@ -218,7 +218,7 @@ export function useReferralRanking(raffleId: string | undefined, limit: number =
     queryKey: ['referral-ranking', raffleId, limit],
     queryFn: async () => {
       if (!raffleId) return [];
-      
+
       // Query the view - cast to any since view types not yet generated
       const { data, error } = await supabase
         .from('referral_ranking' as any)
@@ -230,7 +230,7 @@ export function useReferralRanking(raffleId: string | undefined, limit: number =
         console.error('Referral ranking query error:', error);
         return [];
       }
-      
+
       return (data || []) as unknown as Array<{
         referrer_id: string;
         referrer_phone: string;
@@ -251,7 +251,7 @@ export function useTopBuyersRanking(raffleId: string | undefined, limit: number 
     queryKey: ['top-buyers-ranking', raffleId, limit],
     queryFn: async () => {
       if (!raffleId) return [];
-      
+
       // Query the view - cast to any since view types not yet generated
       const { data, error } = await supabase
         .from('top_buyers_ranking' as any)
@@ -263,7 +263,7 @@ export function useTopBuyersRanking(raffleId: string | undefined, limit: number 
         console.error('Top buyers ranking query error:', error);
         return [];
       }
-      
+
       return (data || []) as unknown as Array<{
         buyer_phone: string;
         buyer_name: string;
@@ -283,9 +283,9 @@ export function useUserReferralCode(phone: string | null) {
     queryKey: ['user-referral-code', phone],
     queryFn: async () => {
       if (!phone) return null;
-      
+
       const cleanPhone = phone.replace(/\D/g, '');
-      
+
       // Get user's customer account
       const { data: account, error } = await supabase
         .from('customer_accounts')
@@ -297,7 +297,7 @@ export function useUserReferralCode(phone: string | null) {
         console.error('Error fetching customer account:', error);
         return null;
       }
-      
+
       return account;
     },
     enabled: !!phone,
@@ -360,9 +360,9 @@ export function useUserTotalNumbers(phone: string | null) {
     queryKey: ['user-total-numbers', phone],
     queryFn: async () => {
       if (!phone) return 0;
-      
+
       const cleanPhone = phone.replace(/\D/g, '');
-      
+
       const { data, error } = await supabase
         .from('purchases')
         .select('quantity')
@@ -373,7 +373,7 @@ export function useUserTotalNumbers(phone: string | null) {
         console.error('Error fetching user purchases:', error);
         return 0;
       }
-      
+
       return data?.reduce((sum, p) => sum + p.quantity, 0) || 0;
     },
     enabled: !!phone,

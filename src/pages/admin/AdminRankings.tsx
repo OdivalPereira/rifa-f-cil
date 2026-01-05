@@ -1,7 +1,8 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Trophy, Medal, Crown, Ticket, Users, Loader2, Award } from "lucide-react";
+import { Trophy, Medal, Crown, Ticket, Users, Loader2, Award, PartyPopper } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useActiveRaffle, useReferralRanking, useTopBuyersRanking } from "@/hooks/useRaffle";
 import { formatCurrency } from "@/lib/validators";
@@ -38,8 +39,16 @@ function EmptyState({ message }: { message: string }) {
 
 export default function AdminRankings() {
     const { data: raffle, isLoading: raffleLoading } = useActiveRaffle();
-    const { data: referralRanking, isLoading: referralLoading } = useReferralRanking(raffle?.id, 500); // Admin sees more
-    const { data: buyersRanking, isLoading: buyersLoading } = useTopBuyersRanking(raffle?.id, 500); // Admin sees more
+    const { data: referralRanking, isLoading: referralLoading, refetch: refetchReferral } = useReferralRanking(raffle?.id, 500); // Admin sees more
+    const { data: buyersRanking, isLoading: buyersLoading, refetch: refetchBuyers } = useTopBuyersRanking(raffle?.id, 500); // Admin sees more
+
+    const handleRefresh = () => {
+        refetchReferral();
+        refetchBuyers();
+    };
+
+    const totalReferralRevenue = referralRanking?.reduce((sum, r) => sum + Number(r.total_revenue), 0) || 0;
+    const totalReferralTickets = referralRanking?.reduce((sum, r) => sum + r.tickets_sold, 0) || 0;
 
     // Format phone number for display
     const formatPhone = (phone: string) => {
@@ -53,14 +62,45 @@ export default function AdminRankings() {
 
     return (
         <div className="space-y-6 animate-fade-in">
-            <div className="flex items-center gap-3">
-                <div className="p-3 rounded-xl bg-gradient-to-br from-yellow-400/20 to-amber-600/20 border border-yellow-400/20">
-                    <Trophy className="w-8 h-8 text-yellow-500" />
+            <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                    <div className="p-3 rounded-xl bg-gradient-to-br from-yellow-400/20 to-amber-600/20 border border-yellow-400/20">
+                        <Trophy className="w-8 h-8 text-yellow-500" />
+                    </div>
+                    <div>
+                        <h1 className="text-3xl font-display font-bold text-foreground">Rankings</h1>
+                        <p className="text-muted-foreground">Visualize os maiores compradores e indicadores da rifa ativa</p>
+                    </div>
                 </div>
-                <div>
-                    <h1 className="text-3xl font-display font-bold text-foreground">Rankings</h1>
-                    <p className="text-muted-foreground">Visualize os maiores compradores e indicadores da rifa ativa</p>
-                </div>
+                <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleRefresh}
+                    disabled={referralLoading || buyersLoading}
+                    className="border-gold/20 hover:bg-gold/10"
+                >
+                    {referralLoading || buyersLoading ? (
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    ) : (
+                        <PartyPopper className="w-4 h-4 mr-2 text-gold" />
+                    )}
+                    Atualizar Dados
+                </Button>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Card className="bg-emerald/5 border-emerald/20">
+                    <CardContent className="pt-6">
+                        <p className="text-sm text-muted-foreground">Vendas via Indicação</p>
+                        <p className="text-2xl font-bold text-emerald">{totalReferralTickets} números</p>
+                    </CardContent>
+                </Card>
+                <Card className="bg-blue-500/5 border-blue-500/20">
+                    <CardContent className="pt-6">
+                        <p className="text-sm text-muted-foreground">Receita via Indicação</p>
+                        <p className="text-2xl font-bold text-blue-500">{formatCurrency(totalReferralRevenue)}</p>
+                    </CardContent>
+                </Card>
             </div>
 
             <Tabs defaultValue="buyers" className="w-full">

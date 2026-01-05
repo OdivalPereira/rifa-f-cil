@@ -147,6 +147,10 @@ export function useUpdatePaymentStatus() {
       queryClient.invalidateQueries({ queryKey: ['pending-purchases'] });
       queryClient.invalidateQueries({ queryKey: ['all-purchases'] });
       queryClient.invalidateQueries({ queryKey: ['admin-stats'] });
+      queryClient.invalidateQueries({ queryKey: ['active-raffle'] });
+      queryClient.invalidateQueries({ queryKey: ['top-buyers-ranking'] });
+      queryClient.invalidateQueries({ queryKey: ['referral-ranking'] });
+      queryClient.invalidateQueries({ queryKey: ['top-buyers'] });
     },
   });
 }
@@ -296,40 +300,27 @@ export function useDrawWinner() {
 // Hook para buscar ranking de compradores
 export function useTopBuyers(raffleId: string | undefined, limit: number = 30) {
   return useQuery({
-    queryKey: ['top-buyers', raffleId, limit],
+    queryKey: ['top-buyers-ranking', raffleId, limit],
     queryFn: async () => {
       if (!raffleId) return [];
 
-      const { data: purchases, error } = await supabase
-        .from('purchases')
-        .select('buyer_name, buyer_email, buyer_phone, quantity')
+      const { data, error } = await supabase
+        .from('top_buyers_ranking' as any)
+        .select('*')
         .eq('raffle_id', raffleId)
-        .eq('payment_status', 'approved');
+        .limit(limit);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Top buyers ranking query error:', error);
+        return [];
+      }
 
-      // Agrupa por comprador (usando phone como identificador único)
-      const buyerMap = new Map<string, { name: string; phone: string; email: string; total: number }>();
-
-      purchases?.forEach(p => {
-        const key = p.buyer_phone;
-        const existing = buyerMap.get(key);
-        if (existing) {
-          existing.total += p.quantity;
-        } else {
-          buyerMap.set(key, {
-            name: p.buyer_name,
-            phone: p.buyer_phone,
-            email: p.buyer_email,
-            total: p.quantity,
-          });
-        }
-      });
-
-      // Ordena por quantidade e retorna o top N
-      return Array.from(buyerMap.values())
-        .sort((a, b) => b.total - a.total)
-        .slice(0, limit);
+      return (data || []).map((b: any) => ({
+        name: b.buyer_name,
+        phone: b.buyer_phone,
+        total: b.tickets_bought,
+        spent: b.total_spent
+      }));
     },
     enabled: !!raffleId,
   });

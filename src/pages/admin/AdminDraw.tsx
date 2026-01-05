@@ -6,10 +6,10 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { formatRaffleNumber } from '@/lib/validators';
 import { useToast } from '@/hooks/use-toast';
-import { 
-  Loader2, 
-  Trophy, 
-  Ticket, 
+import {
+  Loader2,
+  Trophy,
+  Ticket,
   AlertTriangle,
   PartyPopper,
   Sparkles,
@@ -395,21 +395,21 @@ export default function AdminDraw() {
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 max-h-64 overflow-y-auto">
                   {topBuyers.map((buyer, index) => (
-                    <div 
+                    <div
                       key={buyer.phone}
                       className={cn(
                         "flex items-center gap-3 p-2 rounded-lg",
-                        index < 10 ? "bg-emerald/10 border border-emerald/20" : 
-                        index < 30 ? "bg-purple/10 border border-purple/20" : 
-                        "bg-secondary/30"
+                        index < 10 ? "bg-emerald/10 border border-emerald/20" :
+                          index < 30 ? "bg-purple/10 border border-purple/20" :
+                            "bg-secondary/30"
                       )}
                     >
                       <span className={cn(
                         "w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold",
                         index === 0 ? "bg-gold text-primary-foreground" :
-                        index < 3 ? "bg-gold/50 text-foreground" :
-                        index < 10 ? "bg-emerald/30 text-emerald" :
-                        "bg-purple/30 text-purple"
+                          index < 3 ? "bg-gold/50 text-foreground" :
+                            index < 10 ? "bg-emerald/30 text-emerald" :
+                              "bg-purple/30 text-purple"
                       )}>
                         {index + 1}
                       </span>
