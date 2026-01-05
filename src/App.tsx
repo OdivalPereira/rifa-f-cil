@@ -25,6 +25,7 @@ const AdminPayments = lazy(() => import("./pages/admin/AdminPayments"));
 const AdminDraw = lazy(() => import("./pages/admin/AdminDraw"));
 const AdminCustomers = lazy(() => import("./pages/admin/AdminCustomers"));
 const AdminReferralSettings = lazy(() => import("./pages/admin/AdminReferralSettings"));
+const AdminRankings = lazy(() => import("./pages/admin/AdminRankings"));
 
 const queryClient = new QueryClient();
 
@@ -61,6 +62,7 @@ const App = () => (
                   <Route path="pagamentos" element={<AdminPayments />} />
                   <Route path="sorteio" element={<AdminDraw />} />
                   <Route path="clientes" element={<AdminCustomers />} />
+                  <Route path="rankings" element={<AdminRankings />} />
                   <Route path="referral-settings" element={<AdminReferralSettings />} />
                 </Route>
               </Route>
