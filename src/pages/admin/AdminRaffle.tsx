@@ -38,6 +38,8 @@ const raffleSchema = z.object({
   pix_key: z.string().optional(),
   pix_key_type: z.string().optional(),
   pix_beneficiary_name: z.string().optional(),
+  short_code: z.string().max(10, 'Máximo 10 caracteres').optional(),
+  pix_change_notification_email: z.string().email('Email inválido').optional().or(z.literal('')),
   status: z.enum(['draft', 'active', 'completed', 'cancelled']).optional(),
   draw_date: z.string().optional(),
 });
@@ -93,6 +95,8 @@ export default function AdminRaffle() {
         pix_key: '',
         pix_key_type: '',
         pix_beneficiary_name: '',
+        short_code: '',
+        pix_change_notification_email: '',
         status: 'draft',
         draw_date: '',
       });
@@ -123,6 +127,8 @@ export default function AdminRaffle() {
           pix_key: raffle.pix_key || '',
           pix_key_type: raffle.pix_key_type || '',
           pix_beneficiary_name: raffle.pix_beneficiary_name || '',
+          short_code: (raffle as any).short_code || '',
+          pix_change_notification_email: (raffle as any).pix_change_notification_email || '',
           status: raffle.status as RaffleStatus,
           draw_date: raffle.draw_date ? raffle.draw_date.slice(0, 16) : '',
         });
@@ -156,6 +162,8 @@ export default function AdminRaffle() {
         pix_key: data.pix_key,
         pix_key_type: data.pix_key_type,
         pix_beneficiary_name: data.pix_beneficiary_name,
+        short_code: data.short_code,
+        pix_change_notification_email: data.pix_change_notification_email,
         status: data.status,
         draw_date: data.draw_date || undefined,
       });
@@ -301,7 +309,18 @@ export default function AdminRaffle() {
 
                 <div className="border-t border-border pt-6">
                   <h3 className="font-semibold mb-4 text-gold">Configurações de PIX</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="short_code">Código Curto da Rifa (PIX)</Label>
+                      <Input id="short_code" placeholder="Ex: ODS2" {...register('short_code')} />
+                      <p className="text-xs text-muted-foreground">Usado na descrição do PIX.</p>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="pix_change_notification_email">Email Notificação de Alteração</Label>
+                      <Input id="pix_change_notification_email" type="email" {...register('pix_change_notification_email')} />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
                     <div className="space-y-2">
                       <Label htmlFor="pix_key">Chave PIX</Label>
                       <Input id="pix_key" {...register('pix_key')} />

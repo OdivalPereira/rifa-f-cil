@@ -136,6 +136,8 @@ export function useUpsertRaffle() {
       pix_key?: string;
       pix_key_type?: string;
       pix_beneficiary_name?: string;
+      short_code?: string;
+      pix_change_notification_email?: string;
       status?: 'draft' | 'active' | 'completed' | 'cancelled';
       draw_date?: string;
     }) => {
@@ -267,7 +269,7 @@ export function useTopBuyers(raffleId: string | undefined, limit: number = 30) {
 
       // Agrupa por comprador (usando phone como identificador único)
       const buyerMap = new Map<string, { name: string; phone: string; email: string; total: number }>();
-      
+
       purchases?.forEach(p => {
         const key = p.buyer_phone;
         const existing = buyerMap.get(key);
@@ -297,13 +299,13 @@ export function useDrawTopBuyerWinner() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ 
-      raffleId, 
-      topN, 
-      prizeType 
-    }: { 
-      raffleId: string; 
-      topN: number; 
+    mutationFn: async ({
+      raffleId,
+      topN,
+      prizeType
+    }: {
+      raffleId: string;
+      topN: number;
       prizeType: 'top_buyer' | 'second_top_buyer';
     }) => {
       // Get all approved purchases
@@ -318,7 +320,7 @@ export function useDrawTopBuyerWinner() {
 
       // Agrupa por comprador
       const buyerMap = new Map<string, { name: string; phone: string; total: number }>();
-      
+
       purchases.forEach(p => {
         const key = p.buyer_phone;
         const existing = buyerMap.get(key);
@@ -345,15 +347,15 @@ export function useDrawTopBuyerWinner() {
       const winner = topBuyers[winnerIndex];
 
       // Atualiza a rifa com o ganhador do prêmio de ranking
-      const updateData = prizeType === 'top_buyer' 
-        ? { 
-            winner_top_buyer_name: winner.name,
-            winner_top_buyer_number: winner.total,
-          }
+      const updateData = prizeType === 'top_buyer'
+        ? {
+          winner_top_buyer_name: winner.name,
+          winner_top_buyer_number: winner.total,
+        }
         : {
-            winner_second_top_buyer_name: winner.name,
-            winner_second_top_buyer_number: winner.total,
-          };
+          winner_second_top_buyer_name: winner.name,
+          winner_second_top_buyer_number: winner.total,
+        };
 
       const { data, error } = await supabase
         .from('raffles')

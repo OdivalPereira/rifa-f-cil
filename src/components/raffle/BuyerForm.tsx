@@ -124,63 +124,92 @@ export function BuyerForm({ pricePerNumber, maxNumbers, onSubmit, isLoading }: B
             </Label>
 
             {/* Presets - Attractive Bundles */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-              {/* Bundle 1: Starter */}
+            <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
+              {/* 1: Sortudo */}
+              <button
+                type="button"
+                onClick={() => setQuantity(1)}
+                className={`relative p-2 rounded-xl border-2 transition-all text-center ${quantity === 1
+                  ? 'border-emerald bg-emerald/10 glow-emerald'
+                  : 'border-border/50 hover:border-emerald/50 bg-card/50'
+                  }`}
+              >
+                <p className="font-bold text-lg text-foreground">1</p>
+                <p className="text-[9px] text-muted-foreground uppercase">Sortudo</p>
+              </button>
+
+              {/* 5: Esperança */}
+              <button
+                type="button"
+                onClick={() => setQuantity(5)}
+                className={`relative p-2 rounded-xl border-2 transition-all text-center ${quantity === 5
+                  ? 'border-emerald bg-emerald/10 glow-emerald'
+                  : 'border-border/50 hover:border-emerald/50 bg-card/50'
+                  }`}
+              >
+                <p className="font-bold text-lg text-foreground">5</p>
+                <p className="text-[9px] text-muted-foreground uppercase">Top</p>
+              </button>
+
+              {/* 10: Popular */}
               <button
                 type="button"
                 onClick={() => setQuantity(10)}
-                className={`relative p-3 rounded-xl border-2 transition-all text-center ${quantity === 10
+                className={`relative p-2 rounded-xl border-2 transition-all text-center ${quantity === 10
                   ? 'border-emerald bg-emerald/10 glow-emerald'
                   : 'border-border/50 hover:border-emerald/50 bg-card/50'
                   }`}
               >
+                <div className="absolute -top-2 left-1/2 -translate-x-1/2 px-1.5 py-0.5 bg-emerald text-primary-foreground text-[7px] font-bold rounded-full uppercase whitespace-nowrap">
+                  Pop
+                </div>
                 <p className="font-bold text-lg text-foreground">10</p>
-                <p className="text-[10px] text-muted-foreground uppercase">Iniciante</p>
+                <p className="text-[9px] text-muted-foreground uppercase">Popular</p>
               </button>
 
-              {/* Bundle 2: Lucky */}
+              {/* 25: Confiante */}
               <button
                 type="button"
                 onClick={() => setQuantity(25)}
-                className={`relative p-3 rounded-xl border-2 transition-all text-center ${quantity === 25
-                  ? 'border-emerald bg-emerald/10 glow-emerald'
-                  : 'border-border/50 hover:border-emerald/50 bg-card/50'
-                  }`}
-              >
-                <p className="font-bold text-lg text-foreground">25</p>
-                <p className="text-[10px] text-muted-foreground uppercase">Sortudo</p>
-              </button>
-
-              {/* Bundle 3: VIP - Most Popular */}
-              <button
-                type="button"
-                onClick={() => setQuantity(50)}
-                className={`relative p-3 rounded-xl border-2 transition-all text-center ${quantity === 50
+                className={`relative p-2 rounded-xl border-2 transition-all text-center ${quantity === 25
                   ? 'border-gold bg-gold/10 glow-gold'
                   : 'border-gold/30 hover:border-gold/60 bg-gold/5'
                   }`}
               >
-                <div className="absolute -top-2 left-1/2 -translate-x-1/2 px-2 py-0.5 bg-gold text-black text-[8px] font-bold rounded-full uppercase whitespace-nowrap">
-                  ⭐ Mais Popular
+                <div className="absolute -top-2 left-1/2 -translate-x-1/2 px-1.5 py-0.5 bg-gold text-black text-[7px] font-bold rounded-full uppercase whitespace-nowrap">
+                  Mais Vendido
                 </div>
-                <p className="font-bold text-lg text-gold mt-1">50</p>
-                <p className="text-[10px] text-gold/80 uppercase font-semibold">VIP</p>
+                <p className="font-bold text-lg text-gold mt-1">25</p>
+                <p className="text-[9px] text-gold/80 uppercase font-semibold">Confiante</p>
               </button>
 
-              {/* Bundle 4: Magnata - Best Value */}
+              {/* 50: Determinado */}
+              <button
+                type="button"
+                onClick={() => setQuantity(50)}
+                className={`relative p-2 rounded-xl border-2 transition-all text-center ${quantity === 50
+                  ? 'border-gold bg-gold/10 glow-gold'
+                  : 'border-gold/30 hover:border-gold/60 bg-gold/5'
+                  }`}
+              >
+                <p className="font-bold text-lg text-gold">50</p>
+                <p className="text-[9px] text-gold/80 uppercase font-semibold">VIP</p>
+              </button>
+
+              {/* 100: Magnata */}
               <button
                 type="button"
                 onClick={() => setQuantity(100)}
-                className={`relative p-3 rounded-xl border-2 transition-all text-center ${quantity === 100
+                className={`relative p-2 rounded-xl border-2 transition-all text-center ${quantity === 100
                   ? 'border-purple bg-purple/10 glow-purple'
                   : 'border-purple/30 hover:border-purple/60 bg-purple/5'
                   }`}
               >
-                <div className="absolute -top-2 left-1/2 -translate-x-1/2 px-2 py-0.5 bg-purple text-white text-[8px] font-bold rounded-full uppercase whitespace-nowrap">
-                  🚀 Melhor Valor
+                <div className="absolute -top-2 left-1/2 -translate-x-1/2 px-1.5 py-0.5 bg-purple text-white text-[7px] font-bold rounded-full uppercase whitespace-nowrap">
+                  Melhor Valor
                 </div>
                 <p className="font-bold text-lg text-purple mt-1">100</p>
-                <p className="text-[10px] text-purple/80 uppercase font-semibold">Magnata</p>
+                <p className="text-[9px] text-purple/80 uppercase font-semibold">Magnata</p>
               </button>
             </div>
 

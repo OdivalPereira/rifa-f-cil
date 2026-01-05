@@ -28,6 +28,7 @@ export default function Index() {
     quantity: number;
     amount: number;
     expiresAt: string;
+    phone: string;
   } | null>(null);
 
   const { data: raffle, isLoading: raffleLoading } = useActiveRaffle();
@@ -76,6 +77,7 @@ export default function Index() {
         quantity: data.quantity,
         amount: Number(purchase.total_amount),
         expiresAt: purchase.expires_at,
+        phone: data.phone,
       });
 
       setStep('payment');
@@ -203,6 +205,9 @@ export default function Index() {
                 beneficiaryName={raffle.pix_beneficiary_name || 'Organizador'}
                 purchaseId={purchaseData.id}
                 expiresAt={purchaseData.expiresAt}
+                buyerPhone={purchaseData.phone}
+                quantity={purchaseData.quantity}
+                raffleShortCode={(raffle as any).short_code || 'RIFA'}
               />
               <div className="text-center px-4">
                 <Button
