@@ -13,12 +13,12 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from '@/components/ui/sidebar';
-import { 
-  LayoutDashboard, 
-  Ticket, 
-  CreditCard, 
-  Trophy, 
-  LogOut, 
+import {
+  LayoutDashboard,
+  Ticket,
+  CreditCard,
+  Trophy,
+  LogOut,
   Loader2,
   Home,
   Sparkles,
@@ -29,6 +29,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { SlotMachineFrame } from '@/components/SlotMachineFrame';
+import { Loader } from '@/components/ui/Loader';
 
 const menuItems = [
   { title: 'Dashboard', url: '/admin', icon: LayoutDashboard },
@@ -44,11 +45,7 @@ export default function AdminLayout() {
   const location = useLocation();
 
   if (isLoading) {
-    return (
-      <div className="h-screen w-full flex items-center justify-center">
-        <Loader2 className="animate-spin w-10 h-10 text-gold" />
-      </div>
-    );
+    return <Loader />;
   }
 
   if (!user || !isAdmin) {
@@ -68,7 +65,7 @@ export default function AdminLayout() {
                 <span className="font-display font-bold text-gradient-gold">Admin</span>
               </Link>
             </div>
-            
+
             <SidebarContent>
               <SidebarGroup>
                 <SidebarGroupLabel className="text-gold/60 text-xs uppercase tracking-wider">
@@ -81,12 +78,12 @@ export default function AdminLayout() {
                       return (
                         <SidebarMenuItem key={item.title}>
                           <SidebarMenuButton asChild>
-                            <Link 
+                            <Link
                               to={item.url}
                               className={cn(
                                 'flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200',
-                                isActive 
-                                  ? 'bg-emerald/15 text-emerald border border-emerald/30 shadow-emerald' 
+                                isActive
+                                  ? 'bg-emerald/15 text-emerald border border-emerald/30 shadow-emerald'
                                   : 'text-muted-foreground hover:bg-muted/50 hover:text-foreground'
                               )}
                             >
@@ -110,9 +107,9 @@ export default function AdminLayout() {
                   Ver site
                 </Button>
               </Link>
-              <Button 
-                variant="ghost" 
-                size="sm" 
+              <Button
+                variant="ghost"
+                size="sm"
                 onClick={signOut}
                 className="w-full justify-start text-muted-foreground hover:text-destructive hover:bg-destructive/10"
               >

@@ -13,6 +13,7 @@ import { SlotMachineFrame } from '@/components/SlotMachineFrame';
 import type { BuyerFormData } from '@/lib/validators';
 import { useAuth } from '@/hooks/useAuth';
 import { useCustomerAuth } from '@/hooks/useCustomerAuth';
+import { Loader } from '@/components/ui/Loader';
 
 type Step = 'hero' | 'form' | 'payment' | 'numbers' | 'success';
 
@@ -113,7 +114,7 @@ export default function Index() {
         <div className="min-h-[60vh] flex items-center justify-center">
           <div className="text-center space-y-4">
             <div className="relative">
-              <Loader2 className="w-14 h-14 animate-spin text-gold mx-auto" />
+              <Loader />
               <Sparkles className="w-6 h-6 text-emerald absolute -top-2 -right-2 animate-sparkle" />
               <Star className="w-5 h-5 text-gold absolute -bottom-1 -left-1 animate-sparkle" style={{ animationDelay: '0.5s' }} />
             </div>
@@ -131,8 +132,8 @@ export default function Index() {
               <Clover className="w-24 h-24 text-emerald/40 clover-icon animate-pulse-slow" />
               <Star className="w-8 h-8 text-gold absolute -top-2 -right-2 animate-sparkle" />
             </div>
-            <h1 className="text-3xl font-display font-bold text-gradient-gold">Nenhuma rifa ativa</h1>
-            <p className="text-muted-foreground">Volte em breve para tentar a sorte! ✨</p>
+            <h1 className="text-3xl font-display font-bold text-gradient-gold">Aguarde Novidades</h1>
+            <p className="text-muted-foreground">Estamos preparando algo incrível para você! ✨</p>
             <Link to="/meus-numeros">
               <Button className="btn-gold">
                 <Search className="w-4 h-4 mr-2" />
@@ -143,6 +144,7 @@ export default function Index() {
         </div>
       );
     }
+    // ...
 
     return (
       <div>
@@ -199,7 +201,7 @@ export default function Index() {
                 expiresAt={purchaseData.expiresAt}
               />
               <div className="text-center px-4">
-                <Button 
+                <Button
                   onClick={() => setStep('numbers')}
                   className="btn-luck text-primary-foreground font-bold w-full sm:w-auto text-sm sm:text-base py-4 sm:py-5"
                 >
@@ -237,19 +239,19 @@ export default function Index() {
                 <Star className="w-8 h-8 sm:w-10 sm:h-10 text-gold absolute -top-2 -right-2 animate-sparkle" />
                 <Sparkles className="w-6 h-6 sm:w-8 sm:h-8 text-gold absolute -bottom-1 -left-1 animate-sparkle" style={{ animationDelay: '0.5s' }} />
               </div>
-              
+
               <div className="space-y-2 sm:space-y-3">
                 <h1 className="text-2xl sm:text-4xl font-display font-bold text-gradient-gold">Números Reservados!</h1>
                 <p className="text-lg sm:text-xl text-emerald font-medium">Boa sorte no sorteio! 🎰</p>
               </div>
-              
+
               <p className="text-sm sm:text-base text-muted-foreground px-4">
                 Seus números da sorte foram reservados. Após a confirmação do pagamento, você receberá um e-mail de confirmação.
               </p>
-              
+
               <div className="flex flex-col gap-3 justify-center px-4">
-                <Button 
-                  onClick={() => setStep('hero')} 
+                <Button
+                  onClick={() => setStep('hero')}
                   className="btn-luck text-primary-foreground font-bold w-full"
                 >
                   <Clover className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />

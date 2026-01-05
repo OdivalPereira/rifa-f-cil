@@ -259,8 +259,11 @@ export default function AdminRaffle() {
                   <Textarea id="description" placeholder="Descrição da rifa e seu motivo..." {...register('description')} />
                 </div>
 
-                <div className="border p-4 rounded-md space-y-4 bg-muted/20">
-                  <h3 className="font-semibold text-gold">Prêmio Principal (Sorteio)</h3>
+                <div className="border p-4 rounded-md space-y-4 bg-muted/20 border-gold/20">
+                  <h3 className="font-semibold text-gold flex items-center gap-2">
+                    <Save className="w-4 h-4" />
+                    Prêmio Principal (Sorteio)
+                  </h3>
                   <div className="space-y-2">
                     <Label htmlFor="prize_description">Título do Prêmio Principal *</Label>
                     <Input id="prize_description" placeholder="Ex: iPhone 15 Pro Max" {...register('prize_description')} />
@@ -296,8 +299,8 @@ export default function AdminRaffle() {
                   <Input id="image_url" type="url" placeholder="https://..." {...register('image_url')} />
                 </div>
 
-                 <div className="border-t border-border pt-6">
-                  <h3 className="font-semibold mb-4">Configurações de PIX</h3>
+                <div className="border-t border-border pt-6">
+                  <h3 className="font-semibold mb-4 text-gold">Configurações de PIX</h3>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="pix_key">Chave PIX</Label>
@@ -334,7 +337,7 @@ export default function AdminRaffle() {
               {/* ABA GAMIFICAÇÃO - INDICAÇÕES */}
               <TabsContent value="indicacoes" className="space-y-6 pt-4">
                 <div className="space-y-4">
-                  <div className="border p-4 rounded-md space-y-4 bg-muted/20">
+                  <div className="border p-4 rounded-md space-y-4 bg-muted/20 border-gold/20">
                     <h3 className="font-semibold text-gold">Top Indicador (1º Lugar)</h3>
 
                     <div className="space-y-2">
@@ -347,7 +350,7 @@ export default function AdminRaffle() {
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="referral_threshold">Gatilho de Vendas (Quantidade)</Label>
+                      <Label htmlFor="referral_threshold">Meta de Vendas (Gatilho)</Label>
                       <Input
                         id="referral_threshold"
                         type="number"
@@ -360,14 +363,14 @@ export default function AdminRaffle() {
                     </div>
                   </div>
 
-                  <div className="border p-4 rounded-md space-y-4 bg-muted/20">
-                    <h3 className="font-semibold text-gold">Indicadores (2º ao 5º Lugar)</h3>
+                  <div className="border p-4 rounded-md space-y-4 bg-muted/20 border-emerald/20">
+                    <h3 className="font-semibold text-emerald">Indicadores Secundários (2º ao 5º Lugar)</h3>
 
                     <div className="space-y-2">
-                      <Label htmlFor="prize_referral_runners">Descrição do Prêmio</Label>
+                      <Label htmlFor="prize_referral_runners">Descrição dos Prêmios</Label>
                       <Textarea
                         id="prize_referral_runners"
-                        placeholder="Ex: R$ 50 para o 2º, R$ 30 para o 3º..."
+                        placeholder="Ex: R$ 50 para o 2º, R$ 30 para o 3º... (Opcional)"
                         {...register('prize_referral_runners')}
                       />
                     </div>
@@ -377,45 +380,38 @@ export default function AdminRaffle() {
 
               {/* ABA GAMIFICAÇÃO - COMPRADORES */}
               <TabsContent value="compradores" className="space-y-6 pt-4">
-                 <div className="space-y-4">
-                  <div className="border p-4 rounded-md space-y-4 bg-muted/20">
-                    <h3 className="font-semibold text-gold">Maior Comprador (1º Lugar)</h3>
+                <div className="space-y-4">
+                  <div className="border p-4 rounded-md space-y-4 bg-muted/20 border-gold/20">
+                    <h3 className="font-semibold text-gold">Maior Comprador (Top Comprador)</h3>
 
                     <div className="space-y-2">
-                      <Label htmlFor="prize_buyer_1st">Descrição do Prêmio</Label>
+                      <Label htmlFor="prize_buyer_1st">Descrição do Prêmio Principal</Label>
                       <Textarea
                         id="prize_buyer_1st"
-                        placeholder="Ex: R$ 1000 no PIX"
+                        placeholder="Ex: R$ 1000 no PIX para o maior comprador."
                         {...register('prize_buyer_1st')}
                       />
                     </div>
                   </div>
 
-                  <div className="border p-4 rounded-md space-y-4 bg-muted/20">
-                    <h3 className="font-semibold text-gold">Compradores (2º ao 5º Lugar)</h3>
+                  <div className="border p-4 rounded-md space-y-4 bg-muted/20 border-emerald/20">
+                    <h3 className="font-semibold text-emerald">Compradores Secundários (2º ao 5º Lugar)</h3>
 
                     <div className="space-y-2">
-                      <Label htmlFor="prize_buyer_runners">Descrição do Prêmio</Label>
+                      <Label htmlFor="prize_buyer_runners">Descrição dos Prêmios</Label>
                       <Textarea
                         id="prize_buyer_runners"
-                        placeholder="Ex: R$ 200 para o 2º, R$ 100 para o 3º..."
+                        placeholder="Ex: R$ 200 para o 2º, R$ 100 para o 3º... (Opcional)"
                         {...register('prize_buyer_runners')}
                       />
                     </div>
-                  </div>
-
-                  {/* Legacy fields warning (optional, for developer context) */}
-                  <div className="mt-8 pt-4 border-t border-border/50">
-                    <p className="text-xs text-muted-foreground italic">
-                      Nota: Os campos antigos de "Top Comprador" foram migrados para esta nova estrutura.
-                    </p>
                   </div>
                 </div>
               </TabsContent>
             </Tabs>
 
-            <Button 
-              type="submit" 
+            <Button
+              type="submit"
               disabled={upsertRaffle.isPending}
               className="w-full bg-gradient-gold text-primary-foreground hover:opacity-90 mt-6"
             >

@@ -11,6 +11,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Loader2, Lock, Mail, Clover, Sparkles, Star } from 'lucide-react';
 import { SlotMachineFrame } from '@/components/SlotMachineFrame';
 import { supabase } from '@/integrations/supabase/client';
+import { Loader } from '@/components/ui/Loader';
 
 const authSchema = z.object({
   email: z.string().email('E-mail inválido'),
@@ -61,7 +62,7 @@ export default function AdminAuth() {
       const { data: { user: currentUser } } = await supabase.auth.getUser();
 
       if (!currentUser) {
-         throw new Error("No user found after login");
+        throw new Error("No user found after login");
       }
 
       const { data: roleData } = await supabase
@@ -99,12 +100,7 @@ export default function AdminAuth() {
   if (isLoading) {
     return (
       <SlotMachineFrame>
-        <div className="min-h-screen flex items-center justify-center">
-          <div className="flex flex-col items-center gap-4">
-            <Loader2 className="w-12 h-12 animate-spin text-gold" />
-            <p className="text-gold/70 font-medium">Carregando...</p>
-          </div>
-        </div>
+        <Loader />
       </SlotMachineFrame>
     );
   }
@@ -133,7 +129,7 @@ export default function AdminAuth() {
           <div className="card-jackpot p-6">
             {/* Card inner glow effect */}
             <div className="absolute inset-0 rounded-xl bg-gradient-to-b from-gold/5 to-transparent pointer-events-none" />
-            
+
             <form onSubmit={handleSubmit(onSubmit)} className="relative z-10 space-y-5">
               <div className="space-y-2">
                 <Label htmlFor="email" className="flex items-center gap-2 text-foreground/90">
@@ -169,8 +165,8 @@ export default function AdminAuth() {
                 )}
               </div>
 
-              <Button 
-                type="submit" 
+              <Button
+                type="submit"
                 disabled={isSubmitting}
                 className="w-full h-12 btn-gold text-lg font-bold rounded-lg"
               >
@@ -188,8 +184,8 @@ export default function AdminAuth() {
 
           {/* Back to home link */}
           <div className="text-center mt-6">
-            <Link 
-              to="/" 
+            <Link
+              to="/"
               className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-emerald transition-colors"
             >
               <Clover className="w-4 h-4" />
