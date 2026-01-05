@@ -27,13 +27,14 @@ export function usePendingPurchases() {
         .select(`
           *,
           raffle:raffles(title),
-          numbers:raffle_numbers(number)
+          numbers:raffle_numbers(number),
+          receipt_url
         `)
         .eq('payment_status', 'pending')
         .order('created_at', { ascending: true });
 
       if (error) throw error;
-      return data;
+      return data as any;
     },
   });
 }
@@ -48,7 +49,8 @@ export function useAllPurchases(raffleId?: string) {
         .select(`
           *,
           raffle:raffles(title),
-          numbers:raffle_numbers(number)
+          numbers:raffle_numbers(number),
+          receipt_url
         `)
         .order('created_at', { ascending: false });
 
@@ -58,7 +60,7 @@ export function useAllPurchases(raffleId?: string) {
 
       const { data, error } = await query;
       if (error) throw error;
-      return data;
+      return data as any;
     },
   });
 }
@@ -77,6 +79,15 @@ export function useUpdatePaymentStatus() {
       status: 'approved' | 'rejected';
       userId: string;
     }) => {
+      // 1. Buscar dados atuais para pegar a URL do recibo (se houver)
+      const { data: currentPurchase, error: fetchError } = await supabase
+        .from('purchases')
+        .select('receipt_url')
+        .eq('id', purchaseId)
+        .single();
+
+      if (fetchError) throw fetchError;
+
       const updateData: any = {
         payment_status: status,
       };
@@ -90,6 +101,36 @@ export function useUpdatePaymentStatus() {
           .from('raffle_numbers')
           .update({ confirmed_at: new Date().toISOString() })
           .eq('purchase_id', purchaseId);
+      }
+
+      // 2. Tentar deletar o comprovante do Storage se ele existir
+      // Independentemente de aprovar ou rejeitar, o comprovante "temporário" já cumpriu seu papel
+      if ((currentPurchase as any)?.receipt_url) {
+        try {
+          // Extrair nome do arquivo da URL (assumindo padrão ou buscando info)
+          // Mas como usamos o ID da compra como nome do arquivo, é mais seguro tentar deletar direto pelo ID.
+          // Formato salvo: `${purchaseId}.[ext]` - precisamos descobrir a extensão ou tentar deletar as mais comuns
+          // Ou simplesmente deletar buscando na lista.
+
+          // Melhor abordagem: listar arquivos com prefixo do ID e deletar
+          const { data: files } = await supabase.storage
+            .from('receipts')
+            .list('', { search: purchaseId });
+
+          if (files && files.length > 0) {
+            const filesToRemove = files.map(f => f.name);
+            await supabase.storage
+              .from('receipts')
+              .remove(filesToRemove);
+          }
+
+          // Limpar a URL do banco para não ficar link quebrado
+          updateData.receipt_url = null;
+          updateData.receipt_uploaded_at = null;
+        } catch (err) {
+          console.error("Erro ao limpar comprovante:", err);
+          // Não impedir o fluxo principal por erro na deleção
+        }
       }
 
       const { data, error } = await supabase

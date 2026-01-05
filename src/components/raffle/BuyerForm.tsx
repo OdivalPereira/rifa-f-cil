@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { motion } from 'framer-motion';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '@/components/ui/button';
@@ -15,6 +16,15 @@ interface BuyerFormProps {
   onSubmit: (data: BuyerFormData & { quantity: number }) => void;
   isLoading?: boolean;
 }
+
+const BUNDLES = [
+  { id: 1, label: 'Sortudo', color: 'emerald', value: 1, tag: null },
+  { id: 2, label: 'Top', color: 'emerald', value: 5, tag: null },
+  { id: 3, label: 'Popular', color: 'emerald', value: 10, tag: 'Pop' },
+  { id: 4, label: 'Confiante', color: 'gold', value: 25, tag: 'Mais Vendido' },
+  { id: 5, label: 'VIP', color: 'gold', value: 50, tag: null },
+  { id: 6, label: 'Magnata', color: 'purple', value: 100, tag: 'Melhor Valor' },
+];
 
 export function BuyerForm({ pricePerNumber, maxNumbers, onSubmit, isLoading }: BuyerFormProps) {
   const [quantity, setQuantity] = useState(10);
@@ -33,250 +43,215 @@ export function BuyerForm({ pricePerNumber, maxNumbers, onSubmit, isLoading }: B
     onSubmit({ ...data, quantity });
   };
 
+  const containerVariants = {
+    hidden: { opacity: 0, y: 30 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.6, staggerChildren: 0.08 } }
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 10 },
+    visible: { opacity: 1, y: 0 }
+  };
+
   return (
-    <Card className="w-full max-w-lg mx-auto card-jackpot border-gold/20 overflow-hidden">
-      {/* Decorative header bar */}
-      <div className="h-2 bg-gradient-luck" />
+    <motion.div initial="hidden" animate="visible" variants={containerVariants}>
+      <Card className="w-full max-w-lg mx-auto card-jackpot border-gold/20 overflow-hidden shadow-2xl">
+        <div className="h-2 bg-gradient-luck" />
 
-      <CardHeader className="text-center space-y-2 sm:space-y-3 pt-6 sm:pt-8 px-4 sm:px-6 relative">
-        {/* Corner decorations - hidden on small screens */}
-        <div className="absolute top-4 left-4 text-gold/20 hidden sm:block">
-          <Star className="w-6 h-6" />
-        </div>
-        <div className="absolute top-4 right-4 text-emerald/20 hidden sm:block">
-          <Sparkles className="w-6 h-6" />
-        </div>
-
-        <div className="mx-auto w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-gradient-luck flex items-center justify-center mb-2 glow-emerald animate-pulse-glow">
-          <span className="text-2xl sm:text-3xl">🍀</span>
-        </div>
-        <CardTitle className="text-2xl sm:text-3xl font-display text-gradient-luck">Seus Dados</CardTitle>
-        <CardDescription className="text-sm sm:text-base">
-          Preencha seus dados para tentar a sorte! ✨
-        </CardDescription>
-      </CardHeader>
-
-      <CardContent className="pb-6 sm:pb-8 px-4 sm:px-6">
-        <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4 sm:space-y-6">
-          {/* Nome */}
-          <div className="space-y-2">
-            <Label htmlFor="name" className="flex items-center gap-2 text-foreground">
-              <User className="w-4 h-4 text-emerald" />
-              Nome completo <span className="text-destructive">*</span>
-            </Label>
-            <Input
-              id="name"
-              autoComplete="name"
-              placeholder="Seu nome completo"
-              {...register('name')}
-              className={`input-casino ${errors.name ? 'border-destructive' : ''}`}
-            />
-            {errors.name && (
-              <p className="text-sm text-destructive">{errors.name.message}</p>
-            )}
+        <CardHeader className="text-center space-y-2 pt-6 sm:pt-8 px-4 sm:px-6 relative">
+          <div className="absolute top-4 left-4 text-gold/20 hidden sm:block">
+            <Star className="w-8 h-8 animate-float" />
+          </div>
+          <div className="absolute top-4 right-4 text-emerald/20 hidden sm:block">
+            <Sparkles className="w-8 h-8 animate-float [animation-delay:2s]" />
           </div>
 
-          {/* E-mail */}
-          <div className="space-y-2">
-            <Label htmlFor="email" className="flex items-center gap-2 text-foreground">
-              <Mail className="w-4 h-4 text-emerald" />
-              E-mail <span className="text-destructive">*</span>
-            </Label>
-            <Input
-              id="email"
-              type="email"
-              inputMode="email"
-              autoComplete="email"
-              placeholder="seu@email.com"
-              {...register('email')}
-              className={`input-casino ${errors.email ? 'border-destructive' : ''}`}
-            />
-            {errors.email && (
-              <p className="text-sm text-destructive">{errors.email.message}</p>
-            )}
-          </div>
+          <motion.div variants={itemVariants} className="mx-auto w-16 h-16 rounded-full bg-gradient-luck flex items-center justify-center mb-2 glow-emerald shadow-lg">
+            <span className="text-3xl animate-bounce">🍀</span>
+          </motion.div>
+          <motion.div variants={itemVariants}>
+            <CardTitle className="text-3xl sm:text-4xl font-display text-gradient-luck drop-shadow-sm">Garantir Sorte</CardTitle>
+            <CardDescription className="text-sm sm:text-base font-medium text-muted-foreground/80">
+              Escolha seus pacotes e participe ✨
+            </CardDescription>
+          </motion.div>
+        </CardHeader>
 
-          {/* Telefone */}
-          <div className="space-y-2">
-            <Label htmlFor="phone" className="flex items-center gap-2 text-foreground">
-              <Phone className="w-4 h-4 text-emerald" />
-              Telefone (WhatsApp) <span className="text-destructive">*</span>
-            </Label>
-            <Input
-              id="phone"
-              type="tel"
-              inputMode="tel"
-              autoComplete="tel"
-              placeholder="(11) 99999-9999"
-              {...register('phone')}
-              className={`input-casino ${errors.phone ? 'border-destructive' : ''}`}
-            />
-            {errors.phone && (
-              <p className="text-sm text-destructive">{errors.phone.message}</p>
-            )}
-          </div>
+        <CardContent className="pb-8 px-4 sm:px-8">
+          <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
 
-          {/* Quantidade */}
-          <div className="space-y-4">
-            <Label className="flex items-center gap-2 text-foreground">
-              <Hash className="w-4 h-4 text-gold" />
-              Quantidade de números da sorte
-            </Label>
-
-            {/* Presets - Attractive Bundles */}
-            <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
-              {/* 1: Sortudo */}
-              <button
-                type="button"
-                onClick={() => setQuantity(1)}
-                className={`relative p-2 rounded-xl border-2 transition-all text-center ${quantity === 1
-                  ? 'border-emerald bg-emerald/10 glow-emerald'
-                  : 'border-border/50 hover:border-emerald/50 bg-card/50'
-                  }`}
-              >
-                <p className="font-bold text-lg text-foreground">1</p>
-                <p className="text-[9px] text-muted-foreground uppercase">Sortudo</p>
-              </button>
-
-              {/* 5: Esperança */}
-              <button
-                type="button"
-                onClick={() => setQuantity(5)}
-                className={`relative p-2 rounded-xl border-2 transition-all text-center ${quantity === 5
-                  ? 'border-emerald bg-emerald/10 glow-emerald'
-                  : 'border-border/50 hover:border-emerald/50 bg-card/50'
-                  }`}
-              >
-                <p className="font-bold text-lg text-foreground">5</p>
-                <p className="text-[9px] text-muted-foreground uppercase">Top</p>
-              </button>
-
-              {/* 10: Popular */}
-              <button
-                type="button"
-                onClick={() => setQuantity(10)}
-                className={`relative p-2 rounded-xl border-2 transition-all text-center ${quantity === 10
-                  ? 'border-emerald bg-emerald/10 glow-emerald'
-                  : 'border-border/50 hover:border-emerald/50 bg-card/50'
-                  }`}
-              >
-                <div className="absolute -top-2 left-1/2 -translate-x-1/2 px-1.5 py-0.5 bg-emerald text-primary-foreground text-[7px] font-bold rounded-full uppercase whitespace-nowrap">
-                  Pop
+            <motion.div variants={itemVariants} className="space-y-4">
+              <div className="grid grid-cols-1 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="name" className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                    <User className="w-3.5 h-3.5 text-emerald" /> Seu Nome
+                  </Label>
+                  <Input
+                    id="name"
+                    autoComplete="name"
+                    placeholder="Nome Completo"
+                    {...register('name')}
+                    className={`input-casino h-12 ${errors.name ? 'border-destructive' : ''}`}
+                  />
+                  {errors.name && <p className="text-[10px] text-destructive font-bold uppercase tracking-tight">{errors.name.message}</p>}
                 </div>
-                <p className="font-bold text-lg text-foreground">10</p>
-                <p className="text-[9px] text-muted-foreground uppercase">Popular</p>
-              </button>
 
-              {/* 25: Confiante */}
-              <button
-                type="button"
-                onClick={() => setQuantity(25)}
-                className={`relative p-2 rounded-xl border-2 transition-all text-center ${quantity === 25
-                  ? 'border-gold bg-gold/10 glow-gold'
-                  : 'border-gold/30 hover:border-gold/60 bg-gold/5'
-                  }`}
-              >
-                <div className="absolute -top-2 left-1/2 -translate-x-1/2 px-1.5 py-0.5 bg-gold text-black text-[7px] font-bold rounded-full uppercase whitespace-nowrap">
-                  Mais Vendido
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="phone" className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                      <Phone className="w-3.5 h-3.5 text-emerald" /> WhatsApp
+                    </Label>
+                    <Input
+                      id="phone"
+                      type="tel"
+                      placeholder="(11) 99999-9999"
+                      {...register('phone')}
+                      className={`input-casino h-12 ${errors.phone ? 'border-destructive' : ''}`}
+                    />
+                    {errors.phone && <p className="text-[10px] text-destructive font-bold uppercase tracking-tight">{errors.phone.message}</p>}
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="email" className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                      <Mail className="w-3.5 h-3.5 text-emerald" /> E-mail
+                    </Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      placeholder="exemplo@email.com"
+                      {...register('email')}
+                      className={`input-casino h-12 ${errors.email ? 'border-destructive' : ''}`}
+                    />
+                    {errors.email && <p className="text-[10px] text-destructive font-bold uppercase tracking-tight">{errors.email.message}</p>}
+                  </div>
                 </div>
-                <p className="font-bold text-lg text-gold mt-1">25</p>
-                <p className="text-[9px] text-gold/80 uppercase font-semibold">Confiante</p>
-              </button>
+              </div>
+            </motion.div>
 
-              {/* 50: Determinado */}
-              <button
-                type="button"
-                onClick={() => setQuantity(50)}
-                className={`relative p-2 rounded-xl border-2 transition-all text-center ${quantity === 50
-                  ? 'border-gold bg-gold/10 glow-gold'
-                  : 'border-gold/30 hover:border-gold/60 bg-gold/5'
-                  }`}
-              >
-                <p className="font-bold text-lg text-gold">50</p>
-                <p className="text-[9px] text-gold/80 uppercase font-semibold">VIP</p>
-              </button>
+            <motion.div variants={itemVariants} className="space-y-5">
+              <div className="flex items-center justify-between px-1">
+                <Label className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-foreground">
+                  <Hash className="w-4 h-4 text-gold fill-gold/20" /> Escolha sua Cota
+                </Label>
+                <span className="text-[10px] text-muted-foreground font-mono bg-white/5 px-2 py-0.5 rounded-full">ESTOQUE LIMITADO</span>
+              </div>
 
-              {/* 100: Magnata */}
-              <button
-                type="button"
-                onClick={() => setQuantity(100)}
-                className={`relative p-2 rounded-xl border-2 transition-all text-center ${quantity === 100
-                  ? 'border-purple bg-purple/10 glow-purple'
-                  : 'border-purple/30 hover:border-purple/60 bg-purple/5'
-                  }`}
-              >
-                <div className="absolute -top-2 left-1/2 -translate-x-1/2 px-1.5 py-0.5 bg-purple text-white text-[7px] font-bold rounded-full uppercase whitespace-nowrap">
-                  Melhor Valor
+              {/* Bundles Grid */}
+              <div className="grid grid-cols-3 sm:grid-cols-6 gap-2.5">
+                {BUNDLES.map((bundle) => (
+                  <motion.button
+                    key={bundle.id}
+                    type="button"
+                    whileHover={{ y: -4, scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => setQuantity(bundle.value)}
+                    className={`relative p-2.5 rounded-2xl border-2 transition-all group overflow-hidden ${quantity === bundle.value
+                        ? bundle.color === 'emerald' ? 'border-emerald bg-emerald/10 shadow-[0_0_20px_rgba(16,185,129,0.3)]' :
+                          bundle.color === 'gold' ? 'border-gold bg-gold/10 shadow-[0_0_20px_rgba(234,179,8,0.3)]' :
+                            'border-purple bg-purple/10 shadow-[0_0_20px_rgba(168,85,247,0.3)]'
+                        : 'border-border/30 hover:border-border bg-black/20 hover:bg-black/40'
+                      }`}
+                  >
+                    {bundle.tag && (
+                      <div className={`absolute -top-0 left-0 right-0 py-0.5 text-[7px] font-black uppercase text-center ${bundle.color === 'gold' ? 'bg-gold text-black' :
+                          bundle.color === 'purple' ? 'bg-purple text-white' :
+                            'bg-emerald text-white'
+                        }`}>
+                        {bundle.tag}
+                      </div>
+                    )}
+                    <div className="pt-2 pb-1">
+                      <p className={`text-xl font-black ${quantity === bundle.value ? 'scale-110 transition-transform' : 'opacity-80'
+                        } ${bundle.color === 'gold' ? 'text-gold' :
+                          bundle.color === 'purple' ? 'text-purple-light' :
+                            'text-emerald-light'
+                        }`}>{bundle.value}</p>
+                      <p className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest leading-none mt-0.5">{bundle.label}</p>
+                    </div>
+                    {quantity === bundle.value && (
+                      <motion.div layoutId="bundle-active" className="absolute inset-0 border-2 border-inherit rounded-2xl animate-pulse-slow pointer-events-none" />
+                    )}
+                  </motion.button>
+                ))}
+              </div>
+
+              {/* Enhanced Slider */}
+              <div className="space-y-4 pt-4 px-2">
+                <Slider
+                  value={[quantity]}
+                  onValueChange={(value) => setQuantity(value[0])}
+                  min={1}
+                  max={Math.min(500, maxNumbers)}
+                  step={1}
+                  className="py-4 cursor-pointer"
+                />
+                <div className="flex justify-between items-center bg-black/30 p-3 rounded-2xl border border-white/5 shadow-inner">
+                  <div className="flex items-center gap-1.5">
+                    <div className="w-8 h-8 rounded-lg bg-emerald/10 flex items-center justify-center border border-emerald/20">
+                      <span className="text-lg">💰</span>
+                    </div>
+                    <div>
+                      <p className="text-[9px] font-bold text-muted-foreground uppercase leading-none">Quantidade</p>
+                      <p className="text-sm font-black text-emerald-light">{quantity} COTAS</p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-[9px] font-bold text-muted-foreground uppercase leading-none">Preço Unitário</p>
+                    <p className="text-sm font-black text-gold">{formatCurrency(pricePerNumber)}</p>
+                  </div>
                 </div>
-                <p className="font-bold text-lg text-purple mt-1">100</p>
-                <p className="text-[9px] text-purple/80 uppercase font-semibold">Magnata</p>
-              </button>
-            </div>
-
-            {/* Slider */}
-            <div className="space-y-3 pt-2">
-              <Slider
-                value={[quantity]}
-                onValueChange={(value) => setQuantity(value[0])}
-                min={1}
-                max={Math.min(500, maxNumbers)}
-                step={1}
-                className="py-4"
-                aria-label="Selecionar quantidade de números"
-              />
-              <div className="flex justify-between text-sm text-muted-foreground">
-                <span>1</span>
-                <span className="text-emerald font-bold text-lg flex items-center gap-1">
-                  <Star className="w-4 h-4 text-gold animate-sparkle" />
-                  {quantity} números
-                </span>
-                <span>{Math.min(500, maxNumbers)}</span>
               </div>
-            </div>
-          </div>
+            </motion.div>
 
-          {/* Resumo */}
-          <div className="p-4 sm:p-5 rounded-xl bg-gradient-to-br from-gold/10 via-purple/5 to-emerald/10 border border-gold/30 relative overflow-hidden">
-            <div className="absolute top-2 right-2 text-gold/20 hidden sm:block">
-              <Coins className="w-8 h-8" />
-            </div>
-            <div className="absolute bottom-2 left-2 text-purple/10 hidden sm:block">
-              <Zap className="w-6 h-6" />
-            </div>
-            <div className="flex justify-between items-center relative z-10">
-              <div>
-                <p className="text-xs sm:text-sm text-muted-foreground flex items-center gap-1">
-                  <Sparkles className="w-3 h-3 text-gold" />
-                  Total a pagar
-                </p>
-                <p className="text-2xl sm:text-4xl font-display font-bold text-gradient-gold">{formatCurrency(totalAmount)}</p>
+            {/* Total Resumo */}
+            <motion.div variants={itemVariants} className="relative group p-6 rounded-3xl bg-gradient-to-br from-gold/10 via-background to-emerald/10 border-2 border-gold/20 overflow-hidden shadow-xl">
+              <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                <Coins className="w-20 h-20 rotate-12" />
               </div>
-              <div className="text-right">
-                <p className="text-xs sm:text-sm text-emerald font-medium">{quantity}x números</p>
-                <p className="text-xs sm:text-sm text-muted-foreground">{formatCurrency(pricePerNumber)} cada</p>
+              <div className="relative z-10 flex justify-between items-center">
+                <div className="space-y-1">
+                  <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-2">
+                    <Zap className="w-4 h-4 text-gold fill-gold" /> Total do Investimento
+                  </p>
+                  <motion.p
+                    key={totalAmount}
+                    initial={{ scale: 0.9, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    className="text-4xl sm:text-5xl font-display font-bold text-gradient-gold drop-shadow-md"
+                  >
+                    {formatCurrency(totalAmount)}
+                  </motion.p>
+                </div>
+                <div className="h-12 w-12 rounded-full border-2 border-gold/40 flex items-center justify-center animate-shine overflow-hidden">
+                  <span className="text-2xl">🪄</span>
+                </div>
               </div>
-            </div>
-          </div>
+            </motion.div>
 
-          {/* Submit */}
-          <Button
-            type="submit"
-            disabled={isLoading}
-            className="btn-luck w-full py-5 sm:py-7 text-base sm:text-lg text-primary-foreground font-bold uppercase tracking-wider"
-          >
-            {isLoading ? (
-              'Processando...'
-            ) : (
-              <>
-                <span className="mr-2">🍀</span>
-                <span className="hidden sm:inline">Continuar para Pagamento</span>
-                <span className="sm:hidden">Continuar</span>
-                <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 ml-2" />
-              </>
-            )}
-          </Button>
-        </form>
-      </CardContent>
-    </Card>
+            {/* Submit */}
+            <motion.div variants={itemVariants} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+              <Button
+                type="submit"
+                disabled={isLoading}
+                className="btn-luck w-full py-8 text-xl text-primary-foreground font-black uppercase tracking-thicker shadow-2xl group flex items-center justify-center gap-3"
+              >
+                {isLoading ? (
+                  'RESERVANDO...'
+                ) : (
+                  <>
+                    <span className="group-hover:rotate-12 transition-transform">🍀</span>
+                    CONCLUIR PARTICIPAÇÃO
+                    <ArrowRight className="w-6 h-6 group-hover:translate-x-2 transition-transform" />
+                  </>
+                )}
+              </Button>
+            </motion.div>
+
+            <p className="text-[9px] text-center text-muted-foreground uppercase tracking-widest font-bold opacity-60">
+              Processamento Seguro via PIX Oficial Banco Central
+            </p>
+          </form>
+        </CardContent>
+      </Card>
+    </motion.div>
   );
 }

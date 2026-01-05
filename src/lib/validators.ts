@@ -47,3 +47,9 @@ export function formatCurrency(value: number): string {
 export function formatRaffleNumber(num: number, totalDigits: number = 5): string {
   return num.toString().padStart(totalDigits, '0');
 }
+
+// Gerar ID de transação PIX curto e legível (banco)
+export function getPixTxId(purchaseId: string): string {
+  // Pega os primeiros 6 caracteres e converte para maiúsculo
+  return purchaseId.slice(0, 6).toUpperCase();
+}
