@@ -33,14 +33,11 @@ export function BuyerForm({ pricePerNumber, maxNumbers, onSubmit, isLoading }: B
     onSubmit({ ...data, quantity });
   };
 
-  // Presets rápidos de quantidade
-  const quantityPresets = [5, 10, 20, 50, 100];
-
   return (
     <Card className="w-full max-w-lg mx-auto card-jackpot border-gold/20 overflow-hidden">
       {/* Decorative header bar */}
       <div className="h-2 bg-gradient-luck" />
-      
+
       <CardHeader className="text-center space-y-2 sm:space-y-3 pt-6 sm:pt-8 px-4 sm:px-6 relative">
         {/* Corner decorations - hidden on small screens */}
         <div className="absolute top-4 left-4 text-gold/20 hidden sm:block">
@@ -49,7 +46,7 @@ export function BuyerForm({ pricePerNumber, maxNumbers, onSubmit, isLoading }: B
         <div className="absolute top-4 right-4 text-emerald/20 hidden sm:block">
           <Sparkles className="w-6 h-6" />
         </div>
-        
+
         <div className="mx-auto w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-gradient-luck flex items-center justify-center mb-2 glow-emerald animate-pulse-glow">
           <span className="text-2xl sm:text-3xl">🍀</span>
         </div>
@@ -126,25 +123,65 @@ export function BuyerForm({ pricePerNumber, maxNumbers, onSubmit, isLoading }: B
               Quantidade de números da sorte
             </Label>
 
-            {/* Presets */}
-            <div className="flex flex-wrap gap-2">
-              {quantityPresets.map((preset) => (
-                <Button
-                  key={preset}
-                  type="button"
-                  variant={quantity === preset ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => setQuantity(preset)}
-                  aria-label={`Selecionar ${preset} números`}
-                  aria-pressed={quantity === preset}
-                  className={quantity === preset 
-                    ? 'bg-emerald hover:bg-emerald-light text-primary-foreground glow-emerald border-0' 
-                    : 'border-emerald/30 hover:border-emerald hover:bg-emerald/10 bg-transparent'
-                  }
-                >
-                  {preset}
-                </Button>
-              ))}
+            {/* Presets - Attractive Bundles */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+              {/* Bundle 1: Starter */}
+              <button
+                type="button"
+                onClick={() => setQuantity(10)}
+                className={`relative p-3 rounded-xl border-2 transition-all text-center ${quantity === 10
+                  ? 'border-emerald bg-emerald/10 glow-emerald'
+                  : 'border-border/50 hover:border-emerald/50 bg-card/50'
+                  }`}
+              >
+                <p className="font-bold text-lg text-foreground">10</p>
+                <p className="text-[10px] text-muted-foreground uppercase">Iniciante</p>
+              </button>
+
+              {/* Bundle 2: Lucky */}
+              <button
+                type="button"
+                onClick={() => setQuantity(25)}
+                className={`relative p-3 rounded-xl border-2 transition-all text-center ${quantity === 25
+                  ? 'border-emerald bg-emerald/10 glow-emerald'
+                  : 'border-border/50 hover:border-emerald/50 bg-card/50'
+                  }`}
+              >
+                <p className="font-bold text-lg text-foreground">25</p>
+                <p className="text-[10px] text-muted-foreground uppercase">Sortudo</p>
+              </button>
+
+              {/* Bundle 3: VIP - Most Popular */}
+              <button
+                type="button"
+                onClick={() => setQuantity(50)}
+                className={`relative p-3 rounded-xl border-2 transition-all text-center ${quantity === 50
+                  ? 'border-gold bg-gold/10 glow-gold'
+                  : 'border-gold/30 hover:border-gold/60 bg-gold/5'
+                  }`}
+              >
+                <div className="absolute -top-2 left-1/2 -translate-x-1/2 px-2 py-0.5 bg-gold text-black text-[8px] font-bold rounded-full uppercase whitespace-nowrap">
+                  ⭐ Mais Popular
+                </div>
+                <p className="font-bold text-lg text-gold mt-1">50</p>
+                <p className="text-[10px] text-gold/80 uppercase font-semibold">VIP</p>
+              </button>
+
+              {/* Bundle 4: Magnata - Best Value */}
+              <button
+                type="button"
+                onClick={() => setQuantity(100)}
+                className={`relative p-3 rounded-xl border-2 transition-all text-center ${quantity === 100
+                  ? 'border-purple bg-purple/10 glow-purple'
+                  : 'border-purple/30 hover:border-purple/60 bg-purple/5'
+                  }`}
+              >
+                <div className="absolute -top-2 left-1/2 -translate-x-1/2 px-2 py-0.5 bg-purple text-white text-[8px] font-bold rounded-full uppercase whitespace-nowrap">
+                  🚀 Melhor Valor
+                </div>
+                <p className="font-bold text-lg text-purple mt-1">100</p>
+                <p className="text-[10px] text-purple/80 uppercase font-semibold">Magnata</p>
+              </button>
             </div>
 
             {/* Slider */}
@@ -193,8 +230,8 @@ export function BuyerForm({ pricePerNumber, maxNumbers, onSubmit, isLoading }: B
           </div>
 
           {/* Submit */}
-          <Button 
-            type="submit" 
+          <Button
+            type="submit"
             disabled={isLoading}
             className="btn-luck w-full py-5 sm:py-7 text-base sm:text-lg text-primary-foreground font-bold uppercase tracking-wider"
           >

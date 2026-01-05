@@ -14,6 +14,7 @@ import type { BuyerFormData } from '@/lib/validators';
 import { useAuth } from '@/hooks/useAuth';
 import { useCustomerAuth } from '@/hooks/useCustomerAuth';
 import { Loader } from '@/components/ui/Loader';
+import { useSocialProofToasts } from '@/components/raffle/SocialProofToast';
 
 type Step = 'hero' | 'form' | 'payment' | 'numbers' | 'success';
 
@@ -33,6 +34,9 @@ export default function Index() {
   const { data: soldNumbersData } = useSoldNumbers(raffle?.id);
   const createPurchase = useCreatePurchase();
   const reserveNumbers = useReserveNumbers();
+
+  // Enable social proof toasts when on the hero step
+  useSocialProofToasts({ enabled: step === 'hero' && !!raffle });
 
   const { soldNumbers, pendingNumbers } = useMemo(() => {
     if (!soldNumbersData) return { soldNumbers: [], pendingNumbers: [] };

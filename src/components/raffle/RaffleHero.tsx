@@ -9,6 +9,7 @@ import {
 } from '@/components/ui/dialog';
 import { useState } from 'react';
 import rafflePrizesHero from '@/assets/raffle-prizes-hero.jpg';
+import { CountdownTimer } from './CountdownTimer';
 
 interface RaffleHeroProps {
   title: string;
@@ -111,64 +112,114 @@ export function RaffleHero({
                 1º Prêmio
               </div>
               <div className="flex items-center gap-4 relative z-10">
-                 <div className="p-4 rounded-xl bg-gradient-gold animate-pulse-glow shrink-0 group-hover:scale-105 transition-transform">
-                    <Gift className="w-8 h-8 text-purple-dark" />
-                  </div>
-                  <div className="text-left">
-                    <h3 className="text-xl sm:text-2xl font-bold text-foreground">{prizeDescription}</h3>
-                    {prizeDrawDetails && (
-                      <p className="text-sm text-muted-foreground mt-1 underline">Ver detalhes</p>
-                    )}
-                  </div>
+                <div className="p-4 rounded-xl bg-gradient-gold animate-pulse-glow shrink-0 group-hover:scale-105 transition-transform">
+                  <Gift className="w-8 h-8 text-purple-dark" />
+                </div>
+                <div className="text-left">
+                  <h3 className="text-xl sm:text-2xl font-bold text-foreground">{prizeDescription}</h3>
+                  {prizeDrawDetails && (
+                    <p className="text-sm text-muted-foreground mt-1 underline">Ver detalhes</p>
+                  )}
+                </div>
               </div>
               {/* Shine effect */}
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -skew-x-12 translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-1000" />
             </div>
 
+            {/* Urgency Progress Bar */}
+            <div className="space-y-3">
+              {/* Progress Bar with Dynamic Colors */}
+              <div className="relative">
+                <div className="h-4 bg-muted/50 rounded-full overflow-hidden border border-border/50">
+                  <div
+                    className={`h-full rounded-full transition-all duration-1000 ease-out relative overflow-hidden ${progressPercentage >= 80
+                        ? 'bg-gradient-to-r from-red-600 via-red-500 to-orange-500'
+                        : progressPercentage >= 50
+                          ? 'bg-gradient-to-r from-yellow-600 via-yellow-500 to-gold'
+                          : 'bg-gradient-to-r from-emerald-dark via-emerald to-emerald-light'
+                      }`}
+                    style={{ width: `${Math.min(progressPercentage, 100)}%` }}
+                  >
+                    {/* Shimmer effect */}
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-shimmer" />
+                  </div>
+                </div>
+                {/* Percentage badge */}
+                <div
+                  className={`absolute -top-1 transform -translate-x-1/2 px-2 py-0.5 rounded-full text-xs font-bold ${progressPercentage >= 80
+                      ? 'bg-red-500 text-white'
+                      : progressPercentage >= 50
+                        ? 'bg-gold text-black'
+                        : 'bg-emerald text-white'
+                    }`}
+                  style={{ left: `${Math.min(Math.max(progressPercentage, 5), 95)}%` }}
+                >
+                  {progressPercentage.toFixed(0)}%
+                </div>
+              </div>
+
+              {/* Urgency Message */}
+              <div className={`text-center p-3 rounded-xl border ${progressPercentage >= 80
+                  ? 'bg-red-500/10 border-red-500/30 animate-pulse'
+                  : progressPercentage >= 50
+                    ? 'bg-gold/10 border-gold/30'
+                    : 'bg-emerald/10 border-emerald/30'
+                }`}>
+                <p className={`font-bold text-sm ${progressPercentage >= 80
+                    ? 'text-red-400'
+                    : progressPercentage >= 50
+                      ? 'text-gold'
+                      : 'text-emerald'
+                  }`}>
+                  {progressPercentage >= 80
+                    ? `🚨 ÚLTIMOS NÚMEROS! Apenas ${availableNumbers.toLocaleString()} restantes!`
+                    : progressPercentage >= 50
+                      ? `🔥 Metade já foi! Restam ${availableNumbers.toLocaleString()} números`
+                      : `🎯 Garanta seus números! ${availableNumbers.toLocaleString()} disponíveis`}
+                </p>
+              </div>
+            </div>
+
             {/* Stats Bar */}
             <div className="grid grid-cols-3 gap-2 sm:gap-4">
-               <div className="card-casino text-center p-3 rounded-xl border border-emerald/20">
+              <div className="card-casino text-center p-3 rounded-xl border border-emerald/20">
                 <p className="text-xl font-display font-bold text-emerald">{formatCurrency(pricePerNumber)}</p>
                 <p className="text-[10px] text-muted-foreground uppercase">por número</p>
               </div>
               <div className="card-casino text-center p-3 rounded-xl border border-gold/20">
                 <p className="text-xl font-display font-bold text-gold">{availableNumbers.toLocaleString()}</p>
-                 <p className="text-[10px] text-muted-foreground uppercase">restantes</p>
+                <p className="text-[10px] text-muted-foreground uppercase">restantes</p>
               </div>
-               <div className="card-casino text-center p-3 rounded-xl border border-purple/20">
-                 {/* Progress circle or simple text */}
-                 <p className="text-xl font-display font-bold text-purple">{progressPercentage.toFixed(0)}%</p>
-                 <p className="text-[10px] text-muted-foreground uppercase">vendido</p>
+              <div className="card-casino text-center p-3 rounded-xl border border-purple/20">
+                <p className="text-xl font-display font-bold text-purple">{soldNumbers.toLocaleString()}</p>
+                <p className="text-[10px] text-muted-foreground uppercase">vendidos</p>
               </div>
             </div>
 
-            <Button 
+            <Button
               onClick={onParticipate}
               size="lg"
-              className="btn-luck w-full text-lg py-8 text-primary-foreground font-bold uppercase tracking-wider shadow-xl shadow-emerald/20 hover:shadow-emerald/40 transition-all"
+              className="btn-luck w-full text-lg py-8 text-primary-foreground font-bold uppercase tracking-wider shadow-xl shadow-emerald/20 hover:shadow-emerald/40 transition-all animate-pulse-glow"
             >
               <span className="mr-2 text-2xl">🎟️</span>
-              Comprar Números
+              Comprar Números Agora
             </Button>
 
             {drawDate && (
-              <div className="flex justify-center lg:justify-start items-center gap-2 text-sm text-muted-foreground">
-                 <Timer className="w-4 h-4 text-gold" />
-                 <span>Sorteio: <span className="text-foreground font-medium">{new Date(drawDate).toLocaleDateString('pt-BR')} às {new Date(drawDate).toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'})}</span></span>
-              </div>
+              <CountdownTimer targetDate={drawDate} />
             )}
           </div>
 
           {/* Right: Image (Hidden on mobile if desired, or kept) */}
           <div className="relative hidden lg:block animate-fade-in" style={{ animationDelay: '0.2s' }}>
-             <div className="relative aspect-square rounded-2xl overflow-hidden border-4 border-gold/30 shadow-2xl shadow-gold/20 card-jackpot group">
-              <img 
-                src={imageUrl || rafflePrizesHero} 
+            <div className="relative aspect-square rounded-2xl overflow-hidden border-4 border-gold/30 shadow-2xl shadow-gold/20 card-jackpot group">
+              <img
+                src={imageUrl || rafflePrizesHero}
                 alt={prizeDescription}
                 className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-transparent to-transparent" />
-              
+
               <div className="absolute bottom-6 left-6 right-6">
                 <div className="bg-background/80 backdrop-blur-md p-4 rounded-xl border border-gold/30">
                   <p className="text-gold font-bold text-xs uppercase mb-1">Prêmio em destaque</p>
@@ -183,14 +234,14 @@ export function RaffleHero({
         {(prizeReferral1st || prizeBuyer1st) && (
           <div className="animate-fade-in space-y-6" style={{ animationDelay: '0.3s' }}>
             <div className="text-center relative">
-               <div className="absolute inset-0 flex items-center" aria-hidden="true">
-                  <div className="w-full border-t border-gold/20"></div>
-                </div>
-                <div className="relative flex justify-center">
-                  <span className="bg-background px-4 text-sm text-gold font-bold uppercase tracking-widest border border-gold/20 rounded-full py-1">
-                    Vitrine de Prêmios Extras
-                  </span>
-                </div>
+              <div className="absolute inset-0 flex items-center" aria-hidden="true">
+                <div className="w-full border-t border-gold/20"></div>
+              </div>
+              <div className="relative flex justify-center">
+                <span className="bg-background px-4 text-sm text-gold font-bold uppercase tracking-widest border border-gold/20 rounded-full py-1">
+                  Vitrine de Prêmios Extras
+                </span>
+              </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -226,7 +277,7 @@ export function RaffleHero({
                   onClick={() => handlePrizeClick('Maior Comprador', prizeBuyer1st, <Crown className="w-8 h-8 text-gold" />)}
                   className="card-jackpot p-4 rounded-xl border border-gold/30 hover:border-gold/60 cursor-pointer transition-colors relative overflow-hidden group"
                 >
-                   <div className="flex flex-col h-full">
+                  <div className="flex flex-col h-full">
                     <div className="flex items-center gap-3 mb-3">
                       <div className="p-2 bg-gold/20 rounded-lg text-gold group-hover:scale-110 transition-transform">
                         <Crown className="w-6 h-6" />
@@ -244,7 +295,7 @@ export function RaffleHero({
                   onClick={() => handlePrizeClick('Top Indicadores (2º-5º)', prizeReferralRunners, <Medal className="w-8 h-8 text-slate-400" />)}
                   className="card-jackpot p-4 rounded-xl border border-slate-500/30 hover:border-slate-500/60 cursor-pointer transition-colors relative overflow-hidden group"
                 >
-                   <div className="flex flex-col h-full">
+                  <div className="flex flex-col h-full">
                     <div className="flex items-center gap-3 mb-3">
                       <div className="p-2 bg-slate-500/20 rounded-lg text-slate-400 group-hover:scale-110 transition-transform">
                         <Medal className="w-6 h-6" />
@@ -263,7 +314,7 @@ export function RaffleHero({
                   onClick={() => handlePrizeClick('Top Compradores (2º-5º)', prizeBuyerRunners, <Trophy className="w-8 h-8 text-bronze-400" />)}
                   className="card-jackpot p-4 rounded-xl border border-orange-500/30 hover:border-orange-500/60 cursor-pointer transition-colors relative overflow-hidden group"
                 >
-                   <div className="flex flex-col h-full">
+                  <div className="flex flex-col h-full">
                     <div className="flex items-center gap-3 mb-3">
                       <div className="p-2 bg-orange-500/20 rounded-lg text-orange-400 group-hover:scale-110 transition-transform">
                         <Trophy className="w-6 h-6" />
