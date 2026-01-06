@@ -212,6 +212,71 @@ export function useUpsertRaffle() {
   });
 }
 
+// Hook para soft delete de rifa (mover para lixeira)
+export function useSoftDeleteRaffle() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (raffleId: string) => {
+      const { data, error } = await supabase
+        .from('raffles')
+        .update({ deleted_at: new Date().toISOString() } as any)
+        .eq('id', raffleId)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['all-raffles'] });
+      queryClient.invalidateQueries({ queryKey: ['active-raffle'] });
+      queryClient.invalidateQueries({ queryKey: ['deleted-raffles'] });
+    },
+  });
+}
+
+// Hook para restaurar rifa da lixeira
+export function useRestoreRaffle() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (raffleId: string) => {
+      const { data, error } = await supabase
+        .from('raffles')
+        .update({ deleted_at: null } as any)
+        .eq('id', raffleId)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['all-raffles'] });
+      queryClient.invalidateQueries({ queryKey: ['active-raffle'] });
+      queryClient.invalidateQueries({ queryKey: ['deleted-raffles'] });
+    },
+  });
+}
+
+// Hook para buscar rifas excluídas (lixeira)
+export function useDeletedRaffles() {
+  return useQuery({
+    queryKey: ['deleted-raffles'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('raffles')
+        .select('*')
+        .not('deleted_at', 'is', null)
+        .order('deleted_at', { ascending: false });
+
+      if (error) throw error;
+      return data;
+    },
+  });
+}
+
 // Hook para estatísticas do admin
 export function useAdminStats(raffleId?: string) {
   return useQuery({

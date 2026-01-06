@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { useAllRaffles, useUpsertRaffle } from '@/hooks/useAdmin';
+import { useAllRaffles, useUpsertRaffle, useSoftDeleteRaffle, useRestoreRaffle, useDeletedRaffles } from '@/hooks/useAdmin';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -11,7 +11,18 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Save, Plus } from 'lucide-react';
+import { Loader2, Save, Plus, Trash2, RotateCcw } from 'lucide-react';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 
 const raffleSchema = z.object({
   title: z.string().min(3, 'Título muito curto'),
@@ -48,13 +59,50 @@ type RaffleFormData = z.infer<typeof raffleSchema>;
 
 type RaffleStatus = 'draft' | 'active' | 'completed' | 'cancelled';
 
+// Default form values for reset
+const defaultFormValues: RaffleFormData = {
+  title: '',
+  description: '',
+  prize_description: '',
+  prize_draw_details: '',
+  prize_referral_1st: '',
+  referral_threshold: undefined,
+  prize_buyer_1st: '',
+  prize_referral_runners: '',
+  prize_buyer_runners: '',
+  prize_top_buyer: '',
+  prize_top_buyer_details: '',
+  prize_second_top_buyer: '',
+  prize_second_top_buyer_details: '',
+  image_url: '',
+  price_per_number: 0.50,
+  total_numbers: 10000,
+  pix_key: '',
+  pix_key_type: '',
+  pix_beneficiary_name: '',
+  short_code: '',
+  pix_change_notification_email: '',
+  status: 'draft',
+  draw_date: '',
+};
+
 export default function AdminRaffle() {
   const { toast } = useToast();
   const { data: raffles, isLoading } = useAllRaffles();
   const upsertRaffle = useUpsertRaffle();
-  const [selectedRaffleId, setSelectedRaffleId] = useState<string | null>(null);
+  const softDeleteRaffle = useSoftDeleteRaffle();
+  const restoreRaffle = useRestoreRaffle();
+  const { data: deletedRaffles } = useDeletedRaffles();
 
-  const selectedRaffle = raffles?.find(r => r.id === selectedRaffleId);
+  const [selectedRaffleId, setSelectedRaffleId] = useState<string | null>(null);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+
+  // Find selected raffle in both active and deleted lists
+  const selectedRaffle = raffles?.find(r => r.id === selectedRaffleId)
+    || deletedRaffles?.find(r => r.id === selectedRaffleId);
+
+  // Check if selected raffle is in trash
+  const isSelectedRaffleDeleted = selectedRaffle && (selectedRaffle as any).deleted_at != null;
 
   const {
     register,
@@ -75,33 +123,10 @@ export default function AdminRaffle() {
   const handleSelectRaffle = (id: string) => {
     if (id === 'new') {
       setSelectedRaffleId(null);
-      reset({
-        title: '',
-        description: '',
-        prize_description: '',
-        prize_draw_details: '',
-        prize_referral_1st: '',
-        referral_threshold: undefined,
-        prize_buyer_1st: '',
-        prize_referral_runners: '',
-        prize_buyer_runners: '',
-        prize_top_buyer: '',
-        prize_top_buyer_details: '',
-        prize_second_top_buyer: '',
-        prize_second_top_buyer_details: '',
-        image_url: '',
-        price_per_number: 0.50,
-        total_numbers: 10000,
-        pix_key: '',
-        pix_key_type: '',
-        pix_beneficiary_name: '',
-        short_code: '',
-        pix_change_notification_email: '',
-        status: 'draft',
-        draw_date: '',
-      });
+      reset(defaultFormValues);
     } else {
-      const raffle = raffles?.find(r => r.id === id);
+      // Check both active and deleted raffles
+      const raffle = raffles?.find(r => r.id === id) || deletedRaffles?.find(r => r.id === id);
       if (raffle) {
         setSelectedRaffleId(id);
         reset({
@@ -133,6 +158,45 @@ export default function AdminRaffle() {
           draw_date: raffle.draw_date ? raffle.draw_date.slice(0, 16) : '',
         });
       }
+    }
+  };
+
+  // Handler for soft delete (move to trash)
+  const handleSoftDelete = async () => {
+    if (!selectedRaffleId) return;
+    try {
+      await softDeleteRaffle.mutateAsync(selectedRaffleId);
+      toast({
+        title: '🗑️ Rifa movida para lixeira',
+        description: 'A rifa será permanentemente excluída após 30 dias.',
+      });
+      setSelectedRaffleId(null);
+      reset(defaultFormValues);
+      setShowDeleteDialog(false);
+    } catch (error: any) {
+      toast({
+        title: 'Erro',
+        description: error.message || 'Não foi possível excluir a rifa.',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  // Handler for restore from trash
+  const handleRestore = async () => {
+    if (!selectedRaffleId) return;
+    try {
+      await restoreRaffle.mutateAsync(selectedRaffleId);
+      toast({
+        title: '✅ Rifa restaurada!',
+        description: 'A rifa foi recuperada da lixeira com sucesso.',
+      });
+    } catch (error: any) {
+      toast({
+        title: 'Erro',
+        description: error.message || 'Não foi possível restaurar a rifa.',
+        variant: 'destructive',
+      });
     }
   };
 
@@ -198,7 +262,7 @@ export default function AdminRaffle() {
 
       <div className="flex gap-2">
         <Select value={selectedRaffleId || 'new'} onValueChange={handleSelectRaffle}>
-          <SelectTrigger className="w-64">
+          <SelectTrigger className="w-72">
             <SelectValue placeholder="Selecionar rifa" />
           </SelectTrigger>
           <SelectContent>
@@ -208,20 +272,49 @@ export default function AdminRaffle() {
                 Nova Rifa
               </span>
             </SelectItem>
-            {raffles?.map((raffle) => (
+
+            {/* Active raffles (not deleted) */}
+            {raffles?.filter(r => !(r as any).deleted_at).map((raffle) => (
               <SelectItem key={raffle.id} value={raffle.id}>
                 {raffle.title} ({raffle.status})
               </SelectItem>
             ))}
+
+            {/* Trash section */}
+            {deletedRaffles && deletedRaffles.length > 0 && (
+              <>
+                <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground border-t mt-1 pt-2">
+                  🗑️ Lixeira ({deletedRaffles.length})
+                </div>
+                {deletedRaffles.map((raffle) => (
+                  <SelectItem key={raffle.id} value={raffle.id}>
+                    <span className="text-muted-foreground">
+                      <span className="line-through">{raffle.title}</span>
+                      <span className="ml-2 text-xs">(excluída)</span>
+                    </span>
+                  </SelectItem>
+                ))}
+              </>
+            )}
           </SelectContent>
         </Select>
       </div>
 
-      <Card className="border-gold/20">
+      <Card className={`border-gold/20 ${isSelectedRaffleDeleted ? 'border-destructive/50' : ''}`}>
         <CardHeader>
-          <CardTitle>{selectedRaffleId ? 'Editar Rifa' : 'Nova Rifa'}</CardTitle>
+          <CardTitle className="flex items-center gap-2">
+            {isSelectedRaffleDeleted && <Trash2 className="w-5 h-5 text-destructive" />}
+            {selectedRaffleId ? (isSelectedRaffleDeleted ? 'Rifa na Lixeira' : 'Editar Rifa') : 'Nova Rifa'}
+          </CardTitle>
           <CardDescription>
-            Configure os detalhes da rifa e regras de premiação.
+            {isSelectedRaffleDeleted ? (
+              <span className="text-destructive">
+                Esta rifa foi excluída e será permanentemente removida após 30 dias.
+                Restaure-a para continuar editando.
+              </span>
+            ) : (
+              'Configure os detalhes da rifa e regras de premiação.'
+            )}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -429,18 +522,92 @@ export default function AdminRaffle() {
               </TabsContent>
             </Tabs>
 
-            <Button
-              type="submit"
-              disabled={upsertRaffle.isPending}
-              className="w-full bg-gradient-gold text-primary-foreground hover:opacity-90 mt-6"
-            >
-              {upsertRaffle.isPending ? (
-                <Loader2 className="w-4 h-4 animate-spin mr-2" />
-              ) : (
-                <Save className="w-4 h-4 mr-2" />
+            {/* Action Buttons */}
+            <div className="flex gap-3 mt-6">
+              {/* Save Button */}
+              <Button
+                type="submit"
+                disabled={upsertRaffle.isPending || isSelectedRaffleDeleted}
+                className="flex-1 bg-gradient-gold text-primary-foreground hover:opacity-90"
+              >
+                {upsertRaffle.isPending ? (
+                  <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                ) : (
+                  <Save className="w-4 h-4 mr-2" />
+                )}
+                {selectedRaffleId ? 'Salvar Alterações' : 'Criar Rifa'}
+              </Button>
+
+              {/* Delete Button (only for existing non-deleted raffles) */}
+              {selectedRaffleId && !isSelectedRaffleDeleted && (
+                <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+                  <AlertDialogTrigger asChild>
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      className="gap-2"
+                      disabled={softDeleteRaffle.isPending}
+                    >
+                      <Trash2 className="w-4 h-4" />
+                      Excluir
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle className="flex items-center gap-2">
+                        <Trash2 className="w-5 h-5 text-destructive" />
+                        Confirmar Exclusão
+                      </AlertDialogTitle>
+                      <AlertDialogDescription className="space-y-3">
+                        <p>Tem certeza que deseja excluir esta rifa?</p>
+                        <div className="bg-muted/50 p-3 rounded-lg border">
+                          <p className="font-medium text-foreground">"{selectedRaffle?.title}"</p>
+                        </div>
+                        <p>
+                          A rifa será movida para a <strong>lixeira</strong> e permanentemente
+                          excluída após <strong>30 dias</strong>.
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                          Você poderá restaurá-la a qualquer momento durante esse período.
+                        </p>
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={handleSoftDelete}
+                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                      >
+                        {softDeleteRaffle.isPending ? (
+                          <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                        ) : (
+                          <Trash2 className="w-4 h-4 mr-2" />
+                        )}
+                        Excluir Rifa
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               )}
-              {selectedRaffleId ? 'Salvar Alterações' : 'Criar Rifa'}
-            </Button>
+
+              {/* Restore Button (only for deleted raffles) */}
+              {selectedRaffleId && isSelectedRaffleDeleted && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleRestore}
+                  disabled={restoreRaffle.isPending}
+                  className="gap-2 border-emerald-500 text-emerald-500 hover:bg-emerald-500/10 hover:text-emerald-400"
+                >
+                  {restoreRaffle.isPending ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <RotateCcw className="w-4 h-4" />
+                  )}
+                  Restaurar
+                </Button>
+              )}
+            </div>
           </form>
         </CardContent>
       </Card>

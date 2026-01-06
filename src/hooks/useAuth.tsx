@@ -26,7 +26,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       (event, session) => {
         setSession(session);
         setUser(session?.user ?? null);
-        
+
         // Check admin role with setTimeout to avoid deadlock
         if (session?.user) {
           setTimeout(() => {
@@ -42,7 +42,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
-      
+
       if (session?.user) {
         await checkAdminRole(session.user.id);
       }
@@ -59,7 +59,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       .eq('user_id', userId)
       .eq('role', 'admin')
       .maybeSingle();
-    
+
     setIsAdmin(!!data);
   };
 
