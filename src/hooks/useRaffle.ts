@@ -15,6 +15,7 @@ export function useActiveRaffle() {
         .from('raffles')
         .select('*')
         .eq('status', 'active')
+        .is('deleted_at', null)
         .order('created_at', { ascending: false })
         .limit(1)
         .maybeSingle();
