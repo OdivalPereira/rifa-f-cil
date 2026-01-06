@@ -1,10 +1,10 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import { RaffleHero } from '@/components/raffle/RaffleHero';
 import { ReferralPromo } from '@/components/raffle/ReferralPromo';
 import { BuyerForm } from '@/components/raffle/BuyerForm';
 import { PixPayment } from '@/components/raffle/PixPayment';
 import { NumberSelector } from '@/components/raffle/NumberSelector';
-import { useActiveRaffle, useSoldNumbers, useCreatePurchase, useReserveNumbers } from '@/hooks/useRaffle';
+import { useActiveRaffle, useSoldNumbers, useCreatePurchase, useReserveNumbers, usePrefetchRaffleData } from '@/hooks/useRaffle';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, Search, Sparkles, Star, Clover, Heart, User, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -35,8 +35,15 @@ export default function Index() {
   const { data: soldNumbersData } = useSoldNumbers(raffle?.id);
   const createPurchase = useCreatePurchase();
   const reserveNumbers = useReserveNumbers();
+  const { prefetch: prefetchRaffleDetails } = usePrefetchRaffleData(raffle?.id);
 
-  // Enable social proof toasts when on the hero step
+  // Enable social proof toasts and prefetch detailed data when on hero step
+  useEffect(() => {
+    if (step === 'hero' && raffle?.id) {
+      prefetchRaffleDetails();
+    }
+  }, [step, raffle?.id, prefetchRaffleDetails]);
+
   useSocialProofToasts({ enabled: step === 'hero' && !!raffle });
 
   const { soldNumbers, pendingNumbers } = useMemo(() => {

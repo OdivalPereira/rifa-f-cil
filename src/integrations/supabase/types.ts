@@ -51,6 +51,7 @@ export type Database = {
           created_at: string
           expires_at: string
           id: string
+          location: string | null
           payment_status: Database["public"]["Enums"]["payment_status"]
           pix_transaction_id: string | null
           quantity: number
@@ -68,6 +69,7 @@ export type Database = {
           created_at?: string
           expires_at?: string
           id?: string
+          location?: string | null
           payment_status?: Database["public"]["Enums"]["payment_status"]
           pix_transaction_id?: string | null
           quantity: number
@@ -85,6 +87,7 @@ export type Database = {
           created_at?: string
           expires_at?: string
           id?: string
+          location?: string | null
           payment_status?: Database["public"]["Enums"]["payment_status"]
           pix_transaction_id?: string | null
           quantity?: number
@@ -384,6 +387,16 @@ export type Database = {
     }
     Functions: {
       generate_unique_referral_code: { Args: never; Returns: string }
+      get_recent_purchases_public: {
+        Args: Record<string, never>
+        Returns: Array<{
+          display_name: string
+          initials: string
+          location: string | null
+          quantity: number
+          created_at: string
+        }>
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
