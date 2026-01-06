@@ -377,9 +377,7 @@ export function PixPayment({
               <p className="font-mono text-xs text-emerald/80 break-all leading-tight">
                 {pixDescription}
               </p>
-              <p className="text-[10px] text-muted-foreground leading-none italic">
-                💡 Cole na descrição do PIX para liberação instantânea.
-              </p>
+
             </div>
           </motion.div>
 

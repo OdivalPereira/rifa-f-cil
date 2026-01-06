@@ -106,6 +106,34 @@ export function BuyerForm({ pricePerNumber, maxNumbers, onSubmit, isLoading }: B
                       type="tel"
                       placeholder="(11) 99999-9999"
                       {...register('phone')}
+                      onChange={(e) => {
+                        let value = e.target.value.replace(/\D/g, '');
+                        if (value.length > 11) value = value.slice(0, 11);
+
+                        if (value.length > 2) {
+                          value = `(${value.slice(0, 2)}) ${value.slice(2)}`;
+                        }
+                        if (value.length > 9) { // (XX) XXXXX...
+                          value = `${value.slice(0, 10)}-${value.slice(10)}`;
+                        } else if (value.length > 5) { // (XX) XXXX... (before 9th digit)
+                          // value is already (XX) XXXX...
+                        }
+
+                        // Specific adjustment for standard mobile 11 digits: (XX) XXXXX-XXXX
+                        // But we also want to support landlines just in case? Usually raffles focus on mobile/whatsapp.
+                        // Let's stick to the standard mobile format logic improved:
+
+                        const raw = e.target.value.replace(/\D/g, '').slice(0, 11);
+                        let formatted = raw;
+
+                        if (raw.length > 0) {
+                          formatted = raw.replace(/^(\d{2})(\d)/g, '($1) $2');
+                          formatted = formatted.replace(/(\d)(\d{4})$/, '$1-$2');
+                        }
+
+                        e.target.value = formatted;
+                        register('phone').onChange(e); // Propagate to react-hook-form
+                      }}
                       className={`input-casino h-12 ${errors.phone ? 'border-destructive' : ''}`}
                     />
                     {errors.phone && <p className="text-[10px] text-destructive font-bold uppercase tracking-tight">{errors.phone.message}</p>}
@@ -145,16 +173,16 @@ export function BuyerForm({ pricePerNumber, maxNumbers, onSubmit, isLoading }: B
                     whileTap={{ scale: 0.95 }}
                     onClick={() => setQuantity(bundle.value)}
                     className={`relative p-2.5 rounded-2xl border-2 transition-all group overflow-hidden ${quantity === bundle.value
-                        ? bundle.color === 'emerald' ? 'border-emerald bg-emerald/10 shadow-[0_0_20px_rgba(16,185,129,0.3)]' :
-                          bundle.color === 'gold' ? 'border-gold bg-gold/10 shadow-[0_0_20px_rgba(234,179,8,0.3)]' :
-                            'border-purple bg-purple/10 shadow-[0_0_20px_rgba(168,85,247,0.3)]'
-                        : 'border-border/30 hover:border-border bg-black/20 hover:bg-black/40'
+                      ? bundle.color === 'emerald' ? 'border-emerald bg-emerald/10 shadow-[0_0_20px_rgba(16,185,129,0.3)]' :
+                        bundle.color === 'gold' ? 'border-gold bg-gold/10 shadow-[0_0_20px_rgba(234,179,8,0.3)]' :
+                          'border-purple bg-purple/10 shadow-[0_0_20px_rgba(168,85,247,0.3)]'
+                      : 'border-border/30 hover:border-border bg-black/20 hover:bg-black/40'
                       }`}
                   >
                     {bundle.tag && (
                       <div className={`absolute -top-0 left-0 right-0 py-0.5 text-[7px] font-black uppercase text-center ${bundle.color === 'gold' ? 'bg-gold text-black' :
-                          bundle.color === 'purple' ? 'bg-purple text-white' :
-                            'bg-emerald text-white'
+                        bundle.color === 'purple' ? 'bg-purple text-white' :
+                          'bg-emerald text-white'
                         }`}>
                         {bundle.tag}
                       </div>

@@ -49,7 +49,7 @@ export function useActiveRaffle() {
       if (error) throw error;
       return data;
     },
-    staleTime: 10 * 60 * 1000, // 10 minutes for active raffle
+    staleTime: 1 * 60 * 1000, // 1 minute for active raffle (faster updates)
   });
 }
 
