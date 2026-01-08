@@ -104,6 +104,7 @@ export function BuyerForm({ pricePerNumber, maxNumbers, onSubmit, isLoading }: B
                     <Input
                       id="phone"
                       type="tel"
+                      autoComplete="tel"
                       placeholder="(11) 99999-9999"
                       {...register('phone')}
                       onChange={(e) => {
@@ -145,6 +146,7 @@ export function BuyerForm({ pricePerNumber, maxNumbers, onSubmit, isLoading }: B
                     <Input
                       id="email"
                       type="email"
+                      autoComplete="email"
                       placeholder="exemplo@email.com"
                       {...register('email')}
                       className={`input-casino h-12 ${errors.email ? 'border-destructive' : ''}`}
@@ -164,11 +166,13 @@ export function BuyerForm({ pricePerNumber, maxNumbers, onSubmit, isLoading }: B
               </div>
 
               {/* Bundles Grid */}
-              <div className="grid grid-cols-3 sm:grid-cols-6 gap-2.5">
+              <div className="grid grid-cols-3 sm:grid-cols-6 gap-2.5" role="group" aria-label="Selecione um pacote de cotas">
                 {BUNDLES.map((bundle) => (
                   <motion.button
                     key={bundle.id}
                     type="button"
+                    aria-label={`Pacote ${bundle.label} com ${bundle.value} cotas`}
+                    aria-pressed={quantity === bundle.value}
                     whileHover={{ y: -4, scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={() => setQuantity(bundle.value)}
@@ -211,6 +215,7 @@ export function BuyerForm({ pricePerNumber, maxNumbers, onSubmit, isLoading }: B
                   max={Math.min(500, maxNumbers)}
                   step={1}
                   className="py-4 cursor-pointer"
+                  aria-label="Quantidade de cotas"
                 />
                 <div className="flex justify-between items-center bg-black/30 p-3 rounded-2xl border border-white/5 shadow-inner">
                   <div className="flex items-center gap-1.5">
