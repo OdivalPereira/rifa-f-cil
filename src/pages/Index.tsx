@@ -47,17 +47,17 @@ export default function Index() {
   useSocialProofToasts({ enabled: step === 'hero' && !!raffle });
 
   const { soldNumbers, pendingNumbers } = useMemo(() => {
-    if (!soldNumbersData) return { soldNumbers: [], pendingNumbers: [] };
+    if (!soldNumbersData) return { soldNumbers: new Set<number>(), pendingNumbers: new Set<number>() };
 
-    const sold: number[] = [];
-    const pending: number[] = [];
+    const sold = new Set<number>();
+    const pending = new Set<number>();
 
-    // O(N) single-pass iteration to split numbers into sold/pending arrays
+    // O(N) single-pass iteration to split numbers into sold/pending sets
     for (const n of soldNumbersData) {
       if (n.confirmed_at) {
-        sold.push(n.number);
+        sold.add(n.number);
       } else {
-        pending.push(n.number);
+        pending.add(n.number);
       }
     }
 
@@ -183,7 +183,7 @@ export default function Index() {
               imageUrl={raffle.image_url}
               pricePerNumber={Number(raffle.price_per_number)}
               totalNumbers={raffle.total_numbers}
-              soldNumbers={soldNumbers.length}
+              soldNumbers={soldNumbers.size}
               drawDate={raffle.draw_date}
               onParticipate={handleParticipate}
             />
@@ -195,7 +195,7 @@ export default function Index() {
           <div className="min-h-[calc(100vh-3rem)] sm:min-h-[calc(100vh-3.5rem)] flex items-center justify-center p-3 sm:p-4">
             <BuyerForm
               pricePerNumber={Number(raffle.price_per_number)}
-              maxNumbers={raffle.total_numbers - soldNumbers.length}
+              maxNumbers={raffle.total_numbers - soldNumbers.size}
               onSubmit={handleBuyerSubmit}
               isLoading={createPurchase.isPending}
             />

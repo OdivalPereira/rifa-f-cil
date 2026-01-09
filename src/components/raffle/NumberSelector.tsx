@@ -12,8 +12,8 @@ interface NumberSelectorProps {
   raffleId: string;
   totalNumbers: number;
   quantityToSelect: number;
-  soldNumbers: number[];
-  pendingNumbers: number[];
+  soldNumbers: Set<number>;
+  pendingNumbers: Set<number>;
   onConfirm: (numbers: number[]) => void;
   isLoading?: boolean;
 }
@@ -62,9 +62,8 @@ export function NumberSelector({
   const [currentPage, setCurrentPage] = useState(0);
   const numbersPerPage = 500;
 
-  // Optimization: Create Sets for O(1) lookups instead of O(N) Array.includes()
-  const soldNumbersSet = useMemo(() => new Set(soldNumbers), [soldNumbers]);
-  const pendingNumbersSet = useMemo(() => new Set(pendingNumbers), [pendingNumbers]);
+  // Optimization: Removed internal Set creation since props are now Sets.
+  // This avoids O(N) iteration on every render/update of props.
 
   // Subscribe to realtime updates
   useEffect(() => {
@@ -91,7 +90,12 @@ export function NumberSelector({
 
   // All unavailable numbers (sold + pending)
   const unavailableNumbers = useMemo(() => {
-    return new Set([...soldNumbers, ...pendingNumbers]);
+    // Merging two sets efficiently
+    const combined = new Set(soldNumbers);
+    for (const num of pendingNumbers) {
+      combined.add(num);
+    }
+    return combined;
   }, [soldNumbers, pendingNumbers]);
 
   // Generate available numbers for current page
@@ -164,8 +168,8 @@ export function NumberSelector({
   // Optimization: This function is now mostly used inside the render loop logic
   // but using sets makes it O(1).
   const getNumberStatus = (num: number): 'available' | 'selected' | 'sold' | 'pending' => {
-    if (soldNumbersSet.has(num)) return 'sold';
-    if (pendingNumbersSet.has(num)) return 'pending';
+    if (soldNumbers.has(num)) return 'sold';
+    if (pendingNumbers.has(num)) return 'pending';
     if (selectedNumbers.has(num)) return 'selected';
     return 'available';
   };
