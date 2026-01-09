@@ -148,7 +148,7 @@ export function BuyerForm({
                     <Input
                       id="phone"
                       type="tel"
-                      autoComplete="tel"
+                    autoComplete="tel"
                       placeholder="(11) 99999-9999"
                       {...register("phone")}
                       onChange={(e) => {
@@ -204,7 +204,7 @@ export function BuyerForm({
                     <Input
                       id="email"
                       type="email"
-                      autoComplete="email"
+                    autoComplete="email"
                       placeholder="exemplo@email.com"
                       {...register("email")}
                       className={`input-casino h-12 ${errors.email ? "border-destructive" : ""}`}
@@ -302,7 +302,7 @@ export function BuyerForm({
                   max={Math.min(500, maxNumbers)}
                   step={1}
                   className="py-4 cursor-pointer"
-                  aria-label="Selecione a quantidade de cotas"
+                  aria-label="Selecionar quantidade de cotas"
                 />
                 <div className="flex justify-between items-center bg-black/30 p-3 rounded-2xl border border-white/5 shadow-inner">
                   <div className="flex items-center gap-1.5">
