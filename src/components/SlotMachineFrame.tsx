@@ -1,11 +1,10 @@
 import { ReactNode } from 'react';
 import {
-  BackgroundEffects,
+  SlotMachineBackground,
   FloatingParticles,
-  TopLights,
-  BottomLights,
+  MarqueeLights,
   SideLights,
-  BottomDecorations
+  BottomIcons
 } from './SlotMachineDecorations';
 
 interface SlotMachineFrameProps {
@@ -17,7 +16,7 @@ export function SlotMachineFrame({ children, showDecorations = true }: SlotMachi
   return (
     <div className="min-h-screen w-full bg-slot-background relative overflow-hidden">
       {/* Background effects */}
-      <BackgroundEffects />
+      <SlotMachineBackground />
 
       {/* Floating particles */}
       {showDecorations && <FloatingParticles />}
@@ -30,7 +29,7 @@ export function SlotMachineFrame({ children, showDecorations = true }: SlotMachi
           <div className="h-1 bg-gradient-to-r from-gold/50 via-gold-light to-gold/50" />
           
           {/* Marquee lights - top */}
-          <TopLights />
+          <MarqueeLights position="top" />
         </div>
 
         {/* Content area with side borders */}
@@ -71,10 +70,10 @@ export function SlotMachineFrame({ children, showDecorations = true }: SlotMachi
           <div className="h-3 bg-gradient-to-r from-gold-dark via-gold to-gold-dark" />
           
           {/* Marquee lights - bottom */}
-          <BottomLights />
+          <MarqueeLights position="bottom" />
 
           {/* Bottom decorative icons */}
-          <BottomDecorations />
+          <BottomIcons />
         </div>
       </div>
     </div>
