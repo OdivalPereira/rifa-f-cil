@@ -148,7 +148,6 @@ export function BuyerForm({
                     <Input
                       id="phone"
                       type="tel"
-                      inputMode="tel"
                       autoComplete="tel"
                       placeholder="(11) 99999-9999"
                       {...register("phone")}
@@ -205,7 +204,6 @@ export function BuyerForm({
                     <Input
                       id="email"
                       type="email"
-                      inputMode="email"
                       autoComplete="email"
                       placeholder="exemplo@email.com"
                       {...register("email")}
@@ -233,11 +231,13 @@ export function BuyerForm({
               </div>
 
               {/* Bundles Grid */}
-              <div className="grid grid-cols-3 sm:grid-cols-6 gap-2.5">
+              <div className="grid grid-cols-3 sm:grid-cols-6 gap-2.5" role="group" aria-label="Selecione um pacote de cotas">
                 {BUNDLES.map((bundle) => (
                   <motion.button
                     key={bundle.id}
                     type="button"
+                    aria-label={`Pacote ${bundle.label} com ${bundle.value} cotas`}
+                    aria-pressed={quantity === bundle.value}
                     whileHover={{ y: -4, scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={() => setQuantity(bundle.value)}
@@ -304,6 +304,7 @@ export function BuyerForm({
                   max={Math.min(500, maxNumbers)}
                   step={1}
                   className="py-4 cursor-pointer"
+                  aria-label="Quantidade de cotas"
                 />
                 <div className="flex justify-between items-center bg-black/30 p-3 rounded-2xl border border-white/5 shadow-inner">
                   <div className="flex items-center gap-1.5">
