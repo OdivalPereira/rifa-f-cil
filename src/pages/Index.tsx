@@ -125,7 +125,7 @@ export default function Index() {
     if (raffleLoading) {
       return (
         <div className="min-h-[60vh] flex items-center justify-center">
-          <div className="text-center space-y-4">
+          <div className="text-center space-y-4" role="status" aria-live="polite">
             <div className="relative">
               <Loader />
               <Sparkles className="w-6 h-6 text-emerald absolute -top-2 -right-2 animate-sparkle" />
