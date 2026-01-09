@@ -123,7 +123,7 @@ serve(async (req) => {
       // Find account
       const { data: account, error: findError } = await supabase
         .from('customer_accounts')
-        .select('id, phone, pin_hash')
+        .select('id, phone, pin_hash, failed_login_attempts, locked_until')
         .eq('phone', cleanPhone)
         .single();
 
@@ -134,13 +134,47 @@ serve(async (req) => {
         );
       }
 
+      // Check if locked
+      if (account.locked_until && new Date(account.locked_until) > new Date()) {
+        const remaining = Math.ceil((new Date(account.locked_until).getTime() - Date.now()) / 60000);
+        return new Response(
+          JSON.stringify({ error: `Conta bloqueada temporariamente. Tente novamente em ${remaining} minutos.` }),
+          { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
       // Verify PIN
       const pinHash = await hashPin(pin, cleanPhone);
+
       if (pinHash !== account.pin_hash) {
+        // Increment failed attempts
+        const attempts = (account.failed_login_attempts || 0) + 1;
+        const updates: { failed_login_attempts: number; locked_until?: string } = { failed_login_attempts: attempts };
+
+        // Lock if > 5 attempts
+        if (attempts >= 5) {
+          const lockTime = new Date();
+          lockTime.setMinutes(lockTime.getMinutes() + 15); // Lock for 15 mins
+          updates.locked_until = lockTime.toISOString();
+        }
+
+        await supabase
+          .from('customer_accounts')
+          .update(updates)
+          .eq('id', account.id);
+
         return new Response(
           JSON.stringify({ error: 'PIN incorreto' }),
           { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
+      }
+
+      // Success: Reset attempts
+      if (account.failed_login_attempts > 0 || account.locked_until) {
+        await supabase
+          .from('customer_accounts')
+          .update({ failed_login_attempts: 0, locked_until: null })
+          .eq('id', account.id);
       }
 
       const token = generateToken(cleanPhone);
@@ -201,10 +235,14 @@ serve(async (req) => {
       // Hash new PIN
       const pinHash = await hashPin(pin, cleanPhone);
 
-      // Update PIN
+      // Update PIN AND RESET LOCK
       const { error: updateError } = await supabase
         .from('customer_accounts')
-        .update({ pin_hash: pinHash })
+        .update({
+          pin_hash: pinHash,
+          failed_login_attempts: 0,
+          locked_until: null
+        })
         .eq('phone', cleanPhone);
 
       if (updateError) {

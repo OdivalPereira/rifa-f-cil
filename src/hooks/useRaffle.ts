@@ -1,3 +1,4 @@
+import { useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import type { Tables } from '@/integrations/supabase/types';
@@ -6,15 +7,41 @@ type Raffle = Tables<'raffles'>;
 type Purchase = Tables<'purchases'>;
 type RaffleNumber = Tables<'raffle_numbers'>;
 
+// --- Query Key Factory ---
+export const raffleKeys = {
+  all: ['raffles'] as const,
+  active: () => [...raKeys.all, 'active'] as const,
+  stats: (id: string | undefined) => [...raKeys.all, 'stats', id] as const,
+  soldNumbers: (id: string | undefined) => [...raKeys.all, 'sold-numbers', id] as const,
+  recentPublic: () => [...raKeys.all, 'recent-public'] as const,
+  purchases: {
+    all: ['purchases'] as const,
+    recent: () => ['purchases', 'recent'] as const,
+    my: (email: string, phone: string) => ['purchases', 'my', email, phone] as const,
+    userTotal: (phone: string | null) => ['purchases', 'total', phone] as const,
+  },
+  rankings: {
+    referral: (id: string | undefined, limit: number) => ['rankings', 'referral', id, limit] as const,
+    topBuyers: (id: string | undefined, limit: number) => ['rankings', 'top-buyers', id, limit] as const,
+  },
+  accounts: {
+    referral: (phone: string | null) => ['accounts', 'referral', phone] as const,
+  }
+};
+const raKeys = raffleKeys; // Alias for convenience
+
+// --- Hooks ---
+
 // Hook para buscar a rifa ativa
 export function useActiveRaffle() {
   return useQuery({
-    queryKey: ['active-raffle'],
-    queryFn: async () => {
+    queryKey: raKeys.active(),
+    queryFn: async (): Promise<Raffle | null> => {
       const { data, error } = await supabase
         .from('raffles')
         .select('*')
         .eq('status', 'active')
+        .is('deleted_at', null)
         .order('created_at', { ascending: false })
         .limit(1)
         .maybeSingle();
@@ -22,14 +49,15 @@ export function useActiveRaffle() {
       if (error) throw error;
       return data;
     },
+    staleTime: 1 * 60 * 1000, // 1 minute for active raffle (faster updates)
   });
 }
 
 // Hook para buscar números vendidos de uma rifa
 export function useSoldNumbers(raffleId: string | undefined) {
   return useQuery({
-    queryKey: ['sold-numbers', raffleId],
-    queryFn: async () => {
+    queryKey: raKeys.soldNumbers(raffleId),
+    queryFn: async (): Promise<Pick<RaffleNumber, 'number' | 'confirmed_at'>[]> => {
       if (!raffleId) return [];
 
       const { data, error } = await supabase
@@ -74,7 +102,7 @@ export function useMyPurchases(email: string, phone: string) {
   });
 }
 
-// Hook para criar uma compra (com suporte a referrer_id)
+// Hook para criar uma compra (com suporte a referrer_id e captura de localização)
 export function useCreatePurchase() {
   const queryClient = useQueryClient();
 
@@ -95,6 +123,9 @@ export function useCreatePurchase() {
       pricePerNumber: number;
     }) => {
       const totalAmount = quantity * pricePerNumber;
+
+      // Capture location silently (non-blocking, with timeout)
+      const location = await captureUserLocation();
 
       // Check for referral code in localStorage
       const referrerCode = localStorage.getItem('rifa_referrer');
@@ -125,6 +156,7 @@ export function useCreatePurchase() {
         quantity,
         total_amount: totalAmount,
         ...(referrerId ? { referrer_id: referrerId } : {}),
+        ...(location ? { location } : {}),
       };
 
       const { data, error } = await supabase
@@ -138,6 +170,7 @@ export function useCreatePurchase() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['active-raffle'] });
+      queryClient.invalidateQueries({ queryKey: ['recent-purchases-public'] });
     },
   });
 }
@@ -378,4 +411,122 @@ export function useUserTotalNumbers(phone: string | null) {
     },
     enabled: !!phone,
   });
+}
+
+// Hook para buscar compras recentes com dados sanitizados (para Social Proof)
+export function useRecentPurchasesPublic() {
+  return useQuery({
+    queryKey: raKeys.recentPublic(),
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc('get_recent_purchases_public');
+      if (error) {
+        console.error('Error fetching recent purchases:', error);
+        return [];
+      }
+      return data || [];
+    },
+    staleTime: 2 * 60 * 1000, // 2 minutes
+    refetchOnWindowFocus: false,
+  });
+}
+
+// Hook de Prefetching para a home
+export function usePrefetchRaffleData(raffleId: string | undefined) {
+  const queryClient = useQueryClient();
+
+  const prefetch = useCallback(async () => {
+    if (!raffleId) return;
+
+    // Prefetch rankings and stats simultaneously
+    await Promise.all([
+      queryClient.prefetchQuery({
+        queryKey: raKeys.rankings.referral(raffleId, 10),
+        queryFn: () => fetchReferralRanking(raffleId, 10),
+      }),
+      queryClient.prefetchQuery({
+        queryKey: raKeys.rankings.topBuyers(raffleId, 10),
+        queryFn: () => fetchTopBuyersRanking(raffleId, 10),
+      }),
+      queryClient.prefetchQuery({
+        queryKey: raKeys.stats(raffleId),
+        queryFn: () => fetchRaffleStats(raffleId),
+      }),
+    ]);
+  }, [raffleId, queryClient]);
+
+  return { prefetch };
+}
+
+// Internal Fetchers (for reuse in prefetch and query hooks)
+async function fetchReferralRanking(raffleId: string, limit: number) {
+  const { data, error } = await supabase
+    .from('referral_ranking' as any)
+    .select('*')
+    .eq('raffle_id', raffleId)
+    .limit(limit);
+  if (error) throw error;
+  return data || [];
+}
+
+async function fetchTopBuyersRanking(raffleId: string, limit: number) {
+  const { data, error } = await supabase
+    .from('top_buyers_ranking' as any)
+    .select('*')
+    .eq('raffle_id', raffleId)
+    .limit(limit);
+  if (error) throw error;
+  return data || [];
+}
+
+async function fetchRaffleStats(raffleId: string) {
+  const { data: raffle } = await supabase
+    .from('raffles')
+    .select('total_numbers')
+    .eq('id', raffleId)
+    .single();
+
+  const { count: soldCount } = await supabase
+    .from('raffle_numbers')
+    .select('*', { count: 'exact', head: true })
+    .eq('raffle_id', raffleId)
+    .not('confirmed_at', 'is', null);
+
+  const { count: pendingCount } = await supabase
+    .from('raffle_numbers')
+    .select('*', { count: 'exact', head: true })
+    .eq('raffle_id', raffleId)
+    .is('confirmed_at', null);
+
+  return {
+    totalNumbers: raffle?.total_numbers || 0,
+    soldNumbers: soldCount || 0,
+    pendingNumbers: pendingCount || 0,
+    availableNumbers: (raffle?.total_numbers || 0) - (soldCount || 0) - (pendingCount || 0),
+  };
+}
+
+// Utility function to capture user location via IP geolocation (for purchases)
+export async function captureUserLocation(): Promise<string | null> {
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 3000); // 3s timeout
+
+    const response = await fetch('https://ipapi.co/json/', {
+      signal: controller.signal,
+    });
+
+    clearTimeout(timeoutId);
+
+    if (!response.ok) return null;
+
+    const data = await response.json();
+
+    // Return "City/State" format (e.g., "Dourados/MS")
+    if (data.city && data.region_code) {
+      return `${data.city}/${data.region_code}`;
+    }
+  } catch {
+    // Silently fail - location is optional
+  }
+  return null;
 }

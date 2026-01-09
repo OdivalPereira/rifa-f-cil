@@ -1,10 +1,10 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import { RaffleHero } from '@/components/raffle/RaffleHero';
 import { ReferralPromo } from '@/components/raffle/ReferralPromo';
 import { BuyerForm } from '@/components/raffle/BuyerForm';
 import { PixPayment } from '@/components/raffle/PixPayment';
 import { NumberSelector } from '@/components/raffle/NumberSelector';
-import { useActiveRaffle, useSoldNumbers, useCreatePurchase, useReserveNumbers } from '@/hooks/useRaffle';
+import { useActiveRaffle, useSoldNumbers, useCreatePurchase, useReserveNumbers, usePrefetchRaffleData } from '@/hooks/useRaffle';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, Search, Sparkles, Star, Clover, Heart, User, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -35,22 +35,29 @@ export default function Index() {
   const { data: soldNumbersData } = useSoldNumbers(raffle?.id);
   const createPurchase = useCreatePurchase();
   const reserveNumbers = useReserveNumbers();
+  const { prefetch: prefetchRaffleDetails } = usePrefetchRaffleData(raffle?.id);
 
-  // Enable social proof toasts when on the hero step
+  // Enable social proof toasts and prefetch detailed data when on hero step
+  useEffect(() => {
+    if (step === 'hero' && raffle?.id) {
+      prefetchRaffleDetails();
+    }
+  }, [step, raffle?.id, prefetchRaffleDetails]);
+
   useSocialProofToasts({ enabled: step === 'hero' && !!raffle });
 
   const { soldNumbers, pendingNumbers } = useMemo(() => {
-    if (!soldNumbersData) return { soldNumbers: [], pendingNumbers: [] };
+    if (!soldNumbersData) return { soldNumbers: new Set<number>(), pendingNumbers: new Set<number>() };
 
-    const sold: number[] = [];
-    const pending: number[] = [];
+    const sold = new Set<number>();
+    const pending = new Set<number>();
 
-    // O(N) single-pass iteration to split numbers into sold/pending arrays
+    // O(N) single-pass iteration to split numbers into sold/pending sets
     for (const n of soldNumbersData) {
       if (n.confirmed_at) {
-        sold.push(n.number);
+        sold.add(n.number);
       } else {
-        pending.push(n.number);
+        pending.add(n.number);
       }
     }
 
@@ -176,7 +183,7 @@ export default function Index() {
               imageUrl={raffle.image_url}
               pricePerNumber={Number(raffle.price_per_number)}
               totalNumbers={raffle.total_numbers}
-              soldNumbers={soldNumbers.length}
+              soldNumbers={soldNumbers.size}
               drawDate={raffle.draw_date}
               onParticipate={handleParticipate}
             />
@@ -188,7 +195,7 @@ export default function Index() {
           <div className="min-h-[calc(100vh-3rem)] sm:min-h-[calc(100vh-3.5rem)] flex items-center justify-center p-3 sm:p-4">
             <BuyerForm
               pricePerNumber={Number(raffle.price_per_number)}
-              maxNumbers={raffle.total_numbers - soldNumbers.length}
+              maxNumbers={raffle.total_numbers - soldNumbers.size}
               onSubmit={handleBuyerSubmit}
               isLoading={createPurchase.isPending}
             />
