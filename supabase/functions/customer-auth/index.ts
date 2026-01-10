@@ -6,6 +6,70 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// --- Security Helpers ---
+
+// Get Signing Key from Environment (fallbacks purely for type safety, env var MUST exist)
+function getSigningKey(): string {
+  // Use SUPABASE_SERVICE_ROLE_KEY as the secret for HMAC
+  // This is available in Edge Functions and is secure.
+  const key = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+  if (!key) throw new Error("Missing SUPABASE_SERVICE_ROLE_KEY");
+  return key;
+}
+
+async function signToken(payload: Record<string, unknown>): Promise<string> {
+  const secret = getSigningKey();
+  const encoder = new TextEncoder();
+  const keyData = encoder.encode(secret);
+  const algorithm = { name: "HMAC", hash: "SHA-256" };
+
+  const key = await crypto.subtle.importKey("raw", keyData, algorithm, false, ["sign"]);
+
+  // Create payload string (header + payload)
+  // We use a simple structure: base64(json_payload) + "." + base64(signature)
+  const payloadStr = btoa(JSON.stringify(payload));
+  const dataToSign = encoder.encode(payloadStr);
+
+  const signatureBuffer = await crypto.subtle.sign("HMAC", key, dataToSign);
+  const signature = btoa(String.fromCharCode(...new Uint8Array(signatureBuffer)));
+
+  return `${payloadStr}.${signature}`;
+}
+
+async function verifyTokenSecure(token: string): Promise<{ valid: boolean; phone?: string }> {
+  try {
+    const parts = token.split('.');
+    if (parts.length !== 2) return { valid: false };
+
+    const [payloadStr, signature] = parts;
+
+    // Verify Signature
+    const secret = getSigningKey();
+    const encoder = new TextEncoder();
+    const keyData = encoder.encode(secret);
+    const algorithm = { name: "HMAC", hash: "SHA-256" };
+    const key = await crypto.subtle.importKey("raw", keyData, algorithm, false, ["verify"]);
+
+    const dataToVerify = encoder.encode(payloadStr);
+    const signatureBytes = Uint8Array.from(atob(signature), c => c.charCodeAt(0));
+
+    const isValid = await crypto.subtle.verify("HMAC", key, signatureBytes, dataToVerify);
+
+    if (!isValid) return { valid: false };
+
+    // Check Payload
+    const payload = JSON.parse(atob(payloadStr));
+    if (payload.exp < Date.now()) {
+      return { valid: false };
+    }
+
+    return { valid: true, phone: payload.phone };
+  } catch (e) {
+    // console.error("Verification failed:", e);
+    return { valid: false };
+  }
+}
+
 // Simple hash function for PIN (SHA-256 with salt)
 async function hashPin(pin: string, salt: string): Promise<string> {
   const encoder = new TextEncoder();
@@ -13,29 +77,6 @@ async function hashPin(pin: string, salt: string): Promise<string> {
   const hashBuffer = await crypto.subtle.digest('SHA-256', data);
   const hashArray = Array.from(new Uint8Array(hashBuffer));
   return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-}
-
-// Generate a simple JWT-like token
-function generateToken(phone: string): string {
-  const payload = {
-    phone,
-    exp: Date.now() + (7 * 24 * 60 * 60 * 1000), // 7 days
-    iat: Date.now(),
-  };
-  return btoa(JSON.stringify(payload));
-}
-
-// Verify token
-function verifyToken(token: string): { valid: boolean; phone?: string } {
-  try {
-    const payload = JSON.parse(atob(token));
-    if (payload.exp < Date.now()) {
-      return { valid: false };
-    }
-    return { valid: true, phone: payload.phone };
-  } catch {
-    return { valid: false };
-  }
 }
 
 serve(async (req) => {
@@ -55,7 +96,7 @@ serve(async (req) => {
     // Verify token action
     if (action === 'verify') {
       const { token } = await req.json();
-      const result = verifyToken(token);
+      const result = await verifyTokenSecure(token); // Use secure verify
       return new Response(JSON.stringify(result), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
@@ -113,7 +154,14 @@ serve(async (req) => {
         );
       }
 
-      const token = generateToken(cleanPhone);
+      // Use Secure Token Generation
+      const payload = {
+        phone: cleanPhone,
+        exp: Date.now() + (7 * 24 * 60 * 60 * 1000), // 7 days
+        iat: Date.now(),
+      };
+      const token = await signToken(payload);
+
       return new Response(
         JSON.stringify({ success: true, token, phone: cleanPhone }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -177,7 +225,14 @@ serve(async (req) => {
           .eq('id', account.id);
       }
 
-      const token = generateToken(cleanPhone);
+      // Use Secure Token Generation
+      const payload = {
+        phone: cleanPhone,
+        exp: Date.now() + (7 * 24 * 60 * 60 * 1000), // 7 days
+        iat: Date.now(),
+      };
+      const token = await signToken(payload);
+
       return new Response(
         JSON.stringify({ success: true, token, phone: cleanPhone }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
