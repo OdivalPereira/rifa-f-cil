@@ -236,12 +236,11 @@ export function BuyerForm({
                   <motion.button
                     key={bundle.id}
                     type="button"
-                    aria-label={`Pacote ${bundle.label} com ${bundle.value} cotas`}
+                    aria-label={`Selecionar pacote ${bundle.label} com ${bundle.value} cotas`}
                     aria-pressed={quantity === bundle.value}
                     whileHover={{ y: -4, scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={() => setQuantity(bundle.value)}
-                    aria-label={`Selecionar pacote ${bundle.label} com ${bundle.value} cotas`}
                     className={`relative p-2.5 rounded-2xl border-2 transition-all group overflow-hidden ${quantity === bundle.value
                       ? bundle.color === 'emerald' ? 'border-emerald bg-emerald/10 shadow-[0_0_20px_rgba(16,185,129,0.3)]' :
                         bundle.color === 'gold' ? 'border-gold bg-gold/10 shadow-[0_0_20px_rgba(234,179,8,0.3)]' :
@@ -295,7 +294,6 @@ export function BuyerForm({
               {/* Enhanced Slider */}
               <div className="space-y-4 pt-4 px-2">
                 <Slider
-                  aria-label="Selecione a quantidade de cotas"
                   value={[quantity]}
                   onValueChange={(value) => setQuantity(value[0])}
                   min={1}
