@@ -236,7 +236,6 @@ export function BuyerForm({
                   <motion.button
                     key={bundle.id}
                     type="button"
-                    aria-label={`Pacote ${bundle.label} com ${bundle.value} cotas`}
                     aria-pressed={quantity === bundle.value}
                     whileHover={{ y: -4, scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
@@ -295,7 +294,6 @@ export function BuyerForm({
               {/* Enhanced Slider */}
               <div className="space-y-4 pt-4 px-2">
                 <Slider
-                  aria-label="Selecione a quantidade de cotas"
                   value={[quantity]}
                   onValueChange={(value) => setQuantity(value[0])}
                   min={1}
