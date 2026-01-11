@@ -7,7 +7,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { useState } from 'react';
+import { useState, memo } from 'react';
 import rafflePrizesHero from '@/assets/raffle-prizes-hero.jpg';
 import { CountdownTimer } from './CountdownTimer';
 
@@ -38,7 +38,7 @@ interface RaffleHeroProps {
   onParticipate: () => void;
 }
 
-export function RaffleHero({
+export const RaffleHero = memo(({
   title,
   description,
   prizeDescription,
@@ -54,7 +54,7 @@ export function RaffleHero({
   soldNumbers,
   drawDate,
   onParticipate,
-}: RaffleHeroProps) {
+}: RaffleHeroProps) => {
   const progressPercentage = (soldNumbers / totalNumbers) * 100;
   const availableNumbers = totalNumbers - soldNumbers;
   const [selectedPrize, setSelectedPrize] = useState<{
@@ -354,4 +354,6 @@ export function RaffleHero({
       </Dialog>
     </section>
   );
-}
+});
+
+RaffleHero.displayName = 'RaffleHero';
