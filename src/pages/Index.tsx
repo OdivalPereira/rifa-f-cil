@@ -291,7 +291,7 @@ export default function Index() {
     <SlotMachineFrame showDecorations={step === 'hero' || step === 'success'}>
       {/* Header */}
       <header className="sticky top-0 z-50 bg-card/80 backdrop-blur-md border-b border-gold/20">
-        <div className="container mx-auto px-3 sm:px-4 h-12 sm:h-14 flex items-center justify-between">
+        <div className="container mx-auto px-2 sm:px-4 h-12 sm:h-14 flex items-center justify-between">
           <div className="flex items-center">
             <span className="font-display font-bold text-base sm:text-lg text-gradient-gold">OD</span>
             <span className="relative w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center -ml-0.5">
