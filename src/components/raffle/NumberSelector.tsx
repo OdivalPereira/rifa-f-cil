@@ -29,10 +29,26 @@ interface NumberButtonProps {
 const NumberButton = memo(({ num, status, onClick }: NumberButtonProps) => {
   const handleClick = useCallback(() => onClick(num), [onClick, num]);
 
+  const getAriaLabel = () => {
+    switch (status) {
+      case 'available':
+        return `Número ${num}, disponível`;
+      case 'selected':
+        return `Número ${num}, selecionado`;
+      case 'sold':
+        return `Número ${num}, vendido`;
+      case 'pending':
+        return `Número ${num}, reservado`;
+    }
+  };
+
   return (
     <button
+      type="button"
       onClick={handleClick}
       disabled={status === 'sold' || status === 'pending'}
+      aria-label={getAriaLabel()}
+      aria-pressed={status === 'selected'}
       className={cn(
         'aspect-square flex items-center justify-center text-[10px] sm:text-xs font-mono rounded-lg transition-all duration-200',
         'hover:scale-105 focus:outline-none focus:ring-2 focus:ring-gold/50',
@@ -207,6 +223,9 @@ export function NumberSelector({
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input
+              type="search"
+              inputMode="numeric"
+              aria-label="Buscar número específico"
               placeholder="Buscar número..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
