@@ -73,7 +73,7 @@ export const RaffleHero = memo(({
   };
 
   return (
-    <section className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden py-6 px-4 space-y-12">
+    <section className="relative min-h-[calc(100dvh-3rem)] sm:min-h-[calc(100dvh-3.5rem)] flex flex-col items-center justify-center overflow-hidden py-4 sm:py-6 px-4 space-y-6 sm:space-y-12">
       {/* Background decorations */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden hidden sm:block">
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-emerald/5 rounded-full blur-3xl animate-pulse-slow" />
@@ -86,7 +86,7 @@ export const RaffleHero = memo(({
         {/* --- MAIN HERO SECTION --- */}
         <div className="flex flex-col lg:grid lg:grid-cols-2 gap-8 items-center">
           {/* Left: Text & Main Prize */}
-          <div className="space-y-6 text-center lg:text-left w-full">
+          <div className="space-y-4 sm:space-y-6 text-center lg:text-left w-full">
             <div className="inline-flex items-center gap-2 px-3 sm:px-4 py-2 rounded-full bg-emerald/10 border border-emerald/30 glow-emerald mx-auto lg:mx-0">
               <span className="text-emerald animate-sparkle">🍀</span>
               <span className="text-xs sm:text-sm font-semibold text-emerald">Rifa da Sorte</span>
