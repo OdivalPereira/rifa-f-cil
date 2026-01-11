@@ -64,9 +64,9 @@ export default function Index() {
     return { soldNumbers: sold, pendingNumbers: pending };
   }, [soldNumbersData]);
 
-  const handleParticipate = () => setStep('form');
+  const handleParticipate = useCallback(() => setStep('form'), []);
 
-  const handleBuyerSubmit = async (data: BuyerFormData & { quantity: number }) => {
+  const handleBuyerSubmit = useCallback(async (data: BuyerFormData & { quantity: number }) => {
     if (!raffle) return;
 
     try {
@@ -95,9 +95,9 @@ export default function Index() {
         variant: 'destructive',
       });
     }
-  };
+  }, [raffle, createPurchase, toast]);
 
-  const handleNumbersConfirm = async (numbers: number[]) => {
+  const handleNumbersConfirm = useCallback(async (numbers: number[]) => {
     if (!raffle || !purchaseData) return;
 
     try {
@@ -119,7 +119,7 @@ export default function Index() {
         variant: 'destructive',
       });
     }
-  };
+  }, [raffle, purchaseData, reserveNumbers, toast]);
 
   const renderContent = () => {
     if (raffleLoading) {

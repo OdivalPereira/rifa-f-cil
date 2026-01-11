@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, memo } from "react";
 import { motion } from "framer-motion";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -46,12 +46,12 @@ const BUNDLES = [
   { id: 6, label: "Magnata", color: "purple", value: 100, tag: "Melhor Valor" },
 ];
 
-export function BuyerForm({
+export const BuyerForm = memo(({
   pricePerNumber,
   maxNumbers,
   onSubmit,
   isLoading,
-}: BuyerFormProps) {
+}: BuyerFormProps) => {
   const [quantity, setQuantity] = useState(10);
 
   const {
@@ -148,7 +148,7 @@ export function BuyerForm({
                     <Input
                       id="phone"
                       type="tel"
-                    autoComplete="tel"
+                      autoComplete="tel"
                       placeholder="(11) 99999-9999"
                       {...register("phone")}
                       onChange={(e) => {
@@ -204,7 +204,7 @@ export function BuyerForm({
                     <Input
                       id="email"
                       type="email"
-                    autoComplete="email"
+                      autoComplete="email"
                       placeholder="exemplo@email.com"
                       {...register("email")}
                       className={`input-casino h-12 ${errors.email ? "border-destructive" : ""}`}
@@ -241,7 +241,6 @@ export function BuyerForm({
                     whileHover={{ y: -4, scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={() => setQuantity(bundle.value)}
-                    aria-label={`Selecionar pacote ${bundle.label} com ${bundle.value} cotas`}
                     className={`relative p-2.5 rounded-2xl border-2 transition-all group overflow-hidden ${quantity === bundle.value
                       ? bundle.color === 'emerald' ? 'border-emerald bg-emerald/10 shadow-[0_0_20px_rgba(16,185,129,0.3)]' :
                         bundle.color === 'gold' ? 'border-gold bg-gold/10 shadow-[0_0_20px_rgba(234,179,8,0.3)]' :
@@ -302,7 +301,6 @@ export function BuyerForm({
                   max={Math.min(500, maxNumbers)}
                   step={1}
                   className="py-4 cursor-pointer"
-                  aria-label="Selecionar quantidade de cotas"
                 />
                 <div className="flex justify-between items-center bg-black/30 p-3 rounded-2xl border border-white/5 shadow-inner">
                   <div className="flex items-center gap-1.5">
@@ -341,7 +339,7 @@ export function BuyerForm({
               <div className="relative z-10 flex justify-between items-center">
                 <div className="space-y-1">
                   <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-2">
-                    <Zap className="w-4 h-4 text-gold fill-gold" /> Total do
+                    <Zap className="w-4 h-4 text-gold fill-gold/20" /> Total do
                     Investimento
                   </p>
                   <motion.p
@@ -392,4 +390,6 @@ export function BuyerForm({
       </Card>
     </motion.div>
   );
-}
+});
+
+BuyerForm.displayName = 'BuyerForm';

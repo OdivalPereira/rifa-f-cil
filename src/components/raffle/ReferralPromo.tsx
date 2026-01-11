@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { Link } from 'react-router-dom';
 import { Trophy, ArrowRight, HelpCircle, Sparkles, Users, Gift } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -9,7 +10,7 @@ interface ReferralPromoProps {
   referralCode?: string;
 }
 
-export function ReferralPromo({ showShareButton = true, referralCode }: ReferralPromoProps) {
+export const ReferralPromo = memo(({ showShareButton = true, referralCode }: ReferralPromoProps) => {
   const { data: raffle } = useActiveRaffle();
 
   const prizeDescription = raffle?.prize_description || 'prêmios incríveis';
@@ -92,4 +93,6 @@ export function ReferralPromo({ showShareButton = true, referralCode }: Referral
       </div>
     </section>
   );
-}
+});
+
+ReferralPromo.displayName = 'ReferralPromo';
