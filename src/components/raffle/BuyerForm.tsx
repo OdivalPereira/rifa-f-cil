@@ -236,11 +236,11 @@ export function BuyerForm({
                   <motion.button
                     key={bundle.id}
                     type="button"
+                    aria-label={`Selecionar pacote ${bundle.label} com ${bundle.value} cotas`}
                     aria-pressed={quantity === bundle.value}
                     whileHover={{ y: -4, scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={() => setQuantity(bundle.value)}
-                    aria-label={`Selecionar pacote ${bundle.label} com ${bundle.value} cotas`}
                     className={`relative p-2.5 rounded-2xl border-2 transition-all group overflow-hidden ${quantity === bundle.value
                       ? bundle.color === 'emerald' ? 'border-emerald bg-emerald/10 shadow-[0_0_20px_rgba(16,185,129,0.3)]' :
                         bundle.color === 'gold' ? 'border-gold bg-gold/10 shadow-[0_0_20px_rgba(234,179,8,0.3)]' :
@@ -300,7 +300,6 @@ export function BuyerForm({
                   max={Math.min(500, maxNumbers)}
                   step={1}
                   className="py-4 cursor-pointer"
-                  aria-label="Selecionar quantidade de cotas"
                 />
                 <div className="flex justify-between items-center bg-black/30 p-3 rounded-2xl border border-white/5 shadow-inner">
                   <div className="flex items-center gap-1.5">
