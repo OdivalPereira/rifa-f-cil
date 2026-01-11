@@ -7,6 +7,7 @@ import { formatRaffleNumber } from '@/lib/validators';
 import { Search, Shuffle, Check, X, Loader2, Sparkles, Star, Coins, Trophy } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
+import { useDebounce } from '@/hooks/useDebounce';
 
 interface NumberSelectorProps {
   raffleId: string;
@@ -59,6 +60,7 @@ export function NumberSelector({
 }: NumberSelectorProps) {
   const [selectedNumbers, setSelectedNumbers] = useState<Set<number>>(new Set());
   const [searchTerm, setSearchTerm] = useState('');
+  const debouncedSearchTerm = useDebounce(searchTerm, 300);
   const [currentPage, setCurrentPage] = useState(0);
   const numbersPerPage = 500;
 
@@ -104,10 +106,11 @@ export function NumberSelector({
     const end = Math.min((currentPage + 1) * numbersPerPage, totalNumbers);
     const numbers: number[] = [];
 
-    if (searchTerm) {
+    if (debouncedSearchTerm) {
       // Search mode: show matching numbers
+      // Optimization: using debounced term prevents freezing on large datasets
       for (let i = 1; i <= totalNumbers; i++) {
-        if (formatRaffleNumber(i, 5).includes(searchTerm)) {
+        if (formatRaffleNumber(i, 5).includes(debouncedSearchTerm)) {
           numbers.push(i);
           if (numbers.length >= 100) break;
         }
@@ -120,7 +123,7 @@ export function NumberSelector({
     }
 
     return numbers;
-  }, [currentPage, totalNumbers, searchTerm]);
+  }, [currentPage, totalNumbers, debouncedSearchTerm]);
 
   const totalPages = Math.ceil(totalNumbers / numbersPerPage);
 
@@ -287,7 +290,7 @@ export function NumberSelector({
         </ScrollArea>
 
         {/* Pagination */}
-        {!searchTerm && totalPages > 1 && (
+        {!debouncedSearchTerm && totalPages > 1 && (
           <div className="flex items-center justify-center gap-1 sm:gap-2">
             <Button
               variant="outline"
