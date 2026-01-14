@@ -18,10 +18,14 @@ interface RaffleHeroProps {
   prizeDrawDetails?: string | null;
 
   // New Gamification Props
+  enableReferral1st?: boolean;
   prizeReferral1st?: string | null;
   referralThreshold?: number | null;
+  enableBuyer1st?: boolean;
   prizeBuyer1st?: string | null;
+  enableReferralRunners?: boolean;
   prizeReferralRunners?: string | null;
+  enableBuyerRunners?: boolean;
   prizeBuyerRunners?: string | null;
 
   // Legacy props (optional/unused but kept for interface compatibility if needed)
@@ -43,10 +47,14 @@ export function RaffleHero({
   description,
   prizeDescription,
   prizeDrawDetails,
+  enableReferral1st,
   prizeReferral1st,
   referralThreshold,
+  enableBuyer1st,
   prizeBuyer1st,
+  enableReferralRunners,
   prizeReferralRunners,
+  enableBuyerRunners,
   prizeBuyerRunners,
   imageUrl,
   pricePerNumber,
@@ -133,10 +141,10 @@ export function RaffleHero({
                 <div className="h-4 bg-muted/50 rounded-full overflow-hidden border border-border/50">
                   <div
                     className={`h-full rounded-full transition-all duration-1000 ease-out relative overflow-hidden ${progressPercentage >= 80
-                        ? 'bg-gradient-to-r from-red-600 via-red-500 to-orange-500'
-                        : progressPercentage >= 50
-                          ? 'bg-gradient-to-r from-yellow-600 via-yellow-500 to-gold'
-                          : 'bg-gradient-to-r from-emerald-dark via-emerald to-emerald-light'
+                      ? 'bg-gradient-to-r from-red-600 via-red-500 to-orange-500'
+                      : progressPercentage >= 50
+                        ? 'bg-gradient-to-r from-yellow-600 via-yellow-500 to-gold'
+                        : 'bg-gradient-to-r from-emerald-dark via-emerald to-emerald-light'
                       }`}
                     style={{ width: `${Math.min(progressPercentage, 100)}%` }}
                   >
@@ -147,10 +155,10 @@ export function RaffleHero({
                 {/* Percentage badge */}
                 <div
                   className={`absolute -top-1 transform -translate-x-1/2 px-2 py-0.5 rounded-full text-xs font-bold ${progressPercentage >= 80
-                      ? 'bg-red-500 text-white'
-                      : progressPercentage >= 50
-                        ? 'bg-gold text-black'
-                        : 'bg-emerald text-white'
+                    ? 'bg-red-500 text-white'
+                    : progressPercentage >= 50
+                      ? 'bg-gold text-black'
+                      : 'bg-emerald text-white'
                     }`}
                   style={{ left: `${Math.min(Math.max(progressPercentage, 5), 95)}%` }}
                 >
@@ -160,16 +168,16 @@ export function RaffleHero({
 
               {/* Urgency Message */}
               <div className={`text-center p-3 rounded-xl border ${progressPercentage >= 80
-                  ? 'bg-red-500/10 border-red-500/30 animate-pulse'
-                  : progressPercentage >= 50
-                    ? 'bg-gold/10 border-gold/30'
-                    : 'bg-emerald/10 border-emerald/30'
+                ? 'bg-red-500/10 border-red-500/30 animate-pulse'
+                : progressPercentage >= 50
+                  ? 'bg-gold/10 border-gold/30'
+                  : 'bg-emerald/10 border-emerald/30'
                 }`}>
                 <p className={`font-bold text-sm ${progressPercentage >= 80
-                    ? 'text-red-400'
-                    : progressPercentage >= 50
-                      ? 'text-gold'
-                      : 'text-emerald'
+                  ? 'text-red-400'
+                  : progressPercentage >= 50
+                    ? 'text-gold'
+                    : 'text-emerald'
                   }`}>
                   {progressPercentage >= 80
                     ? `🚨 ÚLTIMOS NÚMEROS! Apenas ${availableNumbers.toLocaleString()} restantes!`
@@ -231,105 +239,110 @@ export function RaffleHero({
         </div>
 
         {/* --- EXTRA PRIZES GRID --- */}
-        {(prizeReferral1st || prizeBuyer1st) && (
-          <div className="animate-fade-in space-y-6" style={{ animationDelay: '0.3s' }}>
-            <div className="text-center relative">
-              <div className="absolute inset-0 flex items-center" aria-hidden="true">
-                <div className="w-full border-t border-gold/20"></div>
+        {(() => {
+          const extraPrizes = [
+            {
+              id: 'referral_1st',
+              enabled: enableReferral1st,
+              text: prizeReferral1st,
+              title: 'Maior Indicador',
+              icon: <Users className="w-6 h-6" />,
+              detailsIcon: <Users className="w-8 h-8 text-blue-400" />,
+              borderColor: 'border-blue-500/30 hover:border-blue-500/60',
+              bgColor: 'bg-blue-500/20',
+              textColor: 'text-blue-400',
+              titleColor: 'text-blue-100',
+              subTitle: null,
+              threshold: referralThreshold
+            },
+            {
+              id: 'buyer_1st',
+              enabled: enableBuyer1st,
+              text: prizeBuyer1st,
+              title: 'Maior Comprador',
+              icon: <Crown className="w-6 h-6" />,
+              detailsIcon: <Crown className="w-8 h-8 text-gold" />,
+              borderColor: 'border-gold/30 hover:border-gold/60',
+              bgColor: 'bg-gold/20',
+              textColor: 'text-gold',
+              titleColor: 'text-yellow-100',
+              subTitle: null
+            },
+            {
+              id: 'referral_runners',
+              enabled: enableReferralRunners,
+              text: prizeReferralRunners,
+              title: 'Top Indicadores',
+              icon: <Medal className="w-6 h-6" />,
+              detailsIcon: <Medal className="w-8 h-8 text-slate-400" />,
+              borderColor: 'border-slate-500/30 hover:border-slate-500/60',
+              bgColor: 'bg-slate-500/20',
+              textColor: 'text-slate-400',
+              titleColor: 'text-slate-200',
+              subTitle: '2º ao 5º Lugar'
+            },
+            {
+              id: 'buyer_runners',
+              enabled: enableBuyerRunners,
+              text: prizeBuyerRunners,
+              title: 'Top Compradores',
+              icon: <Trophy className="w-6 h-6" />,
+              detailsIcon: <Trophy className="w-8 h-8 text-orange-400" />,
+              borderColor: 'border-orange-500/30 hover:border-orange-500/60',
+              bgColor: 'bg-orange-500/20',
+              textColor: 'text-orange-400',
+              titleColor: 'text-orange-100',
+              subTitle: '2º ao 5º Lugar'
+            }
+          ].filter(p => p.enabled && p.text);
+
+          if (extraPrizes.length === 0) return null;
+
+          return (
+            <div className="animate-fade-in space-y-6" style={{ animationDelay: '0.3s' }}>
+              <div className="text-center relative">
+                <div className="absolute inset-0 flex items-center" aria-hidden="true">
+                  <div className="w-full border-t border-gold/20"></div>
+                </div>
+                <div className="relative flex justify-center">
+                  <span className="bg-background px-4 text-sm text-gold font-bold uppercase tracking-widest border border-gold/20 rounded-full py-1">
+                    Vitrine de Prêmios Extras
+                  </span>
+                </div>
               </div>
-              <div className="relative flex justify-center">
-                <span className="bg-background px-4 text-sm text-gold font-bold uppercase tracking-widest border border-gold/20 rounded-full py-1">
-                  Vitrine de Prêmios Extras
-                </span>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                {extraPrizes.map((prize) => (
+                  <div
+                    key={prize.id}
+                    onClick={() => handlePrizeClick(prize.title + (prize.subTitle ? ` (${prize.subTitle})` : ''), prize.text, prize.detailsIcon)}
+                    className={`card-jackpot p-4 rounded-xl border ${prize.borderColor} cursor-pointer transition-colors relative overflow-hidden group`}
+                  >
+                    <div className="flex flex-col h-full">
+                      <div className="flex items-center gap-3 mb-3">
+                        <div className={`p-2 ${prize.bgColor} rounded-lg ${prize.textColor} group-hover:scale-110 transition-transform`}>
+                          {prize.icon}
+                        </div>
+                        <h4 className={`font-bold ${prize.titleColor}`}>{prize.title}</h4>
+                      </div>
+                      {prize.subTitle && (
+                        <p className="text-[10px] text-muted-foreground mb-1 uppercase font-semibold">{prize.subTitle}</p>
+                      )}
+                      <p className="text-sm text-muted-foreground line-clamp-3 mb-2 flex-grow">{prize.text}</p>
+
+                      {prize.threshold && (
+                        <div className="mt-auto pt-2 border-t border-blue-500/20 flex items-center gap-2 text-xs text-blue-300">
+                          <Target className="w-3 h-3" />
+                          <span>Meta: {prize.threshold} vendas</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-
-              {/* Card 1: Top Referrer */}
-              {prizeReferral1st && (
-                <div
-                  onClick={() => handlePrizeClick('Maior Indicador', prizeReferral1st, <Users className="w-8 h-8 text-blue-400" />)}
-                  className="card-jackpot p-4 rounded-xl border border-blue-500/30 hover:border-blue-500/60 cursor-pointer transition-colors relative overflow-hidden group"
-                >
-                  <div className="flex flex-col h-full">
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className="p-2 bg-blue-500/20 rounded-lg text-blue-400 group-hover:scale-110 transition-transform">
-                        <Users className="w-6 h-6" />
-                      </div>
-                      <h4 className="font-bold text-blue-100">Maior Indicador</h4>
-                    </div>
-                    <p className="text-sm text-muted-foreground line-clamp-2 mb-2 flex-grow">{prizeReferral1st}</p>
-
-                    {referralThreshold && (
-                      <div className="mt-auto pt-2 border-t border-blue-500/20 flex items-center gap-2 text-xs text-blue-300">
-                        <Target className="w-3 h-3" />
-                        <span>Meta: {referralThreshold} vendas</span>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
-
-              {/* Card 2: Top Buyer */}
-              {prizeBuyer1st && (
-                <div
-                  onClick={() => handlePrizeClick('Maior Comprador', prizeBuyer1st, <Crown className="w-8 h-8 text-gold" />)}
-                  className="card-jackpot p-4 rounded-xl border border-gold/30 hover:border-gold/60 cursor-pointer transition-colors relative overflow-hidden group"
-                >
-                  <div className="flex flex-col h-full">
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className="p-2 bg-gold/20 rounded-lg text-gold group-hover:scale-110 transition-transform">
-                        <Crown className="w-6 h-6" />
-                      </div>
-                      <h4 className="font-bold text-yellow-100">Maior Comprador</h4>
-                    </div>
-                    <p className="text-sm text-muted-foreground line-clamp-3">{prizeBuyer1st}</p>
-                  </div>
-                </div>
-              )}
-
-              {/* Card 3: Referral Runners */}
-              {prizeReferralRunners && (
-                <div
-                  onClick={() => handlePrizeClick('Top Indicadores (2º-5º)', prizeReferralRunners, <Medal className="w-8 h-8 text-slate-400" />)}
-                  className="card-jackpot p-4 rounded-xl border border-slate-500/30 hover:border-slate-500/60 cursor-pointer transition-colors relative overflow-hidden group"
-                >
-                  <div className="flex flex-col h-full">
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className="p-2 bg-slate-500/20 rounded-lg text-slate-400 group-hover:scale-110 transition-transform">
-                        <Medal className="w-6 h-6" />
-                      </div>
-                      <h4 className="font-bold text-slate-200">Top Indicadores</h4>
-                    </div>
-                    <p className="text-xs text-muted-foreground mb-1 uppercase font-semibold">2º ao 5º Lugar</p>
-                    <p className="text-sm text-muted-foreground line-clamp-2">{prizeReferralRunners}</p>
-                  </div>
-                </div>
-              )}
-
-              {/* Card 4: Buyer Runners */}
-              {prizeBuyerRunners && (
-                <div
-                  onClick={() => handlePrizeClick('Top Compradores (2º-5º)', prizeBuyerRunners, <Trophy className="w-8 h-8 text-bronze-400" />)}
-                  className="card-jackpot p-4 rounded-xl border border-orange-500/30 hover:border-orange-500/60 cursor-pointer transition-colors relative overflow-hidden group"
-                >
-                  <div className="flex flex-col h-full">
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className="p-2 bg-orange-500/20 rounded-lg text-orange-400 group-hover:scale-110 transition-transform">
-                        <Trophy className="w-6 h-6" />
-                      </div>
-                      <h4 className="font-bold text-orange-100">Top Compradores</h4>
-                    </div>
-                    <p className="text-xs text-muted-foreground mb-1 uppercase font-semibold">2º ao 5º Lugar</p>
-                    <p className="text-sm text-muted-foreground line-clamp-2">{prizeBuyerRunners}</p>
-                  </div>
-                </div>
-              )}
-
-            </div>
-          </div>
-        )}
+          );
+        })()}
 
       </div>
 
