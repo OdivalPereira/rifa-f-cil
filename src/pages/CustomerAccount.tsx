@@ -3,12 +3,26 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp';
+import { OTPInputContext } from 'input-otp';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { SlotMachineFrame } from '@/components/SlotMachineFrame';
 import { useCustomerAuth } from '@/hooks/useCustomerAuth';
 import { Link } from 'react-router-dom';
 import { ArrowLeft, Clover, Phone, Lock, Sparkles, UserPlus, LogIn, Eye, EyeOff } from 'lucide-react';
 import { toast } from 'sonner';
+import React from 'react';
+
+// Helper component to render masked or unmasked PIN char
+const PinSlot = ({ index, showPin }: { index: number; showPin: boolean }) => {
+  const context = React.useContext(OTPInputContext);
+  const char = context.slots[index]?.char;
+
+  return (
+    <InputOTPSlot index={index} className="w-12 h-14 text-xl font-bold border-gold/30">
+      {char ? (showPin ? char : '●') : null}
+    </InputOTPSlot>
+  );
+};
 
 export default function CustomerAccount() {
   const navigate = useNavigate();
@@ -136,11 +150,13 @@ export default function CustomerAccount() {
               <TabsContent value="login">
                 <form onSubmit={(e) => handleSubmit(e, 'login')} className="space-y-5">
                   <div className="space-y-2">
-                    <label className="text-sm font-medium flex items-center gap-2">
+                    <label htmlFor="login-phone" className="text-sm font-medium flex items-center gap-2">
                       <Phone className="w-4 h-4 text-gold" />
                       Telefone
                     </label>
                     <Input
+                      id="login-phone"
+                      autoComplete="tel"
                       type="tel"
                       inputMode="tel"
                       placeholder="(11) 99999-9999"
@@ -161,6 +177,7 @@ export default function CustomerAccount() {
                         type="button"
                         onClick={() => setShowPin(!showPin)}
                         className="text-muted-foreground hover:text-gold transition-colors"
+                        aria-label={showPin ? "Ocultar PIN" : "Mostrar PIN"}
                       >
                         {showPin ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                       </button>
@@ -170,21 +187,12 @@ export default function CustomerAccount() {
                         maxLength={4}
                         value={pin}
                         onChange={setPin}
-                        render={({ slots }) => (
-                          <InputOTPGroup>
-                            {slots.map((slot, index) => (
-                              <InputOTPSlot
-                                key={index}
-                                index={index}
-                                {...slot}
-                                className="w-12 h-14 text-xl font-bold border-gold/30"
-                              >
-                                {!showPin && slot.char ? '●' : slot.char}
-                              </InputOTPSlot>
-                            ))}
-                          </InputOTPGroup>
-                        )}
                       >
+                        <InputOTPGroup>
+                          {Array.from({ length: 4 }).map((_, index) => (
+                            <PinSlot key={index} index={index} showPin={showPin} />
+                          ))}
+                        </InputOTPGroup>
                       </InputOTP>
                     </div>
                   </div>
@@ -209,11 +217,13 @@ export default function CustomerAccount() {
               <TabsContent value="register">
                 <form onSubmit={(e) => handleSubmit(e, 'register')} className="space-y-5">
                   <div className="space-y-2">
-                    <label className="text-sm font-medium flex items-center gap-2">
+                    <label htmlFor="register-phone" className="text-sm font-medium flex items-center gap-2">
                       <Phone className="w-4 h-4 text-gold" />
                       Telefone
                     </label>
                     <Input
+                      id="register-phone"
+                      autoComplete="tel"
                       type="tel"
                       inputMode="tel"
                       placeholder="(11) 99999-9999"
@@ -234,6 +244,7 @@ export default function CustomerAccount() {
                         type="button"
                         onClick={() => setShowPin(!showPin)}
                         className="text-muted-foreground hover:text-gold transition-colors"
+                        aria-label={showPin ? "Ocultar PIN" : "Mostrar PIN"}
                       >
                         {showPin ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                       </button>
@@ -243,21 +254,12 @@ export default function CustomerAccount() {
                         maxLength={4}
                         value={pin}
                         onChange={setPin}
-                        render={({ slots }) => (
-                          <InputOTPGroup>
-                            {slots.map((slot, index) => (
-                              <InputOTPSlot
-                                key={index}
-                                index={index}
-                                {...slot}
-                                className="w-12 h-14 text-xl font-bold border-gold/30"
-                              >
-                                {!showPin && slot.char ? '●' : slot.char}
-                              </InputOTPSlot>
-                            ))}
-                          </InputOTPGroup>
-                        )}
                       >
+                        <InputOTPGroup>
+                          {Array.from({ length: 4 }).map((_, index) => (
+                            <PinSlot key={index} index={index} showPin={showPin} />
+                          ))}
+                        </InputOTPGroup>
                       </InputOTP>
                     </div>
                     <p className="text-xs text-muted-foreground text-center mt-2">

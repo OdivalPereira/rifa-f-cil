@@ -47,26 +47,26 @@ export default function Index() {
   useSocialProofToasts({ enabled: step === 'hero' && !!raffle });
 
   const { soldNumbers, pendingNumbers } = useMemo(() => {
-    if (!soldNumbersData) return { soldNumbers: [], pendingNumbers: [] };
+    if (!soldNumbersData) return { soldNumbers: new Set<number>(), pendingNumbers: new Set<number>() };
 
-    const sold: number[] = [];
-    const pending: number[] = [];
+    const sold = new Set<number>();
+    const pending = new Set<number>();
 
-    // O(N) single-pass iteration to split numbers into sold/pending arrays
+    // O(N) single-pass iteration to split numbers into sold/pending sets
     for (const n of soldNumbersData) {
       if (n.confirmed_at) {
-        sold.push(n.number);
+        sold.add(n.number);
       } else {
-        pending.push(n.number);
+        pending.add(n.number);
       }
     }
 
     return { soldNumbers: sold, pendingNumbers: pending };
   }, [soldNumbersData]);
 
-  const handleParticipate = () => setStep('form');
+  const handleParticipate = useCallback(() => setStep('form'), []);
 
-  const handleBuyerSubmit = async (data: BuyerFormData & { quantity: number }) => {
+  const handleBuyerSubmit = useCallback(async (data: BuyerFormData & { quantity: number }) => {
     if (!raffle) return;
 
     try {
@@ -95,9 +95,9 @@ export default function Index() {
         variant: 'destructive',
       });
     }
-  };
+  }, [raffle, createPurchase, toast]);
 
-  const handleNumbersConfirm = async (numbers: number[]) => {
+  const handleNumbersConfirm = useCallback(async (numbers: number[]) => {
     if (!raffle || !purchaseData) return;
 
     try {
@@ -119,13 +119,13 @@ export default function Index() {
         variant: 'destructive',
       });
     }
-  };
+  }, [raffle, purchaseData, reserveNumbers, toast]);
 
   const renderContent = () => {
     if (raffleLoading) {
       return (
         <div className="min-h-[60vh] flex items-center justify-center">
-          <div className="text-center space-y-4">
+          <div className="text-center space-y-4" role="status" aria-live="polite">
             <div className="relative">
               <Loader />
               <Sparkles className="w-6 h-6 text-emerald absolute -top-2 -right-2 animate-sparkle" />
@@ -187,7 +187,7 @@ export default function Index() {
               imageUrl={raffle.image_url}
               pricePerNumber={Number(raffle.price_per_number)}
               totalNumbers={raffle.total_numbers}
-              soldNumbers={soldNumbers.length}
+              soldNumbers={soldNumbers.size}
               drawDate={raffle.draw_date}
               onParticipate={handleParticipate}
             />
@@ -199,7 +199,7 @@ export default function Index() {
           <div className="min-h-[calc(100vh-3rem)] sm:min-h-[calc(100vh-3.5rem)] flex items-center justify-center p-3 sm:p-4">
             <BuyerForm
               pricePerNumber={Number(raffle.price_per_number)}
-              maxNumbers={raffle.total_numbers - soldNumbers.length}
+              maxNumbers={raffle.total_numbers - soldNumbers.size}
               onSubmit={handleBuyerSubmit}
               isLoading={createPurchase.isPending}
             />
@@ -295,7 +295,7 @@ export default function Index() {
     <SlotMachineFrame showDecorations={step === 'hero' || step === 'success'}>
       {/* Header */}
       <header className="sticky top-0 z-50 bg-card/80 backdrop-blur-md border-b border-gold/20">
-        <div className="container mx-auto px-3 sm:px-4 h-12 sm:h-14 flex items-center justify-between">
+        <div className="container mx-auto px-2 sm:px-4 h-12 sm:h-14 flex items-center justify-between">
           <div className="flex items-center">
             <span className="font-display font-bold text-base sm:text-lg text-gradient-gold">OD</span>
             <span className="relative w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center -ml-0.5">

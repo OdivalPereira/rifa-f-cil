@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { Link } from 'react-router-dom';
 import { Trophy, ArrowRight, HelpCircle, Sparkles, Users, Gift } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -9,15 +10,15 @@ interface ReferralPromoProps {
   referralCode?: string;
 }
 
-export function ReferralPromo({ showShareButton = true, referralCode }: ReferralPromoProps) {
+export const ReferralPromo = memo(({ showShareButton = true, referralCode }: ReferralPromoProps) => {
   const { data: raffle } = useActiveRaffle();
 
   const prizeDescription = raffle?.prize_description || 'prêmios incríveis';
   const raffleName = raffle?.title || 'Rifa da Sorte';
 
   return (
-    <section className="container mx-auto px-4 my-8 sm:my-12">
-      <div className="card-jackpot relative overflow-hidden p-6 sm:p-8 text-center border-gold/30">
+    <section className="container mx-auto px-2 sm:px-4 my-4 sm:my-12 w-full max-w-[100vw] overflow-hidden">
+      <div className="card-jackpot relative overflow-hidden p-3 sm:p-8 text-center border-gold/30 w-full mx-auto max-w-full">
         {/* Background Effects */}
         <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-transparent to-black/40 pointer-events-none" />
         <div className="absolute -top-10 -right-10 w-32 h-32 bg-gold/10 rounded-full blur-3xl animate-pulse-slow" />
@@ -34,11 +35,11 @@ export function ReferralPromo({ showShareButton = true, referralCode }: Referral
           </div>
 
           {/* Text Content */}
-          <div className="space-y-2 sm:space-y-3 max-w-2xl">
-            <h2 className="text-2xl sm:text-3xl font-display font-bold text-gradient-gold leading-tight">
+          <div className="space-y-2 sm:space-y-3 max-w-2xl w-full">
+            <h2 className="text-xl sm:text-3xl font-display font-bold text-gradient-gold leading-tight break-words">
               🏆 Desafio do Indicador: Ganhe Prêmios Extras!
             </h2>
-            <p className="text-base sm:text-lg text-muted-foreground/90 leading-relaxed">
+            <p className="text-sm sm:text-lg text-muted-foreground/90 leading-relaxed">
               Além do sorteio principal, <span className="text-emerald font-bold">quem mais indicar amigos ganha prêmios exclusivos!</span> Compartilhe seu link e suba no ranking.
             </p>
           </div>
@@ -92,4 +93,6 @@ export function ReferralPromo({ showShareButton = true, referralCode }: Referral
       </div>
     </section>
   );
-}
+});
+
+ReferralPromo.displayName = 'ReferralPromo';

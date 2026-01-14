@@ -7,13 +7,14 @@ import { formatRaffleNumber } from '@/lib/validators';
 import { Search, Shuffle, Check, X, Loader2, Sparkles, Star, Coins, Trophy } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
+import { useDebounce } from '@/hooks/useDebounce';
 
 interface NumberSelectorProps {
   raffleId: string;
   totalNumbers: number;
   quantityToSelect: number;
-  soldNumbers: number[];
-  pendingNumbers: number[];
+  soldNumbers: Set<number>;
+  pendingNumbers: Set<number>;
   onConfirm: (numbers: number[]) => void;
   isLoading?: boolean;
 }
@@ -28,10 +29,26 @@ interface NumberButtonProps {
 const NumberButton = memo(({ num, status, onClick }: NumberButtonProps) => {
   const handleClick = useCallback(() => onClick(num), [onClick, num]);
 
+  const getAriaLabel = () => {
+    switch (status) {
+      case 'available':
+        return `Número ${num}, disponível`;
+      case 'selected':
+        return `Número ${num}, selecionado`;
+      case 'sold':
+        return `Número ${num}, vendido`;
+      case 'pending':
+        return `Número ${num}, reservado`;
+    }
+  };
+
   return (
     <button
+      type="button"
       onClick={handleClick}
       disabled={status === 'sold' || status === 'pending'}
+      aria-label={getAriaLabel()}
+      aria-pressed={status === 'selected'}
       className={cn(
         'aspect-square flex items-center justify-center text-[10px] sm:text-xs font-mono rounded-lg transition-all duration-200',
         'hover:scale-105 focus:outline-none focus:ring-2 focus:ring-gold/50',
@@ -59,12 +76,12 @@ export function NumberSelector({
 }: NumberSelectorProps) {
   const [selectedNumbers, setSelectedNumbers] = useState<Set<number>>(new Set());
   const [searchTerm, setSearchTerm] = useState('');
+  const debouncedSearchTerm = useDebounce(searchTerm, 300);
   const [currentPage, setCurrentPage] = useState(0);
   const numbersPerPage = 500;
 
-  // Optimization: Create Sets for O(1) lookups instead of O(N) Array.includes()
-  const soldNumbersSet = useMemo(() => new Set(soldNumbers), [soldNumbers]);
-  const pendingNumbersSet = useMemo(() => new Set(pendingNumbers), [pendingNumbers]);
+  // Optimization: Removed internal Set creation since props are now Sets.
+  // This avoids O(N) iteration on every render/update of props.
 
   // Subscribe to realtime updates
   useEffect(() => {
@@ -91,7 +108,12 @@ export function NumberSelector({
 
   // All unavailable numbers (sold + pending)
   const unavailableNumbers = useMemo(() => {
-    return new Set([...soldNumbers, ...pendingNumbers]);
+    // Merging two sets efficiently
+    const combined = new Set(soldNumbers);
+    for (const num of pendingNumbers) {
+      combined.add(num);
+    }
+    return combined;
   }, [soldNumbers, pendingNumbers]);
 
   // Generate available numbers for current page
@@ -100,10 +122,11 @@ export function NumberSelector({
     const end = Math.min((currentPage + 1) * numbersPerPage, totalNumbers);
     const numbers: number[] = [];
 
-    if (searchTerm) {
+    if (debouncedSearchTerm) {
       // Search mode: show matching numbers
+      // Optimization: using debounced term prevents freezing on large datasets
       for (let i = 1; i <= totalNumbers; i++) {
-        if (formatRaffleNumber(i, 5).includes(searchTerm)) {
+        if (formatRaffleNumber(i, 5).includes(debouncedSearchTerm)) {
           numbers.push(i);
           if (numbers.length >= 100) break;
         }
@@ -116,7 +139,7 @@ export function NumberSelector({
     }
 
     return numbers;
-  }, [currentPage, totalNumbers, searchTerm]);
+  }, [currentPage, totalNumbers, debouncedSearchTerm]);
 
   const totalPages = Math.ceil(totalNumbers / numbersPerPage);
 
@@ -164,8 +187,8 @@ export function NumberSelector({
   // Optimization: This function is now mostly used inside the render loop logic
   // but using sets makes it O(1).
   const getNumberStatus = (num: number): 'available' | 'selected' | 'sold' | 'pending' => {
-    if (soldNumbersSet.has(num)) return 'sold';
-    if (pendingNumbersSet.has(num)) return 'pending';
+    if (soldNumbers.has(num)) return 'sold';
+    if (pendingNumbers.has(num)) return 'pending';
     if (selectedNumbers.has(num)) return 'selected';
     return 'available';
   };
@@ -200,6 +223,9 @@ export function NumberSelector({
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input
+              type="search"
+              inputMode="numeric"
+              aria-label="Buscar número específico"
               placeholder="Buscar número..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
@@ -283,7 +309,7 @@ export function NumberSelector({
         </ScrollArea>
 
         {/* Pagination */}
-        {!searchTerm && totalPages > 1 && (
+        {!debouncedSearchTerm && totalPages > 1 && (
           <div className="flex items-center justify-center gap-1 sm:gap-2">
             <Button
               variant="outline"

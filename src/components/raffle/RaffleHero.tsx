@@ -7,7 +7,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { useState } from 'react';
+import { useState, memo } from 'react';
 import rafflePrizesHero from '@/assets/raffle-prizes-hero.jpg';
 import { CountdownTimer } from './CountdownTimer';
 
@@ -42,7 +42,7 @@ interface RaffleHeroProps {
   onParticipate: () => void;
 }
 
-export function RaffleHero({
+export const RaffleHero = memo(({
   title,
   description,
   prizeDescription,
@@ -62,7 +62,7 @@ export function RaffleHero({
   soldNumbers,
   drawDate,
   onParticipate,
-}: RaffleHeroProps) {
+}: RaffleHeroProps) => {
   const progressPercentage = (soldNumbers / totalNumbers) * 100;
   const availableNumbers = totalNumbers - soldNumbers;
   const [selectedPrize, setSelectedPrize] = useState<{
@@ -81,7 +81,7 @@ export function RaffleHero({
   };
 
   return (
-    <section className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden py-6 px-4 space-y-12">
+    <section className="relative min-h-[calc(100dvh-3rem)] sm:min-h-[calc(100dvh-3.5rem)] flex flex-col items-center justify-center overflow-hidden py-4 sm:py-6 px-0 sm:px-4 space-y-6 sm:space-y-12 w-full max-w-[100vw]">
       {/* Background decorations */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden hidden sm:block">
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-emerald/5 rounded-full blur-3xl animate-pulse-slow" />
@@ -89,44 +89,44 @@ export function RaffleHero({
         <div className="absolute top-1/2 right-1/3 w-64 h-64 bg-gold/5 rounded-full blur-3xl animate-pulse-slow" style={{ animationDelay: '2s' }} />
       </div>
 
-      <div className="w-full max-w-6xl mx-auto relative z-10 space-y-12">
+      <div className="w-full max-w-6xl mx-auto relative z-10 space-y-12 px-2 sm:px-0 max-w-full">
 
         {/* --- MAIN HERO SECTION --- */}
         <div className="flex flex-col lg:grid lg:grid-cols-2 gap-8 items-center">
           {/* Left: Text & Main Prize */}
-          <div className="space-y-6 text-center lg:text-left w-full">
+          <div className="space-y-4 sm:space-y-6 text-center lg:text-left w-full">
             <div className="inline-flex items-center gap-2 px-3 sm:px-4 py-2 rounded-full bg-emerald/10 border border-emerald/30 glow-emerald mx-auto lg:mx-0">
               <span className="text-emerald animate-sparkle">🍀</span>
               <span className="text-xs sm:text-sm font-semibold text-emerald">Rifa da Sorte</span>
               <Sparkles className="w-3 h-3 sm:w-4 sm:h-4 text-gold animate-sparkle" />
             </div>
 
-            <h1 className="text-3xl sm:text-5xl lg:text-6xl font-display font-bold leading-tight">
+            <h1 className="text-2xl sm:text-5xl lg:text-6xl font-display font-bold leading-tight">
               <span className="text-gradient-luck">{title}</span>
             </h1>
 
             {description && (
-              <p className="text-base sm:text-lg text-muted-foreground max-w-xl mx-auto lg:mx-0">
+              <p className="text-sm sm:text-lg text-muted-foreground max-w-xl mx-auto lg:mx-0">
                 {description}
               </p>
             )}
 
             {/* Main Prize Highlight Card */}
             <div
-              className="card-jackpot p-6 rounded-2xl border-2 border-gold/50 relative overflow-hidden group cursor-pointer hover:border-gold transition-all shadow-lg shadow-gold/10"
+              className="card-jackpot p-2 sm:p-6 rounded-2xl border-2 border-gold/50 relative overflow-hidden group cursor-pointer hover:border-gold transition-all shadow-lg shadow-gold/10 w-full max-w-full"
               onClick={() => handlePrizeClick('Prêmio Principal', prizeDrawDetails || null, <Gift className="w-10 h-10 text-gold" />)}
             >
-              <div className="absolute top-0 right-0 p-3 bg-gold text-primary-foreground font-bold text-xs uppercase rounded-bl-xl z-20">
+              <div className="absolute top-0 right-0 p-2 sm:p-3 bg-gold text-primary-foreground font-bold text-[10px] sm:text-xs uppercase rounded-bl-xl z-20">
                 1º Prêmio
               </div>
-              <div className="flex items-center gap-4 relative z-10">
-                <div className="p-4 rounded-xl bg-gradient-gold animate-pulse-glow shrink-0 group-hover:scale-105 transition-transform">
-                  <Gift className="w-8 h-8 text-purple-dark" />
+              <div className="flex items-center gap-2 sm:gap-4 relative z-10 w-full">
+                <div className="p-1.5 sm:p-4 rounded-xl bg-gradient-gold animate-pulse-glow shrink-0 group-hover:scale-105 transition-transform">
+                  <Gift className="w-5 h-5 sm:w-8 sm:h-8 text-purple-dark" />
                 </div>
-                <div className="text-left">
-                  <h3 className="text-xl sm:text-2xl font-bold text-foreground">{prizeDescription}</h3>
+                <div className="text-left min-w-0 flex-1">
+                  <h3 className="text-sm sm:text-2xl font-bold text-foreground break-words whitespace-normal">{prizeDescription}</h3>
                   {prizeDrawDetails && (
-                    <p className="text-sm text-muted-foreground mt-1 underline">Ver detalhes</p>
+                    <p className="text-xs sm:text-sm text-muted-foreground mt-1 underline">Ver detalhes</p>
                   )}
                 </div>
               </div>
@@ -190,26 +190,26 @@ export function RaffleHero({
 
             {/* Stats Bar */}
             <div className="grid grid-cols-3 gap-2 sm:gap-4">
-              <div className="card-casino text-center p-3 rounded-xl border border-emerald/20">
-                <p className="text-xl font-display font-bold text-emerald">{formatCurrency(pricePerNumber)}</p>
-                <p className="text-[10px] text-muted-foreground uppercase">por número</p>
+              <div className="card-casino text-center p-1.5 sm:p-3 rounded-xl border border-emerald/20">
+                <p className="text-sm sm:text-xl font-display font-bold text-emerald">{formatCurrency(pricePerNumber)}</p>
+                <p className="text-[9px] sm:text-[10px] text-muted-foreground uppercase">por número</p>
               </div>
-              <div className="card-casino text-center p-3 rounded-xl border border-gold/20">
-                <p className="text-xl font-display font-bold text-gold">{availableNumbers.toLocaleString()}</p>
-                <p className="text-[10px] text-muted-foreground uppercase">restantes</p>
+              <div className="card-casino text-center p-1.5 sm:p-3 rounded-xl border border-gold/20">
+                <p className="text-sm sm:text-xl font-display font-bold text-gold">{availableNumbers.toLocaleString()}</p>
+                <p className="text-[9px] sm:text-[10px] text-muted-foreground uppercase">restantes</p>
               </div>
-              <div className="card-casino text-center p-3 rounded-xl border border-purple/20">
-                <p className="text-xl font-display font-bold text-purple">{soldNumbers.toLocaleString()}</p>
-                <p className="text-[10px] text-muted-foreground uppercase">vendidos</p>
+              <div className="card-casino text-center p-1.5 sm:p-3 rounded-xl border border-purple/20">
+                <p className="text-sm sm:text-xl font-display font-bold text-purple">{soldNumbers.toLocaleString()}</p>
+                <p className="text-[9px] sm:text-[10px] text-muted-foreground uppercase">vendidos</p>
               </div>
             </div>
 
             <Button
               onClick={onParticipate}
               size="lg"
-              className="btn-luck w-full text-lg py-8 text-primary-foreground font-bold uppercase tracking-wider shadow-xl shadow-emerald/20 hover:shadow-emerald/40 transition-all animate-pulse-glow"
+              className="btn-luck w-full text-base sm:text-lg py-6 sm:py-8 text-primary-foreground font-bold uppercase tracking-wider shadow-xl shadow-emerald/20 hover:shadow-emerald/40 transition-all animate-pulse-glow"
             >
-              <span className="mr-2 text-2xl">🎟️</span>
+              <span className="mr-2 text-xl sm:text-2xl">🎟️</span>
               Comprar Números Agora
             </Button>
 
@@ -367,4 +367,6 @@ export function RaffleHero({
       </Dialog>
     </section>
   );
-}
+});
+
+RaffleHero.displayName = 'RaffleHero';
