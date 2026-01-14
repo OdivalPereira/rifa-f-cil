@@ -16,7 +16,7 @@ serve(async (req) => {
 
         console.log(`Received event: ${event}`, { raffle_id, raffle_title, deleted_at });
 
-        if (event !== 'raffle_soft_deleted') {
+        if (event !== 'raffle_soft_deleted' && event !== 'soft_delete') {
             return new Response(
                 JSON.stringify({ error: 'Unknown event type', received: event }),
                 { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
