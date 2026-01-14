@@ -166,12 +166,27 @@ export function NumberSelector({
     }
 
     const remaining = quantityToSelect - selectedNumbers.size;
-    const shuffled = available.sort(() => Math.random() - 0.5);
-    const newNumbers = shuffled.slice(0, remaining);
+    const count = Math.min(remaining, available.length);
+    const selected: number[] = [];
+
+    // Optimization: Partial Fisher-Yates shuffle
+    // Instead of sorting the entire array (O(N log N)), we just pick 'count' random numbers (O(k))
+    // where k is the number of items we need to select.
+    const m = available.length;
+
+    for (let i = 0; i < count; i++) {
+      const r = Math.floor(Math.random() * (m - i)) + i;
+      // Swap elements
+      const temp = available[i];
+      available[i] = available[r];
+      available[r] = temp;
+
+      selected.push(available[i]);
+    }
 
     setSelectedNumbers((prev) => {
       const newSet = new Set(prev);
-      newNumbers.forEach((n) => newSet.add(n));
+      selected.forEach((n) => newSet.add(n));
       return newSet;
     });
   }, [totalNumbers, unavailableNumbers, selectedNumbers, quantityToSelect]);
