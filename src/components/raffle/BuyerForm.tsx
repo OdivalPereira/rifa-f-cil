@@ -127,11 +127,17 @@ export const BuyerForm = memo(({
                     autoComplete="name"
                     autoCapitalize="words"
                     placeholder="Nome Completo"
+                    aria-invalid={!!errors.name}
+                    aria-describedby={errors.name ? "name-error" : undefined}
                     {...register("name")}
                     className={`input-casino h-12 ${errors.name ? "border-destructive" : ""}`}
                   />
                   {errors.name && (
-                    <p className="text-[10px] text-destructive font-bold uppercase tracking-tight">
+                    <p
+                      id="name-error"
+                      role="alert"
+                      className="text-[10px] text-destructive font-bold uppercase tracking-tight"
+                    >
                       {errors.name.message}
                     </p>
                   )}
@@ -150,6 +156,8 @@ export const BuyerForm = memo(({
                       type="tel"
                       autoComplete="tel"
                       placeholder="(11) 99999-9999"
+                      aria-invalid={!!errors.phone}
+                      aria-describedby={errors.phone ? "phone-error" : undefined}
                       {...register("phone")}
                       onChange={(e) => {
                         let value = e.target.value.replace(/\D/g, "");
@@ -189,7 +197,11 @@ export const BuyerForm = memo(({
                       className={`input-casino h-12 ${errors.phone ? "border-destructive" : ""}`}
                     />
                     {errors.phone && (
-                      <p className="text-[10px] text-destructive font-bold uppercase tracking-tight">
+                      <p
+                        id="phone-error"
+                        role="alert"
+                        className="text-[10px] text-destructive font-bold uppercase tracking-tight"
+                      >
                         {errors.phone.message}
                       </p>
                     )}
@@ -206,11 +218,17 @@ export const BuyerForm = memo(({
                       type="email"
                       autoComplete="email"
                       placeholder="exemplo@email.com"
+                      aria-invalid={!!errors.email}
+                      aria-describedby={errors.email ? "email-error" : undefined}
                       {...register("email")}
                       className={`input-casino h-12 ${errors.email ? "border-destructive" : ""}`}
                     />
                     {errors.email && (
-                      <p className="text-[10px] text-destructive font-bold uppercase tracking-tight">
+                      <p
+                        id="email-error"
+                        role="alert"
+                        className="text-[10px] text-destructive font-bold uppercase tracking-tight"
+                      >
                         {errors.email.message}
                       </p>
                     )}
@@ -299,6 +317,7 @@ export const BuyerForm = memo(({
                   min={1}
                   max={Math.min(500, maxNumbers)}
                   step={1}
+                  aria-label="Selecione a quantidade de cotas"
                   className="py-4 cursor-pointer"
                 />
                 <div className="flex justify-between items-center bg-black/30 p-3 rounded-2xl border border-white/5 shadow-inner">
