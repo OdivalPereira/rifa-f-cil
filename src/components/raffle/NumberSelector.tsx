@@ -158,6 +158,7 @@ export function NumberSelector({
   }, [unavailableNumbers, quantityToSelect]);
 
   const generateRandomNumbers = useCallback(() => {
+    // 1. Identify available numbers (O(N))
     const available: number[] = [];
     for (let i = 1; i <= totalNumbers; i++) {
       if (!unavailableNumbers.has(i) && !selectedNumbers.has(i)) {
@@ -166,8 +167,27 @@ export function NumberSelector({
     }
 
     const remaining = quantityToSelect - selectedNumbers.size;
-    const shuffled = available.sort(() => Math.random() - 0.5);
-    const newNumbers = shuffled.slice(0, remaining);
+    if (remaining <= 0) return;
+
+    // 2. Partial Fisher-Yates Shuffle (O(k))
+    // Optimization: We only need 'remaining' random numbers.
+    // Instead of sorting the whole array (O(N log N)), we pick k random items (O(k)).
+    const count = Math.min(remaining, available.length);
+    const newNumbers: number[] = [];
+
+    if (count >= available.length) {
+      newNumbers.push(...available);
+    } else {
+      let m = available.length;
+      for (let i = 0; i < count; i++) {
+        const r = Math.floor(Math.random() * m--);
+        const val = available[r];
+        newNumbers.push(val);
+        // Move the last available element to the picked slot to avoid gaps
+        // We don't need to preserve order, so this is O(1) swap-and-pop equivalent
+        available[r] = available[m];
+      }
+    }
 
     setSelectedNumbers((prev) => {
       const newSet = new Set(prev);
