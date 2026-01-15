@@ -5,6 +5,16 @@ const corsHeaders = {
     'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// Helper to sanitize HTML input to prevent injection
+function escapeHtml(unsafe: unknown): string {
+    return String(unsafe)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
 serve(async (req) => {
     // Handle CORS preflight
     if (req.method === 'OPTIONS') {
@@ -56,7 +66,7 @@ serve(async (req) => {
         });
 
         // Link para recuperação
-        const recoveryLink = `${APP_URL}/admin?tab=rifas&restore=${raffle_id}`;
+        const recoveryLink = `${APP_URL}/admin?tab=rifas&restore=${encodeURIComponent(raffle_id)}`;
 
         // Template de e-mail HTML
         const emailHtml = `
@@ -87,7 +97,7 @@ serve(async (req) => {
       <!-- Raffle Info Box -->
       <div style="background: #0f172a; border-radius: 12px; padding: 20px; margin-bottom: 25px;">
         <h3 style="color: #fbbf24; font-size: 18px; margin: 0 0 15px; font-weight: 600;">
-          ${raffle_title}
+          ${escapeHtml(raffle_title)}
         </h3>
         <div style="color: #64748b; font-size: 14px;">
           <p style="margin: 8px 0;">
@@ -95,7 +105,7 @@ serve(async (req) => {
           </p>
           <p style="margin: 8px 0;">
             <strong style="color: #94a3b8;">ID:</strong> 
-            <code style="background: #1e293b; padding: 2px 6px; border-radius: 4px; font-size: 12px;">${raffle_id}</code>
+            <code style="background: #1e293b; padding: 2px 6px; border-radius: 4px; font-size: 12px;">${escapeHtml(raffle_id)}</code>
           </p>
         </div>
       </div>
