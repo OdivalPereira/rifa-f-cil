@@ -198,6 +198,8 @@ export const BuyerForm = memo(({
                         e.target.value = formatted;
                         register("phone").onChange(e); // Propagate to react-hook-form
                       }}
+                      aria-invalid={!!errors.phone}
+                      aria-describedby={errors.phone ? "phone-error" : undefined}
                       className={`input-casino h-12 ${errors.phone ? "border-destructive" : ""}`}
                     />
                     {errors.phone && (
