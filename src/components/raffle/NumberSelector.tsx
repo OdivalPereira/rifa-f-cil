@@ -158,6 +158,7 @@ export function NumberSelector({
   }, [unavailableNumbers, quantityToSelect]);
 
   const generateRandomNumbers = useCallback(() => {
+    // 1. Identify available numbers (O(N))
     const available: number[] = [];
     for (let i = 1; i <= totalNumbers; i++) {
       if (!unavailableNumbers.has(i) && !selectedNumbers.has(i)) {
