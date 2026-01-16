@@ -607,3 +607,118 @@ FROM public.purchases p
 WHERE p.payment_status = 'approved'
 GROUP BY p.buyer_phone, p.buyer_name, p.raffle_id
 ORDER BY tickets_bought DESC;;
+
+-- FILE: supabase/migrations/20260106120000_soft_delete_raffles.sql
+
+-- ==============================================
+-- SOFT DELETE PARA RIFAS - Exclusão Segura
+-- ==============================================
+
+-- 1. Adicionar coluna deleted_at para soft delete
+ALTER TABLE public.raffles 
+ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMP WITH TIME ZONE;
+
+-- 2. Criar índice para queries de soft delete
+CREATE INDEX IF NOT EXISTS idx_raffles_deleted_at 
+ON public.raffles(deleted_at);
+
+-- 3. Atualizar política RLS para SELECT público
+DROP POLICY IF EXISTS "Anyone can view active raffles" ON public.raffles;
+
+CREATE POLICY "Anyone can view active raffles"
+ON public.raffles
+FOR SELECT
+USING (
+  (status = 'active' AND deleted_at IS NULL) 
+  OR public.has_role(auth.uid(), 'admin')
+);
+
+-- 4. Função para cleanup de rifas excluídas há mais de 30 dias
+CREATE OR REPLACE FUNCTION public.cleanup_deleted_raffles()
+RETURNS integer
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  deleted_count integer;
+BEGIN
+  WITH deleted AS (
+    DELETE FROM public.raffles 
+    WHERE deleted_at IS NOT NULL 
+      AND deleted_at < NOW() - INTERVAL '30 days'
+    RETURNING id
+  )
+  SELECT COUNT(*) INTO deleted_count FROM deleted;
+  
+  RETURN deleted_count;
+END;
+$$;
+
+-- 5. Trigger function para logging de soft delete
+CREATE OR REPLACE FUNCTION public.log_raffle_soft_delete()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  IF OLD.deleted_at IS NULL AND NEW.deleted_at IS NOT NULL THEN
+    RAISE NOTICE 'Raffle soft deleted: id=%, title=%, deleted_at=%', 
+      NEW.id, NEW.title, NEW.deleted_at;
+  ELSIF OLD.deleted_at IS NOT NULL AND NEW.deleted_at IS NULL THEN
+    RAISE NOTICE 'Raffle restored: id=%, title=%', NEW.id, NEW.title;
+  END IF;
+  RETURN NEW;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS tr_log_raffle_soft_delete ON public.raffles;
+CREATE TRIGGER tr_log_raffle_soft_delete
+AFTER UPDATE ON public.raffles
+FOR EACH ROW
+WHEN (OLD.deleted_at IS DISTINCT FROM NEW.deleted_at)
+EXECUTE FUNCTION public.log_raffle_soft_delete();
+
+COMMENT ON COLUMN public.raffles.deleted_at IS 'Data de soft delete. NULL = ativa, NOT NULL = na lixeira';
+COMMENT ON FUNCTION public.cleanup_deleted_raffles() IS 'Remove permanentemente rifas na lixeira há mais de 30 dias';
+
+-- ==============================================
+-- TRIGGER PARA NOTIFICAÇÃO VIA EMAIL
+-- ==============================================
+
+CREATE EXTENSION IF NOT EXISTS "pg_net" WITH SCHEMA "extensions";
+
+CREATE OR REPLACE FUNCTION public.notify_raffle_soft_delete()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, extensions
+AS $$
+DECLARE
+  payload jsonb;
+BEGIN
+  IF OLD.deleted_at IS NULL AND NEW.deleted_at IS NOT NULL THEN
+    payload := jsonb_build_object(
+      'event', 'soft_delete',
+      'raffle_id', NEW.id,
+      'raffle_title', NEW.title,
+      'deleted_at', NEW.deleted_at
+    );
+    
+    PERFORM net.http_post(
+      url := 'https://iohfdtczqxzofqxngsag.supabase.co/functions/v1/notify-admin-action',
+      headers := '{"Content-Type": "application/json"}'::jsonb,
+      body := payload
+    );
+  END IF;
+  RETURN NEW;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS tr_notify_raffle_soft_delete ON public.raffles;
+CREATE TRIGGER tr_notify_raffle_soft_delete
+AFTER UPDATE ON public.raffles
+FOR EACH ROW
+WHEN (OLD.deleted_at IS DISTINCT FROM NEW.deleted_at)
+EXECUTE FUNCTION public.notify_raffle_soft_delete();

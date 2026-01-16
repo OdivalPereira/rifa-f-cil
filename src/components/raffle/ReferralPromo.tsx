@@ -1,11 +1,24 @@
+import { memo } from 'react';
 import { Link } from 'react-router-dom';
-import { Trophy, ArrowRight, HelpCircle, Sparkles } from 'lucide-react';
+import { Trophy, ArrowRight, HelpCircle, Sparkles, Users, Gift } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { WhatsAppShareButton } from './WhatsAppShareButton';
+import { useActiveRaffle } from '@/hooks/useRaffle';
 
-export function ReferralPromo() {
+interface ReferralPromoProps {
+  showShareButton?: boolean;
+  referralCode?: string;
+}
+
+export const ReferralPromo = memo(({ showShareButton = true, referralCode }: ReferralPromoProps) => {
+  const { data: raffle } = useActiveRaffle();
+
+  const prizeDescription = raffle?.prize_description || 'prêmios incríveis';
+  const raffleName = raffle?.title || 'Rifa da Sorte';
+
   return (
-    <section className="container mx-auto px-4 my-8 sm:my-12">
-      <div className="card-jackpot relative overflow-hidden p-6 sm:p-8 text-center border-gold/30">
+    <section className="container mx-auto px-2 sm:px-4 my-4 sm:my-12 w-full max-w-[100vw] overflow-hidden">
+      <div className="card-jackpot relative overflow-hidden p-3 sm:p-8 text-center border-gold/30 w-full mx-auto max-w-full">
         {/* Background Effects */}
         <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-transparent to-black/40 pointer-events-none" />
         <div className="absolute -top-10 -right-10 w-32 h-32 bg-gold/10 rounded-full blur-3xl animate-pulse-slow" />
@@ -22,21 +35,45 @@ export function ReferralPromo() {
           </div>
 
           {/* Text Content */}
-          <div className="space-y-2 sm:space-y-3 max-w-2xl">
-            <h2 className="text-2xl sm:text-3xl font-display font-bold text-gradient-gold leading-tight">
-              🏆 Desafio do Indicador: Ganhe uma Viagem Extra!
+          <div className="space-y-2 sm:space-y-3 max-w-2xl w-full">
+            <h2 className="text-xl sm:text-3xl font-display font-bold text-gradient-gold leading-tight break-words">
+              🏆 Desafio do Indicador: Ganhe Prêmios Extras!
             </h2>
-            <p className="text-base sm:text-lg text-muted-foreground/90 leading-relaxed">
-              Quer ir para Porto de Galinhas com tudo pago? Além do sorteio principal, <span className="text-emerald font-bold">quem mais indicar amigos ganha uma viagem exclusiva!</span> Compre seus números para entrar no jogo.
+            <p className="text-sm sm:text-lg text-muted-foreground/90 leading-relaxed">
+              Além do sorteio principal, <span className="text-emerald font-bold">quem mais indicar amigos ganha prêmios exclusivos!</span> Compartilhe seu link e suba no ranking.
             </p>
           </div>
 
-          {/* Actions */}
+          {/* Stats badges */}
+          <div className="flex flex-wrap justify-center gap-3">
+            <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-emerald/10 border border-emerald/30">
+              <Users className="w-4 h-4 text-emerald" />
+              <span className="text-sm font-medium text-emerald">Indique Amigos</span>
+            </div>
+            <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-gold/10 border border-gold/30">
+              <Gift className="w-4 h-4 text-gold" />
+              <span className="text-sm font-medium text-gold">Ganhe Prêmios</span>
+            </div>
+          </div>
+
+          {/* WhatsApp Share Section - Main CTA */}
+          {showShareButton && (
+            <div className="w-full max-w-md mt-2">
+              <WhatsAppShareButton
+                referralCode={referralCode}
+                prizeDescription={prizeDescription}
+                raffleName={raffleName}
+              />
+            </div>
+          )}
+
+          {/* Secondary Actions */}
           <div className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto mt-2">
             <Link to="/rankings" className="w-full sm:w-auto">
               <Button
                 size="lg"
-                className="w-full sm:w-auto bg-gold hover:bg-gold/80 text-black font-bold text-base sm:text-lg shadow-gold hover:shadow-gold-lg transition-all transform hover:-translate-y-1"
+                variant="outline"
+                className="w-full sm:w-auto border-gold/30 hover:border-gold hover:bg-gold/10 text-gold font-bold text-base transition-all"
               >
                 Ver Ranking em Tempo Real
                 <ArrowRight className="w-5 h-5 ml-2" />
@@ -56,4 +93,6 @@ export function ReferralPromo() {
       </div>
     </section>
   );
-}
+});
+
+ReferralPromo.displayName = 'ReferralPromo';

@@ -9,6 +9,7 @@ export function useAllRaffles() {
       const { data, error } = await supabase
         .from('raffles')
         .select('*')
+        .is('deleted_at', null)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -27,13 +28,14 @@ export function usePendingPurchases() {
         .select(`
           *,
           raffle:raffles(title),
-          numbers:raffle_numbers(number)
+          numbers:raffle_numbers(number),
+          receipt_url
         `)
         .eq('payment_status', 'pending')
         .order('created_at', { ascending: true });
 
       if (error) throw error;
-      return data;
+      return data as any;
     },
   });
 }
@@ -48,7 +50,8 @@ export function useAllPurchases(raffleId?: string) {
         .select(`
           *,
           raffle:raffles(title),
-          numbers:raffle_numbers(number)
+          numbers:raffle_numbers(number),
+          receipt_url
         `)
         .order('created_at', { ascending: false });
 
@@ -58,7 +61,7 @@ export function useAllPurchases(raffleId?: string) {
 
       const { data, error } = await query;
       if (error) throw error;
-      return data;
+      return data as any;
     },
   });
 }
@@ -77,6 +80,15 @@ export function useUpdatePaymentStatus() {
       status: 'approved' | 'rejected';
       userId: string;
     }) => {
+      // 1. Buscar dados atuais para pegar a URL do recibo (se houver)
+      const { data: currentPurchase, error: fetchError } = await supabase
+        .from('purchases')
+        .select('receipt_url')
+        .eq('id', purchaseId)
+        .single();
+
+      if (fetchError) throw fetchError;
+
       const updateData: any = {
         payment_status: status,
       };
@@ -90,6 +102,36 @@ export function useUpdatePaymentStatus() {
           .from('raffle_numbers')
           .update({ confirmed_at: new Date().toISOString() })
           .eq('purchase_id', purchaseId);
+      }
+
+      // 2. Tentar deletar o comprovante do Storage se ele existir
+      // Independentemente de aprovar ou rejeitar, o comprovante "temporário" já cumpriu seu papel
+      if ((currentPurchase as any)?.receipt_url) {
+        try {
+          // Extrair nome do arquivo da URL (assumindo padrão ou buscando info)
+          // Mas como usamos o ID da compra como nome do arquivo, é mais seguro tentar deletar direto pelo ID.
+          // Formato salvo: `${purchaseId}.[ext]` - precisamos descobrir a extensão ou tentar deletar as mais comuns
+          // Ou simplesmente deletar buscando na lista.
+
+          // Melhor abordagem: listar arquivos com prefixo do ID e deletar
+          const { data: files } = await supabase.storage
+            .from('receipts')
+            .list('', { search: purchaseId });
+
+          if (files && files.length > 0) {
+            const filesToRemove = files.map(f => f.name);
+            await supabase.storage
+              .from('receipts')
+              .remove(filesToRemove);
+          }
+
+          // Limpar a URL do banco para não ficar link quebrado
+          updateData.receipt_url = null;
+          updateData.receipt_uploaded_at = null;
+        } catch (err) {
+          console.error("Erro ao limpar comprovante:", err);
+          // Não impedir o fluxo principal por erro na deleção
+        }
       }
 
       const { data, error } = await supabase
@@ -106,6 +148,10 @@ export function useUpdatePaymentStatus() {
       queryClient.invalidateQueries({ queryKey: ['pending-purchases'] });
       queryClient.invalidateQueries({ queryKey: ['all-purchases'] });
       queryClient.invalidateQueries({ queryKey: ['admin-stats'] });
+      queryClient.invalidateQueries({ queryKey: ['active-raffle'] });
+      queryClient.invalidateQueries({ queryKey: ['top-buyers-ranking'] });
+      queryClient.invalidateQueries({ queryKey: ['referral-ranking'] });
+      queryClient.invalidateQueries({ queryKey: ['top-buyers'] });
     },
   });
 }
@@ -122,10 +168,14 @@ export function useUpsertRaffle() {
       prize_description: string;
       prize_draw_details?: string;
       prize_referral_1st?: string;
+      enable_referral_1st?: boolean;
       referral_threshold?: number;
       prize_buyer_1st?: string;
+      enable_buyer_1st?: boolean;
       prize_referral_runners?: string;
+      enable_referral_runners?: boolean;
       prize_buyer_runners?: string;
+      enable_buyer_runners?: boolean;
       prize_top_buyer?: string;
       prize_top_buyer_details?: string;
       prize_second_top_buyer?: string;
@@ -136,6 +186,8 @@ export function useUpsertRaffle() {
       pix_key?: string;
       pix_key_type?: string;
       pix_beneficiary_name?: string;
+      short_code?: string;
+      pix_change_notification_email?: string;
       status?: 'draft' | 'active' | 'completed' | 'cancelled';
       draw_date?: string;
     }) => {
@@ -161,6 +213,71 @@ export function useUpsertRaffle() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['all-raffles'] });
       queryClient.invalidateQueries({ queryKey: ['active-raffle'] });
+    },
+  });
+}
+
+// Hook para soft delete de rifa (mover para lixeira)
+export function useSoftDeleteRaffle() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (raffleId: string) => {
+      const { data, error } = await supabase
+        .from('raffles')
+        .update({ deleted_at: new Date().toISOString() } as any)
+        .eq('id', raffleId)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['all-raffles'] });
+      queryClient.invalidateQueries({ queryKey: ['active-raffle'] });
+      queryClient.invalidateQueries({ queryKey: ['deleted-raffles'] });
+    },
+  });
+}
+
+// Hook para restaurar rifa da lixeira
+export function useRestoreRaffle() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (raffleId: string) => {
+      const { data, error } = await supabase
+        .from('raffles')
+        .update({ deleted_at: null } as any)
+        .eq('id', raffleId)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['all-raffles'] });
+      queryClient.invalidateQueries({ queryKey: ['active-raffle'] });
+      queryClient.invalidateQueries({ queryKey: ['deleted-raffles'] });
+    },
+  });
+}
+
+// Hook para buscar rifas excluídas (lixeira)
+export function useDeletedRaffles() {
+  return useQuery({
+    queryKey: ['deleted-raffles'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('raffles')
+        .select('*')
+        .not('deleted_at', 'is', null)
+        .order('deleted_at', { ascending: false });
+
+      if (error) throw error;
+      return data;
     },
   });
 }
@@ -253,40 +370,27 @@ export function useDrawWinner() {
 // Hook para buscar ranking de compradores
 export function useTopBuyers(raffleId: string | undefined, limit: number = 30) {
   return useQuery({
-    queryKey: ['top-buyers', raffleId, limit],
+    queryKey: ['top-buyers-ranking', raffleId, limit],
     queryFn: async () => {
       if (!raffleId) return [];
 
-      const { data: purchases, error } = await supabase
-        .from('purchases')
-        .select('buyer_name, buyer_email, buyer_phone, quantity')
+      const { data, error } = await supabase
+        .from('top_buyers_ranking' as any)
+        .select('*')
         .eq('raffle_id', raffleId)
-        .eq('payment_status', 'approved');
+        .limit(limit);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Top buyers ranking query error:', error);
+        return [];
+      }
 
-      // Agrupa por comprador (usando phone como identificador único)
-      const buyerMap = new Map<string, { name: string; phone: string; email: string; total: number }>();
-      
-      purchases?.forEach(p => {
-        const key = p.buyer_phone;
-        const existing = buyerMap.get(key);
-        if (existing) {
-          existing.total += p.quantity;
-        } else {
-          buyerMap.set(key, {
-            name: p.buyer_name,
-            phone: p.buyer_phone,
-            email: p.buyer_email,
-            total: p.quantity,
-          });
-        }
-      });
-
-      // Ordena por quantidade e retorna o top N
-      return Array.from(buyerMap.values())
-        .sort((a, b) => b.total - a.total)
-        .slice(0, limit);
+      return (data || []).map((b: any) => ({
+        name: b.buyer_name,
+        phone: b.buyer_phone,
+        total: b.tickets_bought,
+        spent: b.total_spent
+      }));
     },
     enabled: !!raffleId,
   });
@@ -297,13 +401,13 @@ export function useDrawTopBuyerWinner() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ 
-      raffleId, 
-      topN, 
-      prizeType 
-    }: { 
-      raffleId: string; 
-      topN: number; 
+    mutationFn: async ({
+      raffleId,
+      topN,
+      prizeType
+    }: {
+      raffleId: string;
+      topN: number;
       prizeType: 'top_buyer' | 'second_top_buyer';
     }) => {
       // Get all approved purchases
@@ -318,7 +422,7 @@ export function useDrawTopBuyerWinner() {
 
       // Agrupa por comprador
       const buyerMap = new Map<string, { name: string; phone: string; total: number }>();
-      
+
       purchases.forEach(p => {
         const key = p.buyer_phone;
         const existing = buyerMap.get(key);
@@ -345,15 +449,15 @@ export function useDrawTopBuyerWinner() {
       const winner = topBuyers[winnerIndex];
 
       // Atualiza a rifa com o ganhador do prêmio de ranking
-      const updateData = prizeType === 'top_buyer' 
-        ? { 
-            winner_top_buyer_name: winner.name,
-            winner_top_buyer_number: winner.total,
-          }
+      const updateData = prizeType === 'top_buyer'
+        ? {
+          winner_top_buyer_name: winner.name,
+          winner_top_buyer_number: winner.total,
+        }
         : {
-            winner_second_top_buyer_name: winner.name,
-            winner_second_top_buyer_number: winner.total,
-          };
+          winner_second_top_buyer_name: winner.name,
+          winner_second_top_buyer_number: winner.total,
+        };
 
       const { data, error } = await supabase
         .from('raffles')

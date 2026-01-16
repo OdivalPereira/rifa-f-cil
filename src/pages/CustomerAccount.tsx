@@ -3,19 +3,34 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp';
+import { OTPInputContext } from 'input-otp';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { SlotMachineFrame } from '@/components/SlotMachineFrame';
 import { useCustomerAuth } from '@/hooks/useCustomerAuth';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, Clover, Phone, Lock, Sparkles, UserPlus, LogIn } from 'lucide-react';
+import { ArrowLeft, Clover, Phone, Lock, Sparkles, UserPlus, LogIn, Eye, EyeOff } from 'lucide-react';
 import { toast } from 'sonner';
+import React from 'react';
+
+// Helper component to render masked or unmasked PIN char
+const PinSlot = ({ index, showPin }: { index: number; showPin: boolean }) => {
+  const context = React.useContext(OTPInputContext);
+  const char = context.slots[index]?.char;
+
+  return (
+    <InputOTPSlot index={index} className="w-12 h-14 text-xl font-bold border-gold/30">
+      {char ? (showPin ? char : '●') : null}
+    </InputOTPSlot>
+  );
+};
 
 export default function CustomerAccount() {
   const navigate = useNavigate();
   const { isAuthenticated, isLoading, register, login } = useCustomerAuth();
-  
+
   const [phone, setPhone] = useState('');
   const [pin, setPin] = useState('');
+  const [showPin, setShowPin] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [activeTab, setActiveTab] = useState('login');
 
@@ -34,9 +49,9 @@ export default function CustomerAccount() {
 
   const handleSubmit = async (e: React.FormEvent, action: 'register' | 'login') => {
     e.preventDefault();
-    
+
     const cleanPhone = phone.replace(/\D/g, '');
-    
+
     if (cleanPhone.length < 10) {
       toast.error('Telefone inválido', { description: 'Digite um número de telefone válido' });
       return;
@@ -50,7 +65,7 @@ export default function CustomerAccount() {
     setIsSubmitting(true);
 
     try {
-      const result = action === 'register' 
+      const result = action === 'register'
         ? await register(cleanPhone, pin)
         : await login(cleanPhone, pin);
 
@@ -116,14 +131,14 @@ export default function CustomerAccount() {
 
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
               <TabsList className="grid w-full grid-cols-2 mb-6 bg-muted/50">
-                <TabsTrigger 
-                  value="login" 
+                <TabsTrigger
+                  value="login"
                   className="data-[state=active]:bg-emerald data-[state=active]:text-primary-foreground"
                 >
                   <LogIn className="w-4 h-4 mr-2" />
                   Entrar
                 </TabsTrigger>
-                <TabsTrigger 
+                <TabsTrigger
                   value="register"
                   className="data-[state=active]:bg-emerald data-[state=active]:text-primary-foreground"
                 >
@@ -135,11 +150,13 @@ export default function CustomerAccount() {
               <TabsContent value="login">
                 <form onSubmit={(e) => handleSubmit(e, 'login')} className="space-y-5">
                   <div className="space-y-2">
-                    <label className="text-sm font-medium flex items-center gap-2">
+                    <label htmlFor="login-phone" className="text-sm font-medium flex items-center gap-2">
                       <Phone className="w-4 h-4 text-gold" />
                       Telefone
                     </label>
                     <Input
+                      id="login-phone"
+                      autoComplete="tel"
                       type="tel"
                       inputMode="tel"
                       placeholder="(11) 99999-9999"
@@ -151,9 +168,19 @@ export default function CustomerAccount() {
                   </div>
 
                   <div className="space-y-2">
-                    <label className="text-sm font-medium flex items-center gap-2">
-                      <Lock className="w-4 h-4 text-gold" />
-                      PIN (4 dígitos)
+                    <label className="text-sm font-medium flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Lock className="w-4 h-4 text-gold" />
+                        PIN (4 dígitos)
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setShowPin(!showPin)}
+                        className="text-muted-foreground hover:text-gold transition-colors"
+                        aria-label={showPin ? "Ocultar PIN" : "Mostrar PIN"}
+                      >
+                        {showPin ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
                     </label>
                     <div className="flex justify-center">
                       <InputOTP
@@ -162,17 +189,16 @@ export default function CustomerAccount() {
                         onChange={setPin}
                       >
                         <InputOTPGroup>
-                          <InputOTPSlot index={0} className="w-12 h-14 text-xl font-bold border-gold/30" />
-                          <InputOTPSlot index={1} className="w-12 h-14 text-xl font-bold border-gold/30" />
-                          <InputOTPSlot index={2} className="w-12 h-14 text-xl font-bold border-gold/30" />
-                          <InputOTPSlot index={3} className="w-12 h-14 text-xl font-bold border-gold/30" />
+                          {Array.from({ length: 4 }).map((_, index) => (
+                            <PinSlot key={index} index={index} showPin={showPin} />
+                          ))}
                         </InputOTPGroup>
                       </InputOTP>
                     </div>
                   </div>
 
-                  <Button 
-                    type="submit" 
+                  <Button
+                    type="submit"
                     className="w-full btn-luck py-6 text-lg font-bold"
                     disabled={isSubmitting}
                   >
@@ -191,11 +217,13 @@ export default function CustomerAccount() {
               <TabsContent value="register">
                 <form onSubmit={(e) => handleSubmit(e, 'register')} className="space-y-5">
                   <div className="space-y-2">
-                    <label className="text-sm font-medium flex items-center gap-2">
+                    <label htmlFor="register-phone" className="text-sm font-medium flex items-center gap-2">
                       <Phone className="w-4 h-4 text-gold" />
                       Telefone
                     </label>
                     <Input
+                      id="register-phone"
+                      autoComplete="tel"
                       type="tel"
                       inputMode="tel"
                       placeholder="(11) 99999-9999"
@@ -207,9 +235,19 @@ export default function CustomerAccount() {
                   </div>
 
                   <div className="space-y-2">
-                    <label className="text-sm font-medium flex items-center gap-2">
-                      <Lock className="w-4 h-4 text-gold" />
-                      Crie um PIN (4 dígitos)
+                    <label className="text-sm font-medium flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Lock className="w-4 h-4 text-gold" />
+                        Crie um PIN (4 dígitos)
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setShowPin(!showPin)}
+                        className="text-muted-foreground hover:text-gold transition-colors"
+                        aria-label={showPin ? "Ocultar PIN" : "Mostrar PIN"}
+                      >
+                        {showPin ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
                     </label>
                     <div className="flex justify-center">
                       <InputOTP
@@ -218,10 +256,9 @@ export default function CustomerAccount() {
                         onChange={setPin}
                       >
                         <InputOTPGroup>
-                          <InputOTPSlot index={0} className="w-12 h-14 text-xl font-bold border-gold/30" />
-                          <InputOTPSlot index={1} className="w-12 h-14 text-xl font-bold border-gold/30" />
-                          <InputOTPSlot index={2} className="w-12 h-14 text-xl font-bold border-gold/30" />
-                          <InputOTPSlot index={3} className="w-12 h-14 text-xl font-bold border-gold/30" />
+                          {Array.from({ length: 4 }).map((_, index) => (
+                            <PinSlot key={index} index={index} showPin={showPin} />
+                          ))}
                         </InputOTPGroup>
                       </InputOTP>
                     </div>
@@ -230,8 +267,8 @@ export default function CustomerAccount() {
                     </p>
                   </div>
 
-                  <Button 
-                    type="submit" 
+                  <Button
+                    type="submit"
                     className="w-full btn-luck py-6 text-lg font-bold"
                     disabled={isSubmitting}
                   >
@@ -258,8 +295,8 @@ export default function CustomerAccount() {
 
           {/* Back to home */}
           <div className="mt-6 text-center">
-            <Link 
-              to="/" 
+            <Link
+              to="/"
               className="inline-flex items-center justify-center gap-2 text-sm text-muted-foreground hover:text-emerald transition-colors"
             >
               <ArrowLeft className="w-4 h-4" />

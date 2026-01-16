@@ -1,10 +1,14 @@
 services:
   - type: web
     name: rifa-facil-app
-    env: static
+    runtime: static
     region: ohio
     buildCommand: pnpm install && pnpm run build
     staticPublishPath: dist
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
     envVars:
       - key: VITE_SUPABASE_URL
         sync: false

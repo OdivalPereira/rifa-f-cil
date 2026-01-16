@@ -1,10 +1,10 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import { RaffleHero } from '@/components/raffle/RaffleHero';
 import { ReferralPromo } from '@/components/raffle/ReferralPromo';
 import { BuyerForm } from '@/components/raffle/BuyerForm';
 import { PixPayment } from '@/components/raffle/PixPayment';
 import { NumberSelector } from '@/components/raffle/NumberSelector';
-import { useActiveRaffle, useSoldNumbers, useCreatePurchase, useReserveNumbers } from '@/hooks/useRaffle';
+import { useActiveRaffle, useSoldNumbers, useCreatePurchase, useReserveNumbers, usePrefetchRaffleData } from '@/hooks/useRaffle';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, Search, Sparkles, Star, Clover, Heart, User, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -13,6 +13,8 @@ import { SlotMachineFrame } from '@/components/SlotMachineFrame';
 import type { BuyerFormData } from '@/lib/validators';
 import { useAuth } from '@/hooks/useAuth';
 import { useCustomerAuth } from '@/hooks/useCustomerAuth';
+import { Loader } from '@/components/ui/Loader';
+import { useSocialProofToasts } from '@/components/raffle/SocialProofToast';
 
 type Step = 'hero' | 'form' | 'payment' | 'numbers' | 'success';
 
@@ -26,35 +28,45 @@ export default function Index() {
     quantity: number;
     amount: number;
     expiresAt: string;
+    phone: string;
   } | null>(null);
 
   const { data: raffle, isLoading: raffleLoading } = useActiveRaffle();
   const { data: soldNumbersData } = useSoldNumbers(raffle?.id);
   const createPurchase = useCreatePurchase();
   const reserveNumbers = useReserveNumbers();
+  const { prefetch: prefetchRaffleDetails } = usePrefetchRaffleData(raffle?.id);
+
+  // Enable social proof toasts and prefetch detailed data when on hero step
+  useEffect(() => {
+    if (step === 'hero' && raffle?.id) {
+      prefetchRaffleDetails();
+    }
+  }, [step, raffle?.id, prefetchRaffleDetails]);
+
+  useSocialProofToasts({ enabled: step === 'hero' && !!raffle });
 
   const { soldNumbers, pendingNumbers } = useMemo(() => {
-    if (!soldNumbersData) return { soldNumbers: [], pendingNumbers: [] };
+    if (!soldNumbersData) return { soldNumbers: new Set<number>(), pendingNumbers: new Set<number>() };
 
-    const sold: number[] = [];
-    const pending: number[] = [];
+    const sold = new Set<number>();
+    const pending = new Set<number>();
 
-    // O(N) single-pass iteration to split numbers into sold/pending arrays
-    // More efficient than filtering independently (approx O(4N)) inside render
+    // O(N) single-pass iteration to split numbers into sold/pending sets
     for (const n of soldNumbersData) {
       if (n.confirmed_at) {
-        sold.push(n.number);
+        sold.add(n.number);
       } else {
-        pending.push(n.number);
+        pending.add(n.number);
       }
     }
 
     return { soldNumbers: sold, pendingNumbers: pending };
   }, [soldNumbersData]);
 
-  const handleParticipate = () => setStep('form');
+  const handleParticipate = useCallback(() => setStep('form'), []);
 
-  const handleBuyerSubmit = async (data: BuyerFormData & { quantity: number }) => {
+  const handleBuyerSubmit = useCallback(async (data: BuyerFormData & { quantity: number }) => {
     if (!raffle) return;
 
     try {
@@ -72,6 +84,7 @@ export default function Index() {
         quantity: data.quantity,
         amount: Number(purchase.total_amount),
         expiresAt: purchase.expires_at,
+        phone: data.phone,
       });
 
       setStep('payment');
@@ -82,9 +95,9 @@ export default function Index() {
         variant: 'destructive',
       });
     }
-  };
+  }, [raffle, createPurchase, toast]);
 
-  const handleNumbersConfirm = async (numbers: number[]) => {
+  const handleNumbersConfirm = useCallback(async (numbers: number[]) => {
     if (!raffle || !purchaseData) return;
 
     try {
@@ -106,44 +119,34 @@ export default function Index() {
         variant: 'destructive',
       });
     }
-  };
+  }, [raffle, purchaseData, reserveNumbers, toast]);
 
-  if (raffleLoading) {
-    return (
-      <SlotMachineFrame>
-        {/* ADICIONE ESTA BARRA DE TESTE */}
-        <div className="bg-red-600 text-white text-center py-4 font-bold text-xl z-50 relative border-b-4 border-yellow-400">
-          🚧 VERSÃO DE DEBUG V10 - SE VOCÊ VÊ ISSO, O DEPLOY FUNCIONOU 🚧
-        </div>
-        <div className="min-h-screen flex items-center justify-center">
-          <div className="text-center space-y-4">
+  const renderContent = () => {
+    if (raffleLoading) {
+      return (
+        <div className="min-h-[60vh] flex items-center justify-center">
+          <div className="text-center space-y-4" role="status" aria-live="polite">
             <div className="relative">
-              <Loader2 className="w-14 h-14 animate-spin text-gold mx-auto" />
+              <Loader />
               <Sparkles className="w-6 h-6 text-emerald absolute -top-2 -right-2 animate-sparkle" />
               <Star className="w-5 h-5 text-gold absolute -bottom-1 -left-1 animate-sparkle" style={{ animationDelay: '0.5s' }} />
             </div>
             <p className="text-gold/80 font-medium">Carregando sua sorte...</p>
           </div>
         </div>
-      </SlotMachineFrame>
-    );
-  }
+      );
+    }
 
-  if (!raffle) {
-    return (
-      <SlotMachineFrame>
-        {/* ADICIONE ESTA BARRA DE TESTE */}
-        <div className="bg-red-600 text-white text-center py-4 font-bold text-xl z-50 relative border-b-4 border-yellow-400">
-          🚧 VERSÃO DE DEBUG V10 - SE VOCÊ VÊ ISSO, O DEPLOY FUNCIONOU 🚧
-        </div>
-        <div className="min-h-screen flex flex-col items-center justify-center p-4">
+    if (!raffle) {
+      return (
+        <div className="min-h-[60vh] flex flex-col items-center justify-center p-4">
           <div className="text-center space-y-6 max-w-md">
             <div className="relative inline-block">
               <Clover className="w-24 h-24 text-emerald/40 clover-icon animate-pulse-slow" />
               <Star className="w-8 h-8 text-gold absolute -top-2 -right-2 animate-sparkle" />
             </div>
-            <h1 className="text-3xl font-display font-bold text-gradient-gold">Nenhuma rifa ativa</h1>
-            <p className="text-muted-foreground">Volte em breve para tentar a sorte! ✨</p>
+            <h1 className="text-3xl font-display font-bold text-gradient-gold">Aguarde Novidades</h1>
+            <p className="text-muted-foreground">Estamos preparando algo incrível para você! ✨</p>
             <Link to="/meus-numeros">
               <Button className="btn-gold">
                 <Search className="w-4 h-4 mr-2" />
@@ -152,20 +155,147 @@ export default function Index() {
             </Link>
           </div>
         </div>
-      </SlotMachineFrame>
+      );
+    }
+    // ...
+
+    return (
+      <div>
+        {step === 'hero' && (
+          <>
+            <RaffleHero
+              title={raffle.title}
+              description={raffle.description}
+              prizeDescription={raffle.prize_description}
+              prizeDrawDetails={raffle.prize_draw_details}
+              prizeTopBuyer={raffle.prize_top_buyer}
+              prizeTopBuyerDetails={raffle.prize_top_buyer_details}
+              prizeSecondTopBuyer={raffle.prize_second_top_buyer}
+              prizeSecondTopBuyerDetails={raffle.prize_second_top_buyer_details}
+
+              // New Gamification Props
+              enableReferral1st={raffle.enable_referral_1st}
+              prizeReferral1st={raffle.prize_referral_1st}
+              referralThreshold={raffle.referral_threshold}
+              enableBuyer1st={raffle.enable_buyer_1st}
+              prizeBuyer1st={raffle.prize_buyer_1st}
+              enableReferralRunners={raffle.enable_referral_runners}
+              prizeReferralRunners={raffle.prize_referral_runners}
+              enableBuyerRunners={raffle.enable_buyer_runners}
+              prizeBuyerRunners={raffle.prize_buyer_runners}
+
+              imageUrl={raffle.image_url}
+              pricePerNumber={Number(raffle.price_per_number)}
+              totalNumbers={raffle.total_numbers}
+              soldNumbers={soldNumbers.size}
+              drawDate={raffle.draw_date}
+              onParticipate={handleParticipate}
+            />
+            <ReferralPromo />
+          </>
+        )}
+
+        {step === 'form' && (
+          <div className="min-h-[calc(100vh-3rem)] sm:min-h-[calc(100vh-3.5rem)] flex items-center justify-center p-3 sm:p-4">
+            <BuyerForm
+              pricePerNumber={Number(raffle.price_per_number)}
+              maxNumbers={raffle.total_numbers - soldNumbers.size}
+              onSubmit={handleBuyerSubmit}
+              isLoading={createPurchase.isPending}
+            />
+          </div>
+        )}
+
+        {step === 'payment' && purchaseData && raffle.pix_key && (
+          <div className="min-h-[calc(100vh-3rem)] sm:min-h-[calc(100vh-3.5rem)] flex items-center justify-center p-3 sm:p-4">
+            <div className="space-y-4 sm:space-y-6 w-full max-w-lg">
+              <PixPayment
+                amount={purchaseData.amount}
+                pixKey={raffle.pix_key}
+                pixKeyType={raffle.pix_key_type || 'random'}
+                beneficiaryName={raffle.pix_beneficiary_name || 'Organizador'}
+                purchaseId={purchaseData.id}
+                expiresAt={purchaseData.expiresAt}
+                buyerPhone={purchaseData.phone}
+                quantity={purchaseData.quantity}
+                raffleShortCode={(raffle as any).short_code || 'RIFA'}
+              />
+              <div className="text-center px-4">
+                <Button
+                  onClick={() => setStep('numbers')}
+                  className="btn-luck text-primary-foreground font-bold w-full sm:w-auto text-sm sm:text-base py-4 sm:py-5"
+                >
+                  <Sparkles className="w-4 h-4 mr-2" />
+                  <span className="hidden sm:inline">Já paguei - Escolher meus números</span>
+                  <span className="sm:hidden">Já paguei - Escolher números</span>
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {step === 'numbers' && purchaseData && (
+          <div className="min-h-[calc(100vh-3rem)] sm:min-h-[calc(100vh-3.5rem)] flex items-center justify-center p-2 sm:p-4">
+            <NumberSelector
+              raffleId={raffle.id}
+              totalNumbers={raffle.total_numbers}
+              quantityToSelect={purchaseData.quantity}
+              soldNumbers={soldNumbers}
+              pendingNumbers={pendingNumbers}
+              onConfirm={handleNumbersConfirm}
+              isLoading={reserveNumbers.isPending}
+            />
+          </div>
+        )}
+
+        {step === 'success' && (
+          <div className="min-h-[calc(100vh-3rem)] sm:min-h-[calc(100vh-3.5rem)] flex items-center justify-center p-4">
+            <div className="text-center space-y-6 sm:space-y-8 max-w-md">
+              {/* Animated success icon */}
+              <div className="relative inline-block">
+                <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-full bg-gradient-to-br from-emerald to-emerald-light flex items-center justify-center mx-auto glow-emerald animate-pulse-glow">
+                  <Clover className="w-12 h-12 sm:w-16 sm:h-16 text-primary-foreground" />
+                </div>
+                <Star className="w-8 h-8 sm:w-10 sm:h-10 text-gold absolute -top-2 -right-2 animate-sparkle" />
+                <Sparkles className="w-6 h-6 sm:w-8 sm:h-8 text-gold absolute -bottom-1 -left-1 animate-sparkle" style={{ animationDelay: '0.5s' }} />
+              </div>
+
+              <div className="space-y-2 sm:space-y-3">
+                <h1 className="text-2xl sm:text-4xl font-display font-bold text-gradient-gold">Números Reservados!</h1>
+                <p className="text-lg sm:text-xl text-emerald font-medium">Boa sorte no sorteio! 🎰</p>
+              </div>
+
+              <p className="text-sm sm:text-base text-muted-foreground px-4">
+                Seus números da sorte foram reservados. Após a confirmação do pagamento, você receberá um e-mail de confirmação.
+              </p>
+
+              <div className="flex flex-col gap-3 justify-center px-4">
+                <Button
+                  onClick={() => setStep('hero')}
+                  className="btn-luck text-primary-foreground font-bold w-full"
+                >
+                  <Clover className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
+                  Voltar ao início
+                </Button>
+                <Link to="/meus-numeros" className="w-full">
+                  <Button variant="outline" className="border-gold/30 hover:border-gold hover:bg-gold/10 w-full">
+                    <Star className="w-4 h-4 mr-2 text-gold" />
+                    Ver meus números
+                  </Button>
+                </Link>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
     );
-  }
+  };
 
   return (
     <SlotMachineFrame showDecorations={step === 'hero' || step === 'success'}>
-      {/* ADICIONE ESTA BARRA DE TESTE */}
-      <div className="bg-red-600 text-white text-center py-4 font-bold text-xl z-50 relative border-b-4 border-yellow-400">
-        🚧 VERSÃO DE DEBUG V10 - SE VOCÊ VÊ ISSO, O DEPLOY FUNCIONOU 🚧
-      </div>
-
       {/* Header */}
       <header className="sticky top-0 z-50 bg-card/80 backdrop-blur-md border-b border-gold/20">
-        <div className="container mx-auto px-3 sm:px-4 h-12 sm:h-14 flex items-center justify-between">
+        <div className="container mx-auto px-2 sm:px-4 h-12 sm:h-14 flex items-center justify-between">
           <div className="flex items-center">
             <span className="font-display font-bold text-base sm:text-lg text-gradient-gold">OD</span>
             <span className="relative w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center -ml-0.5">
@@ -219,119 +349,7 @@ export default function Index() {
         </div>
       </header>
 
-      <div>
-        {step === 'hero' && (
-          <>
-            <RaffleHero
-              title={raffle.title}
-              description={raffle.description}
-              prizeDescription={raffle.prize_description}
-              prizeDrawDetails={raffle.prize_draw_details}
-              prizeTopBuyer={raffle.prize_top_buyer}
-              prizeTopBuyerDetails={raffle.prize_top_buyer_details}
-              prizeSecondTopBuyer={raffle.prize_second_top_buyer}
-              prizeSecondTopBuyerDetails={raffle.prize_second_top_buyer_details}
-              imageUrl={raffle.image_url}
-              pricePerNumber={Number(raffle.price_per_number)}
-              totalNumbers={raffle.total_numbers}
-              soldNumbers={soldNumbers.length}
-              drawDate={raffle.draw_date}
-              onParticipate={handleParticipate}
-            />
-            <ReferralPromo />
-          </>
-        )}
-
-        {step === 'form' && (
-          <div className="min-h-[calc(100vh-3rem)] sm:min-h-[calc(100vh-3.5rem)] flex items-center justify-center p-3 sm:p-4">
-            <BuyerForm
-              pricePerNumber={Number(raffle.price_per_number)}
-              maxNumbers={raffle.total_numbers - soldNumbers.length}
-              onSubmit={handleBuyerSubmit}
-              isLoading={createPurchase.isPending}
-            />
-          </div>
-        )}
-
-        {step === 'payment' && purchaseData && raffle.pix_key && (
-          <div className="min-h-[calc(100vh-3rem)] sm:min-h-[calc(100vh-3.5rem)] flex items-center justify-center p-3 sm:p-4">
-            <div className="space-y-4 sm:space-y-6 w-full max-w-lg">
-              <PixPayment
-                amount={purchaseData.amount}
-                pixKey={raffle.pix_key}
-                pixKeyType={raffle.pix_key_type || 'random'}
-                beneficiaryName={raffle.pix_beneficiary_name || 'Organizador'}
-                purchaseId={purchaseData.id}
-                expiresAt={purchaseData.expiresAt}
-              />
-              <div className="text-center px-4">
-                <Button 
-                  onClick={() => setStep('numbers')}
-                  className="btn-luck text-primary-foreground font-bold w-full sm:w-auto text-sm sm:text-base py-4 sm:py-5"
-                >
-                  <Sparkles className="w-4 h-4 mr-2" />
-                  <span className="hidden sm:inline">Já paguei - Escolher meus números</span>
-                  <span className="sm:hidden">Já paguei - Escolher números</span>
-                </Button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {step === 'numbers' && purchaseData && (
-          <div className="min-h-[calc(100vh-3rem)] sm:min-h-[calc(100vh-3.5rem)] flex items-center justify-center p-2 sm:p-4">
-            <NumberSelector
-              raffleId={raffle.id}
-              totalNumbers={raffle.total_numbers}
-              quantityToSelect={purchaseData.quantity}
-              soldNumbers={soldNumbers}
-              pendingNumbers={pendingNumbers}
-              onConfirm={handleNumbersConfirm}
-              isLoading={reserveNumbers.isPending}
-            />
-          </div>
-        )}
-
-        {step === 'success' && (
-          <div className="min-h-[calc(100vh-3rem)] sm:min-h-[calc(100vh-3.5rem)] flex items-center justify-center p-4">
-            <div className="text-center space-y-6 sm:space-y-8 max-w-md">
-              {/* Animated success icon */}
-              <div className="relative inline-block">
-                <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-full bg-gradient-to-br from-emerald to-emerald-light flex items-center justify-center mx-auto glow-emerald animate-pulse-glow">
-                  <Clover className="w-12 h-12 sm:w-16 sm:h-16 text-primary-foreground" />
-                </div>
-                <Star className="w-8 h-8 sm:w-10 sm:h-10 text-gold absolute -top-2 -right-2 animate-sparkle" />
-                <Sparkles className="w-6 h-6 sm:w-8 sm:h-8 text-gold absolute -bottom-1 -left-1 animate-sparkle" style={{ animationDelay: '0.5s' }} />
-              </div>
-              
-              <div className="space-y-2 sm:space-y-3">
-                <h1 className="text-2xl sm:text-4xl font-display font-bold text-gradient-gold">Números Reservados!</h1>
-                <p className="text-lg sm:text-xl text-emerald font-medium">Boa sorte no sorteio! 🎰</p>
-              </div>
-              
-              <p className="text-sm sm:text-base text-muted-foreground px-4">
-                Seus números da sorte foram reservados. Após a confirmação do pagamento, você receberá um e-mail de confirmação.
-              </p>
-              
-              <div className="flex flex-col gap-3 justify-center px-4">
-                <Button 
-                  onClick={() => setStep('hero')} 
-                  className="btn-luck text-primary-foreground font-bold w-full"
-                >
-                  <Clover className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
-                  Voltar ao início
-                </Button>
-                <Link to="/meus-numeros" className="w-full">
-                  <Button variant="outline" className="border-gold/30 hover:border-gold hover:bg-gold/10 w-full">
-                    <Star className="w-4 h-4 mr-2 text-gold" />
-                    Ver meus números
-                  </Button>
-                </Link>
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
+      {renderContent()}
     </SlotMachineFrame>
   );
 }
