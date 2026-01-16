@@ -9,3 +9,7 @@
 ## 2024-05-25 - Accessible Form Validation
 **Learning:** Simply displaying error messages is not enough for screen readers. Inputs must be programmatically linked to their error messages using `aria-describedby`, and the message itself needs `role="alert"` to ensure immediate feedback.
 **Action:** Always add `aria-invalid` and `aria-describedby` to inputs when they have validation errors.
+
+## 2024-05-26 - Interactive Card Accessibility
+**Learning:** Interactive cards that trigger modals are frequently implemented as `div`s, excluding keyboard users. Converting them to `<button>` elements requires explicitly setting `text-left` and `w-full` to preserve the card layout while restoring native focus and activation behavior.
+**Action:** When making cards interactive, use `<button type="button">` instead of `div`, and ensure CSS resets (width, text-align) are applied to match the original design.
