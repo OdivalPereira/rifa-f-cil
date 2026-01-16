@@ -166,12 +166,28 @@ export function NumberSelector({
     }
 
     const remaining = quantityToSelect - selectedNumbers.size;
-    const shuffled = available.sort(() => Math.random() - 0.5);
-    const newNumbers = shuffled.slice(0, remaining);
+    const newNumbers: number[] = [];
+
+    // Optimization: Partial Fisher-Yates shuffle - O(k)
+    // Avoids sorting the entire array which is O(N log N)
+    if (available.length <= remaining) {
+      available.forEach((n) => newNumbers.push(n));
+    } else {
+      let m = available.length;
+      for (let i = 0; i < remaining; i++) {
+        const r = Math.floor(Math.random() * m);
+        newNumbers.push(available[r]);
+
+        // Swap-delete: Move last element to the selected position
+        // This is O(1)
+        available[r] = available[m - 1];
+        m--;
+      }
+    }
 
     setSelectedNumbers((prev) => {
       const newSet = new Set(prev);
-      newNumbers.forEach((n) => newSet.add(n));
+      selected.forEach((n) => newSet.add(n));
       return newSet;
     });
   }, [totalNumbers, unavailableNumbers, selectedNumbers, quantityToSelect]);
