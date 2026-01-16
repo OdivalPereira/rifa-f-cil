@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback, useEffect, memo } from 'react';
+import { useState, useMemo, useCallback, useEffect, memo, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -106,15 +106,18 @@ export function NumberSelector({
     };
   }, [raffleId]);
 
-  // All unavailable numbers (sold + pending)
-  const unavailableNumbers = useMemo(() => {
-    // Merging two sets efficiently
-    const combined = new Set(soldNumbers);
-    for (const num of pendingNumbers) {
-      combined.add(num);
-    }
-    return combined;
-  }, [soldNumbers, pendingNumbers]);
+  // Optimization: Use refs for sold/pending numbers to stabilize callbacks
+  // This prevents re-rendering all buttons when one number changes status (e.g. via realtime)
+  const soldNumbersRef = useRef(soldNumbers);
+  const pendingNumbersRef = useRef(pendingNumbers);
+
+  useEffect(() => {
+    soldNumbersRef.current = soldNumbers;
+  }, [soldNumbers]);
+
+  useEffect(() => {
+    pendingNumbersRef.current = pendingNumbers;
+  }, [pendingNumbers]);
 
   // Generate available numbers for current page
   const displayedNumbers = useMemo(() => {
@@ -144,7 +147,8 @@ export function NumberSelector({
   const totalPages = Math.ceil(totalNumbers / numbersPerPage);
 
   const toggleNumber = useCallback((num: number) => {
-    if (unavailableNumbers.has(num)) return;
+    // Optimization: Check against refs to avoid recreating this function when sets change
+    if (soldNumbersRef.current.has(num) || pendingNumbersRef.current.has(num)) return;
 
     setSelectedNumbers((prev) => {
       const newSet = new Set(prev);
@@ -155,13 +159,17 @@ export function NumberSelector({
       }
       return newSet;
     });
-  }, [unavailableNumbers, quantityToSelect]);
+  }, [quantityToSelect]);
 
   const generateRandomNumbers = useCallback(() => {
     // 1. Identify available numbers (O(N))
     const available: number[] = [];
+    // Optimization: Check sets directly instead of creating a combined Set (O(N) operation avoided)
+    const isSold = (n: number) => soldNumbersRef.current.has(n);
+    const isPending = (n: number) => pendingNumbersRef.current.has(n);
+
     for (let i = 1; i <= totalNumbers; i++) {
-      if (!unavailableNumbers.has(i) && !selectedNumbers.has(i)) {
+      if (!isSold(i) && !isPending(i) && !selectedNumbers.has(i)) {
         available.push(i);
       }
     }
@@ -191,7 +199,7 @@ export function NumberSelector({
       newNumbers.forEach((n) => newSet.add(n));
       return newSet;
     });
-  }, [totalNumbers, unavailableNumbers, selectedNumbers, quantityToSelect]);
+  }, [totalNumbers, selectedNumbers, quantityToSelect]);
 
   const clearSelection = () => {
     setSelectedNumbers(new Set());
