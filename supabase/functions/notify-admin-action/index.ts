@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
     'Access-Control-Allow-Origin': '*',
@@ -22,9 +23,9 @@ serve(async (req) => {
     }
 
     try {
-        const { event, raffle_id, raffle_title, deleted_at } = await req.json();
+        const { event, raffle_id, raffle_title: payload_title, deleted_at: payload_deleted_at } = await req.json();
 
-        console.log(`Received event: ${event}`, { raffle_id, raffle_title, deleted_at });
+        console.log(`Received event: ${event}`, { raffle_id, payload_title, payload_deleted_at });
 
         // Check for both event names to support legacy/different triggers
         if (event !== 'raffle_soft_deleted' && event !== 'soft_delete') {
@@ -33,6 +34,47 @@ serve(async (req) => {
                 { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
             );
         }
+
+        // 🛡️ SENTINEL SECURITY CHECK
+        // Verify the raffle actually exists and is deleted in the database.
+        // This prevents unauthorized calls (spoofing) and ensures data integrity.
+        const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+        const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+        const supabase = createClient(supabaseUrl, supabaseKey);
+
+        const { data: raffle, error: dbError } = await supabase
+            .from('raffles')
+            .select('id, title, deleted_at')
+            .eq('id', raffle_id)
+            .maybeSingle();
+
+        if (dbError) {
+            console.error('Database verification failed:', dbError);
+            return new Response(
+                JSON.stringify({ error: 'Database verification failed' }),
+                { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+            );
+        }
+
+        if (!raffle) {
+            console.warn(`Security: Attempt to notify for non-existent raffle ${raffle_id}`);
+            return new Response(
+                JSON.stringify({ error: 'Raffle not found' }),
+                { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+            );
+        }
+
+        if (!raffle.deleted_at) {
+            console.warn(`Security: Attempt to notify for active raffle ${raffle_id}`);
+            return new Response(
+                JSON.stringify({ error: 'Raffle is not deleted' }),
+                { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+            );
+        }
+
+        // Use trusted data from DB instead of payload
+        const raffle_title = raffle.title;
+        const deleted_at = raffle.deleted_at;
 
         // Configurações de e-mail
         const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY');
