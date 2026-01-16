@@ -26,6 +26,8 @@ const AdminDraw = lazy(() => import("./pages/admin/AdminDraw"));
 const AdminCustomers = lazy(() => import("./pages/admin/AdminCustomers"));
 const AdminReferralSettings = lazy(() => import("./pages/admin/AdminReferralSettings"));
 const AdminRankings = lazy(() => import("./pages/admin/AdminRankings"));
+const OrganizerSettings = lazy(() => import("./pages/admin/OrganizerSettings"));
+const OrganizerSignup = lazy(() => import("./pages/OrganizerSignup"));
 
 const queryClient = new QueryClient();
 
@@ -64,8 +66,11 @@ const App = () => (
                   <Route path="clientes" element={<AdminCustomers />} />
                   <Route path="rankings" element={<AdminRankings />} />
                   <Route path="referral-settings" element={<AdminReferralSettings />} />
+                  <Route path="settings" element={<OrganizerSettings />} />
                 </Route>
               </Route>
+
+              <Route path="/signup-organizer" element={<OrganizerSignup />} />
 
               {/* Catch-all */}
               <Route path="*" element={<NotFound />} />

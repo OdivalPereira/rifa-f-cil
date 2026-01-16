@@ -26,7 +26,8 @@ import {
   Star,
   Users,
   MessageSquareShare,
-  BarChart3
+  BarChart3,
+  Settings
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { SlotMachineFrame } from '@/components/SlotMachineFrame';
@@ -40,6 +41,7 @@ const menuItems = [
   { title: 'Rankings', url: '/admin/rankings', icon: BarChart3 },
   { title: 'Clientes', url: '/admin/clientes', icon: Users },
   { title: 'Indicações', url: '/admin/referral-settings', icon: MessageSquareShare },
+  { title: 'Configurações', url: '/admin/settings', icon: Settings },
 ];
 
 export default function AdminLayout() {

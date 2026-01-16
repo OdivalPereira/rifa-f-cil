@@ -41,6 +41,36 @@ export type Database = {
         }
         Relationships: []
       }
+      organizer_profiles: {
+        Row: {
+          id: string
+          organization_name: string
+          logo_url: string | null
+          support_phone: string | null
+          support_email: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id: string
+          organization_name: string
+          logo_url?: string | null
+          support_phone?: string | null
+          support_email?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          organization_name?: string
+          logo_url?: string | null
+          support_phone?: string | null
+          support_email?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       purchases: {
         Row: {
           approved_at: string | null
@@ -202,6 +232,7 @@ export type Database = {
           winner_top_buyer_name: string | null
           winner_top_buyer_number: number | null
           deleted_at: string | null
+          owner_id: string | null
         }
         Insert: {
           created_at?: string
