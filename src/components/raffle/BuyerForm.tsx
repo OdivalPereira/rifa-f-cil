@@ -120,7 +120,8 @@ export const BuyerForm = memo(({
                     htmlFor="name"
                     className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-muted-foreground"
                   >
-                    <User className="w-3.5 h-3.5 text-emerald" /> Seu Nome <span className="text-destructive" aria-hidden="true">*</span>
+                    <User className="w-3.5 h-3.5 text-emerald" /> Seu Nome
+                    <span className="text-destructive ml-1">*</span>
                   </Label>
                   <Input
                     id="name"
@@ -150,7 +151,8 @@ export const BuyerForm = memo(({
                       htmlFor="phone"
                       className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-muted-foreground"
                     >
-                      <Phone className="w-3.5 h-3.5 text-emerald" /> WhatsApp <span className="text-destructive" aria-hidden="true">*</span>
+                      <Phone className="w-3.5 h-3.5 text-emerald" /> WhatsApp
+                      <span className="text-destructive ml-1">*</span>
                     </Label>
                     <Input
                       id="phone"
@@ -213,7 +215,8 @@ export const BuyerForm = memo(({
                       htmlFor="email"
                       className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-muted-foreground"
                     >
-                      <Mail className="w-3.5 h-3.5 text-emerald" /> E-mail <span className="text-destructive" aria-hidden="true">*</span>
+                      <Mail className="w-3.5 h-3.5 text-emerald" /> E-mail
+                      <span className="text-destructive ml-1">*</span>
                     </Label>
                     <Input
                       id="email"
@@ -320,6 +323,7 @@ export const BuyerForm = memo(({
                   min={1}
                   max={Math.min(500, maxNumbers)}
                   step={1}
+                  aria-label="Selecionar quantidade de cotas"
                   className="py-4 cursor-pointer"
                 />
                 <div className="flex justify-between items-center bg-black/30 p-3 rounded-2xl border border-white/5 shadow-inner">
