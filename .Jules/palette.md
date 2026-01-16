@@ -6,6 +6,6 @@
 **Learning:** Adding `autoComplete` attributes (e.g., `name`, `email`, `tel`) to form inputs significantly speeds up form completion on mobile devices by allowing one-tap filling from the OS keychain/browser.
 **Action:** Ensure all standard user data inputs (name, email, phone, address) have the correct `autoComplete` attribute explicitly defined.
 
-## 2026-01-15 - Accessible Form Validation & Sliders
-**Learning:** Complex interactive components like `Slider` require explicit `aria-label` props for screen reader context, as they lack inherent text labels. Additionally, form validation errors are often not programmatically linked to inputs; using `aria-describedby` with `role="alert"` ensures users are immediately aware of validation issues.
-**Action:** When implementing forms, always link error message IDs to input `aria-describedby` attributes and ensure all icon-only or abstract controls (like sliders) have descriptive `aria-label`s.
+## 2024-05-25 - Accessible Form Validation
+**Learning:** Simply displaying error messages is not enough for screen readers. Inputs must be programmatically linked to their error messages using `aria-describedby`, and the message itself needs `role="alert"` to ensure immediate feedback.
+**Action:** Always add `aria-invalid` and `aria-describedby` to inputs when they have validation errors.
