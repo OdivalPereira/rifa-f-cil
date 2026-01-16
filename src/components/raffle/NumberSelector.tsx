@@ -167,31 +167,28 @@ export function NumberSelector({
     }
 
     const remaining = quantityToSelect - selectedNumbers.size;
-    if (remaining <= 0) return;
-
-    // 2. Partial Fisher-Yates Shuffle (O(k))
-    // Optimization: We only need 'remaining' random numbers.
-    // Instead of sorting the whole array (O(N log N)), we pick k random items (O(k)).
-    const count = Math.min(remaining, available.length);
     const newNumbers: number[] = [];
 
-    if (count >= available.length) {
-      newNumbers.push(...available);
+    // Optimization: Partial Fisher-Yates shuffle - O(k)
+    // Avoids sorting the entire array which is O(N log N)
+    if (available.length <= remaining) {
+      available.forEach((n) => newNumbers.push(n));
     } else {
       let m = available.length;
-      for (let i = 0; i < count; i++) {
-        const r = Math.floor(Math.random() * m--);
-        const val = available[r];
-        newNumbers.push(val);
-        // Move the last available element to the picked slot to avoid gaps
-        // We don't need to preserve order, so this is O(1) swap-and-pop equivalent
-        available[r] = available[m];
+      for (let i = 0; i < remaining; i++) {
+        const r = Math.floor(Math.random() * m);
+        newNumbers.push(available[r]);
+
+        // Swap-delete: Move last element to the selected position
+        // This is O(1)
+        available[r] = available[m - 1];
+        m--;
       }
     }
 
     setSelectedNumbers((prev) => {
       const newSet = new Set(prev);
-      newNumbers.forEach((n) => newSet.add(n));
+      selected.forEach((n) => newSet.add(n));
       return newSet;
     });
   }, [totalNumbers, unavailableNumbers, selectedNumbers, quantityToSelect]);
