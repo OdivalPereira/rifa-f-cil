@@ -166,18 +166,23 @@ export function NumberSelector({
     }
 
     const remaining = quantityToSelect - selectedNumbers.size;
-    // Optimization: Partial Fisher-Yates shuffle to pick K numbers.
-    // Replaced O(N log N) full sort with O(N) + O(K) partial shuffle.
-    // Benchmark: 8.7x faster for 100k items (85ms -> 10ms).
-    const finalCount = Math.min(remaining, available.length);
     const newNumbers: number[] = [];
 
-    for (let i = 0; i < finalCount; i++) {
-      const j = Math.floor(Math.random() * (available.length - i)) + i;
-      const temp = available[i];
-      available[i] = available[j];
-      available[j] = temp;
-      newNumbers.push(available[i]);
+    // Optimization: Partial Fisher-Yates shuffle - O(k)
+    // Avoids sorting the entire array which is O(N log N)
+    if (available.length <= remaining) {
+      available.forEach((n) => newNumbers.push(n));
+    } else {
+      let m = available.length;
+      for (let i = 0; i < remaining; i++) {
+        const r = Math.floor(Math.random() * m);
+        newNumbers.push(available[r]);
+
+        // Swap-delete: Move last element to the selected position
+        // This is O(1)
+        available[r] = available[m - 1];
+        m--;
+      }
     }
 
     setSelectedNumbers((prev) => {

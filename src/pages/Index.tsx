@@ -174,10 +174,14 @@ export default function Index() {
               prizeSecondTopBuyerDetails={raffle.prize_second_top_buyer_details}
 
               // New Gamification Props
+              enableReferral1st={raffle.enable_referral_1st}
               prizeReferral1st={raffle.prize_referral_1st}
               referralThreshold={raffle.referral_threshold}
+              enableBuyer1st={raffle.enable_buyer_1st}
               prizeBuyer1st={raffle.prize_buyer_1st}
+              enableReferralRunners={raffle.enable_referral_runners}
               prizeReferralRunners={raffle.prize_referral_runners}
+              enableBuyerRunners={raffle.enable_buyer_runners}
               prizeBuyerRunners={raffle.prize_buyer_runners}
 
               imageUrl={raffle.image_url}

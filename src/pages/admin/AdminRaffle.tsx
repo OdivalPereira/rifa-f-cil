@@ -5,6 +5,7 @@ import { z } from 'zod';
 import { useAllRaffles, useUpsertRaffle, useSoftDeleteRaffle, useRestoreRaffle, useDeletedRaffles } from '@/hooks/useAdmin';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -31,10 +32,17 @@ const raffleSchema = z.object({
   prize_draw_details: z.string().optional(),
 
   // New Gamification Fields
+  enable_referral_1st: z.boolean().default(false),
   prize_referral_1st: z.string().optional(),
   referral_threshold: z.coerce.number().optional(),
+
+  enable_buyer_1st: z.boolean().default(false),
   prize_buyer_1st: z.string().optional(),
+
+  enable_referral_runners: z.boolean().default(false),
   prize_referral_runners: z.string().optional(),
+
+  enable_buyer_runners: z.boolean().default(false),
   prize_buyer_runners: z.string().optional(),
 
   // Legacy fields (kept for compatibility or hidden)
@@ -53,6 +61,35 @@ const raffleSchema = z.object({
   pix_change_notification_email: z.string().email('Email inválido').optional().or(z.literal('')),
   status: z.enum(['draft', 'active', 'completed', 'cancelled']).optional(),
   draw_date: z.string().optional(),
+}).superRefine((data, ctx) => {
+  if (data.enable_referral_1st && !data.prize_referral_1st) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: 'Descrição obrigatória para prêmio ativado',
+      path: ['prize_referral_1st'],
+    });
+  }
+  if (data.enable_buyer_1st && !data.prize_buyer_1st) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: 'Descrição obrigatória para prêmio ativado',
+      path: ['prize_buyer_1st'],
+    });
+  }
+  if (data.enable_referral_runners && !data.prize_referral_runners) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: 'Descrição obrigatória para prêmio ativado',
+      path: ['prize_referral_runners'],
+    });
+  }
+  if (data.enable_buyer_runners && !data.prize_buyer_runners) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: 'Descrição obrigatória para prêmio ativado',
+      path: ['prize_buyer_runners'],
+    });
+  }
 });
 
 type RaffleFormData = z.infer<typeof raffleSchema>;
@@ -65,10 +102,14 @@ const defaultFormValues: RaffleFormData = {
   description: '',
   prize_description: '',
   prize_draw_details: '',
+  enable_referral_1st: false,
   prize_referral_1st: '',
   referral_threshold: undefined,
+  enable_buyer_1st: false,
   prize_buyer_1st: '',
+  enable_referral_runners: false,
   prize_referral_runners: '',
+  enable_buyer_runners: false,
   prize_buyer_runners: '',
   prize_top_buyer: '',
   prize_top_buyer_details: '',
@@ -135,10 +176,14 @@ export default function AdminRaffle() {
           prize_description: raffle.prize_description,
           prize_draw_details: raffle.prize_draw_details || '',
 
+          enable_referral_1st: raffle.enable_referral_1st || false,
           prize_referral_1st: raffle.prize_referral_1st || '',
           referral_threshold: raffle.referral_threshold || undefined,
+          enable_buyer_1st: raffle.enable_buyer_1st || false,
           prize_buyer_1st: raffle.prize_buyer_1st || '',
+          enable_referral_runners: raffle.enable_referral_runners || false,
           prize_referral_runners: raffle.prize_referral_runners || '',
+          enable_buyer_runners: raffle.enable_buyer_runners || false,
           prize_buyer_runners: raffle.prize_buyer_runners || '',
 
           prize_top_buyer: raffle.prize_top_buyer || '',
@@ -209,10 +254,14 @@ export default function AdminRaffle() {
         prize_description: data.prize_description,
         prize_draw_details: data.prize_draw_details || undefined,
 
+        enable_referral_1st: data.enable_referral_1st,
         prize_referral_1st: data.prize_referral_1st || undefined,
         referral_threshold: data.referral_threshold,
+        enable_buyer_1st: data.enable_buyer_1st,
         prize_buyer_1st: data.prize_buyer_1st || undefined,
+        enable_referral_runners: data.enable_referral_runners,
         prize_referral_runners: data.prize_referral_runners || undefined,
+        enable_buyer_runners: data.enable_buyer_runners,
         prize_buyer_runners: data.prize_buyer_runners || undefined,
 
         prize_top_buyer: data.prize_top_buyer || undefined,
@@ -450,42 +499,74 @@ export default function AdminRaffle() {
               <TabsContent value="indicacoes" className="space-y-6 pt-4">
                 <div className="space-y-4">
                   <div className="border p-4 rounded-md space-y-4 bg-muted/20 border-gold/20">
-                    <h3 className="font-semibold text-gold">Top Indicador (1º Lugar)</h3>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="prize_referral_1st">Descrição do Prêmio</Label>
-                      <Textarea
-                        id="prize_referral_1st"
-                        placeholder="Ex: R$ 500 no PIX para quem mais indicar."
-                        {...register('prize_referral_1st')}
-                      />
+                    <div className="flex items-center justify-between bg-gold/5 p-2 rounded-lg border border-gold/10">
+                      <h3 className="font-semibold text-gold">Top Indicador (1º Lugar)</h3>
+                      <div className="flex items-center gap-2">
+                        <Label htmlFor="enable_referral_1st" className="text-sm font-medium cursor-pointer">Exibir este prêmio?</Label>
+                        <Switch
+                          id="enable_referral_1st"
+                          checked={watch('enable_referral_1st')}
+                          onCheckedChange={(c) => setValue('enable_referral_1st', c)}
+                          className="data-[state=checked]:bg-gold"
+                        />
+                      </div>
                     </div>
 
-                    <div className="space-y-2">
-                      <Label htmlFor="referral_threshold">Meta de Vendas (Gatilho)</Label>
-                      <Input
-                        id="referral_threshold"
-                        type="number"
-                        placeholder="Ex: 6000"
-                        {...register('referral_threshold')}
-                      />
-                      <p className="text-sm text-muted-foreground">
-                        Entregar prêmio imediatamente ao atingir X vendas totais da rifa.
-                      </p>
-                    </div>
+                    {watch('enable_referral_1st') && (
+                      <div className="space-y-4 animate-in fade-in slide-in-from-top-2">
+                        <div className="space-y-2">
+                          <Label htmlFor="prize_referral_1st">Descrição do Prêmio *</Label>
+                          <Textarea
+                            id="prize_referral_1st"
+                            placeholder="Ex: R$ 500 no PIX para quem mais indicar."
+                            {...register('prize_referral_1st')}
+                            className={errors.prize_referral_1st ? 'border-destructive' : ''}
+                          />
+                          {errors.prize_referral_1st && <p className="text-xs text-destructive">{errors.prize_referral_1st.message}</p>}
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label htmlFor="referral_threshold">Meta de Vendas (Gatilho)</Label>
+                          <Input
+                            id="referral_threshold"
+                            type="number"
+                            placeholder="Ex: 6000"
+                            {...register('referral_threshold')}
+                          />
+                          <p className="text-sm text-muted-foreground">
+                            Entregar prêmio imediatamente ao atingir X vendas totais da rifa.
+                          </p>
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                   <div className="border p-4 rounded-md space-y-4 bg-muted/20 border-emerald/20">
-                    <h3 className="font-semibold text-emerald">Indicadores Secundários (2º ao 5º Lugar)</h3>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="prize_referral_runners">Descrição dos Prêmios</Label>
-                      <Textarea
-                        id="prize_referral_runners"
-                        placeholder="Ex: R$ 50 para o 2º, R$ 30 para o 3º... (Opcional)"
-                        {...register('prize_referral_runners')}
-                      />
+                    <div className="flex items-center justify-between bg-emerald/5 p-2 rounded-lg border border-emerald/10">
+                      <h3 className="font-semibold text-emerald">Indicadores Secundários (2º ao 5º Lugar)</h3>
+                      <div className="flex items-center gap-2">
+                        <Label htmlFor="enable_referral_runners" className="text-sm font-medium cursor-pointer">Exibir este prêmio?</Label>
+                        <Switch
+                          id="enable_referral_runners"
+                          checked={watch('enable_referral_runners')}
+                          onCheckedChange={(c) => setValue('enable_referral_runners', c)}
+                          className="data-[state=checked]:bg-emerald"
+                        />
+                      </div>
                     </div>
+
+                    {watch('enable_referral_runners') && (
+                      <div className="space-y-2 animate-in fade-in slide-in-from-top-2">
+                        <Label htmlFor="prize_referral_runners">Descrição dos Prêmios *</Label>
+                        <Textarea
+                          id="prize_referral_runners"
+                          placeholder="Ex: R$ 50 para o 2º, R$ 30 para o 3º... (Opcional)"
+                          {...register('prize_referral_runners')}
+                          className={errors.prize_referral_runners ? 'border-destructive' : ''}
+                        />
+                        {errors.prize_referral_runners && <p className="text-xs text-destructive">{errors.prize_referral_runners.message}</p>}
+                      </div>
+                    )}
                   </div>
                 </div>
               </TabsContent>
@@ -494,29 +575,59 @@ export default function AdminRaffle() {
               <TabsContent value="compradores" className="space-y-6 pt-4">
                 <div className="space-y-4">
                   <div className="border p-4 rounded-md space-y-4 bg-muted/20 border-gold/20">
-                    <h3 className="font-semibold text-gold">Maior Comprador (Top Comprador)</h3>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="prize_buyer_1st">Descrição do Prêmio Principal</Label>
-                      <Textarea
-                        id="prize_buyer_1st"
-                        placeholder="Ex: R$ 1000 no PIX para o maior comprador."
-                        {...register('prize_buyer_1st')}
-                      />
+                    <div className="flex items-center justify-between bg-gold/5 p-2 rounded-lg border border-gold/10">
+                      <h3 className="font-semibold text-gold">Maior Comprador (Top Comprador)</h3>
+                      <div className="flex items-center gap-2">
+                        <Label htmlFor="enable_buyer_1st" className="text-sm font-medium cursor-pointer">Exibir este prêmio?</Label>
+                        <Switch
+                          id="enable_buyer_1st"
+                          checked={watch('enable_buyer_1st')}
+                          onCheckedChange={(c) => setValue('enable_buyer_1st', c)}
+                          className="data-[state=checked]:bg-gold"
+                        />
+                      </div>
                     </div>
+
+                    {watch('enable_buyer_1st') && (
+                      <div className="space-y-2 animate-in fade-in slide-in-from-top-2">
+                        <Label htmlFor="prize_buyer_1st">Descrição do Prêmio Principal *</Label>
+                        <Textarea
+                          id="prize_buyer_1st"
+                          placeholder="Ex: R$ 1000 no PIX para o maior comprador."
+                          {...register('prize_buyer_1st')}
+                          className={errors.prize_buyer_1st ? 'border-destructive' : ''}
+                        />
+                        {errors.prize_buyer_1st && <p className="text-xs text-destructive">{errors.prize_buyer_1st.message}</p>}
+                      </div>
+                    )}
                   </div>
 
                   <div className="border p-4 rounded-md space-y-4 bg-muted/20 border-emerald/20">
-                    <h3 className="font-semibold text-emerald">Compradores Secundários (2º ao 5º Lugar)</h3>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="prize_buyer_runners">Descrição dos Prêmios</Label>
-                      <Textarea
-                        id="prize_buyer_runners"
-                        placeholder="Ex: R$ 200 para o 2º, R$ 100 para o 3º... (Opcional)"
-                        {...register('prize_buyer_runners')}
-                      />
+                    <div className="flex items-center justify-between bg-emerald/5 p-2 rounded-lg border border-emerald/10">
+                      <h3 className="font-semibold text-emerald">Compradores Secundários (2º ao 5º Lugar)</h3>
+                      <div className="flex items-center gap-2">
+                        <Label htmlFor="enable_buyer_runners" className="text-sm font-medium cursor-pointer">Exibir este prêmio?</Label>
+                        <Switch
+                          id="enable_buyer_runners"
+                          checked={watch('enable_buyer_runners')}
+                          onCheckedChange={(c) => setValue('enable_buyer_runners', c)}
+                          className="data-[state=checked]:bg-emerald"
+                        />
+                      </div>
                     </div>
+
+                    {watch('enable_buyer_runners') && (
+                      <div className="space-y-2 animate-in fade-in slide-in-from-top-2">
+                        <Label htmlFor="prize_buyer_runners">Descrição dos Prêmios *</Label>
+                        <Textarea
+                          id="prize_buyer_runners"
+                          placeholder="Ex: R$ 200 para o 2º, R$ 100 para o 3º... (Opcional)"
+                          {...register('prize_buyer_runners')}
+                          className={errors.prize_buyer_runners ? 'border-destructive' : ''}
+                        />
+                        {errors.prize_buyer_runners && <p className="text-xs text-destructive">{errors.prize_buyer_runners.message}</p>}
+                      </div>
+                    )}
                   </div>
                 </div>
               </TabsContent>
