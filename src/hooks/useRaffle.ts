@@ -4,6 +4,11 @@ import { supabase } from '@/integrations/supabase/client';
 import type { Tables } from '@/integrations/supabase/types';
 
 type Raffle = Tables<'raffles'>;
+type OrganizerProfile = Tables<'organizer_profiles'>;
+export type RaffleWithOrganizer = Raffle & {
+  organizer: OrganizerProfile | null;
+};
+
 type Purchase = Tables<'purchases'>;
 type RaffleNumber = Tables<'raffle_numbers'>;
 
@@ -36,8 +41,9 @@ const raKeys = raffleKeys; // Alias for convenience
 export function useActiveRaffle() {
   return useQuery({
     queryKey: raKeys.active(),
-    queryFn: async (): Promise<Raffle | null> => {
-      const { data, error } = await supabase
+    queryFn: async (): Promise<RaffleWithOrganizer | null> => {
+      // 1. Fetch active raffle
+      const { data: raffle, error } = await supabase
         .from('raffles')
         .select('*')
         .eq('status', 'active')
@@ -47,7 +53,23 @@ export function useActiveRaffle() {
         .maybeSingle();
 
       if (error) throw error;
-      return data;
+      if (!raffle) return null;
+
+      // 2. Fetch organizer profile if owner_id exists
+      let organizer: OrganizerProfile | null = null;
+      if (raffle.owner_id) {
+        const { data: profile } = await supabase
+          .from('organizer_profiles')
+          .select('*')
+          .eq('id', raffle.owner_id)
+          .maybeSingle();
+        organizer = profile;
+      }
+
+      return {
+        ...raffle,
+        organizer,
+      };
     },
     staleTime: 1 * 60 * 1000, // 1 minute for active raffle (faster updates)
   });

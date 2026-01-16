@@ -46,6 +46,14 @@ export default function Index() {
 
   useSocialProofToasts({ enabled: step === 'hero' && !!raffle });
 
+  // Update document title with dynamic branding
+  useEffect(() => {
+    if (raffle) {
+      const orgName = raffle.organizer?.organization_name || 'Rifa Fácil';
+      document.title = `${raffle.title} | ${orgName}`;
+    }
+  }, [raffle]);
+
   const { soldNumbers, pendingNumbers } = useMemo(() => {
     if (!soldNumbersData) return { soldNumbers: new Set<number>(), pendingNumbers: new Set<number>() };
 
@@ -296,15 +304,18 @@ export default function Index() {
       {/* Header */}
       <header className="sticky top-0 z-50 bg-card/80 backdrop-blur-md border-b border-gold/20">
         <div className="container mx-auto px-2 sm:px-4 h-12 sm:h-14 flex items-center justify-between">
-          <div className="flex items-center">
-            <span className="font-display font-bold text-base sm:text-lg text-gradient-gold">OD</span>
-            <span className="relative w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center -ml-0.5">
-              {/* S2 text - fades out */}
-              <span className="absolute inset-0 flex items-center justify-center font-display font-bold text-base sm:text-lg text-red-500 animate-[heartbeat-text_2s_ease-in-out_infinite]">
-                S2
-              </span>
-              {/* Heart icon - fades in */}
-              <Heart className="absolute w-4 h-4 sm:w-5 sm:h-5 text-red-500 fill-red-500 animate-[heartbeat-icon_2s_ease-in-out_infinite]" />
+          <div className="flex items-center gap-2">
+            {raffle?.organizer?.logo_url ? (
+              <img
+                src={raffle.organizer.logo_url}
+                alt={raffle.organizer.organization_name}
+                className="w-8 h-8 rounded-full object-cover border border-gold/30"
+              />
+            ) : (
+              <Clover className="w-6 h-6 text-emerald" />
+            )}
+            <span className="font-display font-bold text-base sm:text-lg text-gradient-gold">
+              {raffle?.organizer?.organization_name || "Rifa Fácil"}
             </span>
           </div>
           <div className="flex items-center gap-1 sm:gap-3">
