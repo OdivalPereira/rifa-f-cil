@@ -112,8 +112,10 @@ export const RaffleHero = memo(({
             )}
 
             {/* Main Prize Highlight Card */}
-            <div
-              className="card-jackpot p-2 sm:p-6 rounded-2xl border-2 border-gold/50 relative overflow-hidden group cursor-pointer hover:border-gold transition-all shadow-lg shadow-gold/10 w-full max-w-full"
+            <button
+              type="button"
+              aria-haspopup="dialog"
+              className="card-jackpot p-2 sm:p-6 rounded-2xl border-2 border-gold/50 relative overflow-hidden group cursor-pointer hover:border-gold transition-all shadow-lg shadow-gold/10 w-full max-w-full text-left active:scale-[0.99]"
               onClick={() => handlePrizeClick('Prêmio Principal', prizeDrawDetails || null, <Gift className="w-10 h-10 text-gold" />)}
             >
               <div className="absolute top-0 right-0 p-2 sm:p-3 bg-gold text-primary-foreground font-bold text-[10px] sm:text-xs uppercase rounded-bl-xl z-20">
@@ -132,7 +134,7 @@ export const RaffleHero = memo(({
               </div>
               {/* Shine effect */}
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -skew-x-12 translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-1000" />
-            </div>
+            </button>
 
             {/* Urgency Progress Bar */}
             <div className="space-y-3">
@@ -313,10 +315,12 @@ export const RaffleHero = memo(({
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 {extraPrizes.map((prize) => (
-                  <div
+                  <button
                     key={prize.id}
+                    type="button"
+                    aria-haspopup="dialog"
                     onClick={() => handlePrizeClick(prize.title + (prize.subTitle ? ` (${prize.subTitle})` : ''), prize.text, prize.detailsIcon)}
-                    className={`card-jackpot p-4 rounded-xl border ${prize.borderColor} cursor-pointer transition-colors relative overflow-hidden group`}
+                    className={`card-jackpot p-4 rounded-xl border ${prize.borderColor} cursor-pointer transition-colors relative overflow-hidden group w-full text-left active:scale-[0.98]`}
                   >
                     <div className="flex flex-col h-full">
                       <div className="flex items-center gap-3 mb-3">
@@ -337,7 +341,7 @@ export const RaffleHero = memo(({
                         </div>
                       )}
                     </div>
-                  </div>
+                  </button>
                 ))}
               </div>
             </div>
