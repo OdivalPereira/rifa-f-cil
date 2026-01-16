@@ -5,6 +5,16 @@ const corsHeaders = {
     'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// Helper to sanitize HTML input to prevent injection
+function escapeHtml(unsafe: unknown): string {
+    return String(unsafe)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
 serve(async (req) => {
     // Handle CORS preflight
     if (req.method === 'OPTIONS') {
@@ -57,7 +67,7 @@ serve(async (req) => {
         });
 
         // Link para recuperação
-        const recoveryLink = `${APP_URL}/admin?tab=rifas&restore=${raffle_id}`;
+        const recoveryLink = `${APP_URL}/admin?tab=rifas&restore=${encodeURIComponent(raffle_id)}`;
 
         // Sanitize inputs to prevent HTML injection
         // SECURITY: raffle_title could potentially contain malicious HTML if inserted by a compromised admin
