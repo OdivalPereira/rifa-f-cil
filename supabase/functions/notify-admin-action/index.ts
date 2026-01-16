@@ -16,7 +16,8 @@ serve(async (req) => {
 
         console.log(`Received event: ${event}`, { raffle_id, raffle_title, deleted_at });
 
-        if (event !== 'raffle_soft_deleted') {
+        // Check for both event names to support legacy/different triggers
+        if (event !== 'raffle_soft_deleted' && event !== 'soft_delete') {
             return new Response(
                 JSON.stringify({ error: 'Unknown event type', received: event }),
                 { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -58,18 +59,20 @@ serve(async (req) => {
         // Link para recuperação
         const recoveryLink = `${APP_URL}/admin?tab=rifas&restore=${raffle_id}`;
 
-        // Helper function to prevent HTML injection
-        const escapeHtml = (unsafe: string) => {
+        // Sanitize inputs to prevent HTML injection
+        // SECURITY: raffle_title could potentially contain malicious HTML if inserted by a compromised admin
+        function escapeHtml(unsafe: string): string {
+            if (!unsafe) return '';
             return String(unsafe)
                 .replace(/&/g, "&amp;")
                 .replace(/</g, "&lt;")
                 .replace(/>/g, "&gt;")
                 .replace(/"/g, "&quot;")
                 .replace(/'/g, "&#039;");
-        };
+        }
 
-        const safeTitle = escapeHtml(raffle_title);
-        const safeId = escapeHtml(raffle_id);
+        const safeTitle = escapeHtml(raffle_title || 'Sem título');
+        const safeId = escapeHtml(raffle_id || 'N/A');
 
         // Template de e-mail HTML
         const emailHtml = `

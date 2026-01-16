@@ -170,6 +170,10 @@ export type Database = {
           created_at: string
           description: string | null
           draw_date: string | null
+          enable_buyer_1st: boolean
+          enable_buyer_runners: boolean
+          enable_referral_1st: boolean
+          enable_referral_runners: boolean
           id: string
           image_url: string | null
           pix_beneficiary_name: string | null
@@ -203,6 +207,10 @@ export type Database = {
           created_at?: string
           description?: string | null
           draw_date?: string | null
+          enable_buyer_1st?: boolean
+          enable_buyer_runners?: boolean
+          enable_referral_1st?: boolean
+          enable_referral_runners?: boolean
           id?: string
           image_url?: string | null
           pix_beneficiary_name?: string | null
@@ -235,6 +243,10 @@ export type Database = {
           created_at?: string
           description?: string | null
           draw_date?: string | null
+          enable_buyer_1st?: boolean
+          enable_buyer_runners?: boolean
+          enable_referral_1st?: boolean
+          enable_referral_runners?: boolean
           id?: string
           image_url?: string | null
           pix_beneficiary_name?: string | null
