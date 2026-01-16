@@ -188,7 +188,7 @@ export function NumberSelector({
 
     setSelectedNumbers((prev) => {
       const newSet = new Set(prev);
-      selected.forEach((n) => newSet.add(n));
+      newNumbers.forEach((n) => newSet.add(n));
       return newSet;
     });
   }, [totalNumbers, unavailableNumbers, selectedNumbers, quantityToSelect]);
