@@ -112,7 +112,7 @@ export const BuyerForm = memo(({
         </CardHeader>
 
         <CardContent className="pb-8 px-4 sm:px-8">
-          <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
+          <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6" noValidate>
             <motion.div variants={itemVariants} className="space-y-4">
               <div className="grid grid-cols-1 gap-4">
                 <div className="space-y-2">
@@ -121,17 +121,25 @@ export const BuyerForm = memo(({
                     className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-muted-foreground"
                   >
                     <User className="w-3.5 h-3.5 text-emerald" /> Seu Nome
+                    <span className="text-destructive ml-1">*</span>
                   </Label>
                   <Input
                     id="name"
                     autoComplete="name"
                     autoCapitalize="words"
                     placeholder="Nome Completo"
+                    aria-invalid={!!errors.name}
+                    aria-describedby={errors.name ? "name-error" : undefined}
+                    aria-required="true"
                     {...register("name")}
                     className={`input-casino h-12 ${errors.name ? "border-destructive" : ""}`}
                   />
                   {errors.name && (
-                    <p className="text-[10px] text-destructive font-bold uppercase tracking-tight">
+                    <p
+                      id="name-error"
+                      role="alert"
+                      className="text-[10px] text-destructive font-bold uppercase tracking-tight"
+                    >
                       {errors.name.message}
                     </p>
                   )}
@@ -144,12 +152,16 @@ export const BuyerForm = memo(({
                       className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-muted-foreground"
                     >
                       <Phone className="w-3.5 h-3.5 text-emerald" /> WhatsApp
+                      <span className="text-destructive ml-1">*</span>
                     </Label>
                     <Input
                       id="phone"
                       type="tel"
                       autoComplete="tel"
                       placeholder="(11) 99999-9999"
+                      aria-invalid={!!errors.phone}
+                      aria-describedby={errors.phone ? "phone-error" : undefined}
+                      aria-required="true"
                       {...register("phone")}
                       onChange={(e) => {
                         let value = e.target.value.replace(/\D/g, "");
@@ -189,7 +201,11 @@ export const BuyerForm = memo(({
                       className={`input-casino h-12 ${errors.phone ? "border-destructive" : ""}`}
                     />
                     {errors.phone && (
-                      <p className="text-[10px] text-destructive font-bold uppercase tracking-tight">
+                      <p
+                        id="phone-error"
+                        role="alert"
+                        className="text-[10px] text-destructive font-bold uppercase tracking-tight"
+                      >
                         {errors.phone.message}
                       </p>
                     )}
@@ -200,17 +216,25 @@ export const BuyerForm = memo(({
                       className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-muted-foreground"
                     >
                       <Mail className="w-3.5 h-3.5 text-emerald" /> E-mail
+                      <span className="text-destructive ml-1">*</span>
                     </Label>
                     <Input
                       id="email"
                       type="email"
                       autoComplete="email"
                       placeholder="exemplo@email.com"
+                      aria-invalid={!!errors.email}
+                      aria-describedby={errors.email ? "email-error" : undefined}
+                      aria-required="true"
                       {...register("email")}
                       className={`input-casino h-12 ${errors.email ? "border-destructive" : ""}`}
                     />
                     {errors.email && (
-                      <p className="text-[10px] text-destructive font-bold uppercase tracking-tight">
+                      <p
+                        id="email-error"
+                        role="alert"
+                        className="text-[10px] text-destructive font-bold uppercase tracking-tight"
+                      >
                         {errors.email.message}
                       </p>
                     )}
@@ -299,6 +323,7 @@ export const BuyerForm = memo(({
                   min={1}
                   max={Math.min(500, maxNumbers)}
                   step={1}
+                  aria-label="Selecionar quantidade de cotas"
                   className="py-4 cursor-pointer"
                 />
                 <div className="flex justify-between items-center bg-black/30 p-3 rounded-2xl border border-white/5 shadow-inner">
