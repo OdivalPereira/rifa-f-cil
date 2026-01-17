@@ -162,33 +162,74 @@ export function NumberSelector({
   }, [quantityToSelect]);
 
   const generateRandomNumbers = useCallback(() => {
-    // 1. Identify available numbers (O(N))
-    const available: number[] = [];
-    // Optimization: Check sets directly instead of creating a combined Set (O(N) operation avoided)
     const isSold = (n: number) => soldNumbersRef.current.has(n);
     const isPending = (n: number) => pendingNumbersRef.current.has(n);
+    const remaining = quantityToSelect - selectedNumbers.size;
+
+    if (remaining <= 0) return;
+
+    // Optimization: Smart selection strategy based on occupancy
+    // If < 75% numbers are taken, Rejection Sampling is O(k) vs O(N) for array building
+    // This avoids allocating a massive array (e.g. 100k items) just to pick 10 numbers.
+    const occupiedCount = soldNumbersRef.current.size + pendingNumbersRef.current.size + selectedNumbers.size;
+    const occupancyRate = occupiedCount / totalNumbers;
+    const newNumbers: number[] = [];
+
+    if (occupancyRate < 0.75) {
+      // Rejection Sampling Strategy (Fast Path)
+      const generated = new Set<number>();
+      // Safety break to prevent infinite loops (should not happen with < 0.75 occupancy)
+      let attempts = 0;
+      const maxAttempts = remaining * 20;
+
+      while (generated.size < remaining && attempts < maxAttempts) {
+        attempts++;
+        const r = Math.floor(Math.random() * totalNumbers) + 1;
+
+        if (!isSold(r) && !isPending(r) && !selectedNumbers.has(r) && !generated.has(r)) {
+          generated.add(r);
+          newNumbers.push(r);
+        }
+      }
+
+      // If we failed to find enough numbers (extremely rare), fall through to array method
+      if (newNumbers.length < remaining) {
+        // This only happens if RNG is extremely unlucky
+        // Reset and use the robust method
+      } else {
+        setSelectedNumbers((prev) => {
+          const newSet = new Set(prev);
+          newNumbers.forEach((n) => newSet.add(n));
+          return newSet;
+        });
+        return;
+      }
+    }
+
+    // Array Building Strategy (Robust Fallback)
+    // Used when occupancy is high or rejection sampling failed
+    const available: number[] = [];
+
+    // Exclude numbers already picked in the failed fast path if any (though we reset usually)
+    const existingPicks = new Set(newNumbers);
 
     for (let i = 1; i <= totalNumbers; i++) {
-      if (!isSold(i) && !isPending(i) && !selectedNumbers.has(i)) {
+      if (!isSold(i) && !isPending(i) && !selectedNumbers.has(i) && !existingPicks.has(i)) {
         available.push(i);
       }
     }
 
-    const remaining = quantityToSelect - selectedNumbers.size;
-    const newNumbers: number[] = [];
+    // Shuffle remaining needed
+    const stillNeeded = remaining - newNumbers.length;
 
-    // Optimization: Partial Fisher-Yates shuffle - O(k)
-    // Avoids sorting the entire array which is O(N log N)
-    if (available.length <= remaining) {
+    if (available.length <= stillNeeded) {
       available.forEach((n) => newNumbers.push(n));
     } else {
       let m = available.length;
-      for (let i = 0; i < remaining; i++) {
+      for (let i = 0; i < stillNeeded; i++) {
         const r = Math.floor(Math.random() * m);
         newNumbers.push(available[r]);
-
-        // Swap-delete: Move last element to the selected position
-        // This is O(1)
+        // Swap-delete: O(1)
         available[r] = available[m - 1];
         m--;
       }
