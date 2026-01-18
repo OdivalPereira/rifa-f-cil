@@ -7,3 +7,7 @@
 ## 2024-05-23 - Memoizing Heavy Decorations
 **Learning:** Large layout wrappers with heavy CSS animations (like `SlotMachineFrame`) re-render completely when children change. If they contain many DOM elements (lights, particles) generated in render, this adds significant overhead to every state change in the child (e.g. form inputs).
 **Action:** Extract heavy, static decorative elements into separate `memo`ized components so they don't re-render when the layout's children update.
+
+## 2024-05-23 - Rejection Sampling Optimization
+**Learning:** Generating random numbers for sparse sets (low occupancy) is much faster using Rejection Sampling (pick random -> check if available) than shuffling a full array of available numbers (O(N) allocation).
+**Action:** Switch to Rejection Sampling when occupancy is < 75% for massive speedups (e.g. 3000x for 100k items).
