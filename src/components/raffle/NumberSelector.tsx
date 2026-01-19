@@ -162,33 +162,72 @@ export function NumberSelector({
   }, [quantityToSelect]);
 
   const generateRandomNumbers = useCallback(() => {
-    // 1. Identify available numbers (O(N))
-    const available: number[] = [];
-    // Optimization: Check sets directly instead of creating a combined Set (O(N) operation avoided)
+    const remainingToSelect = quantityToSelect - selectedNumbers.size;
+    if (remainingToSelect <= 0) return;
+
+    // Helper checks
     const isSold = (n: number) => soldNumbersRef.current.has(n);
     const isPending = (n: number) => pendingNumbersRef.current.has(n);
+    const isSelected = (n: number) => selectedNumbers.has(n);
+
+    const occupiedCount = soldNumbersRef.current.size + pendingNumbersRef.current.size + selectedNumbers.size;
+    const saturation = occupiedCount / totalNumbers;
+
+    const newNumbersSet = new Set<number>();
+
+    // Strategy 1: Rejection Sampling (O(k))
+    // Best for low to medium saturation. Avoids O(N) memory allocation and iteration.
+    // We use 0.8 as a safe threshold where rejection sampling is still much faster than O(N).
+    if (saturation < 0.8) {
+      let attempts = 0;
+      // Allow enough attempts to find numbers even if luck is bad, but stop before blocking UI
+      // Expected trials per number = 1 / (1 - saturation). At 0.8, exp = 5.
+      // We give a generous buffer (e.g., 50x) to almost guarantee success if mathematically possible.
+      const maxAttempts = remainingToSelect * 50;
+
+      while (newNumbersSet.size < remainingToSelect && attempts < maxAttempts) {
+        attempts++;
+        const r = Math.floor(Math.random() * totalNumbers) + 1;
+        if (!isSold(r) && !isPending(r) && !isSelected(r) && !newNumbersSet.has(r)) {
+          newNumbersSet.add(r);
+        }
+      }
+
+      // If we found all needed numbers, commit and return
+      if (newNumbersSet.size === remainingToSelect) {
+        setSelectedNumbers((prev) => {
+          const newSet = new Set(prev);
+          newNumbersSet.forEach((n) => newSet.add(n));
+          return newSet;
+        });
+        return;
+      }
+      // If we failed to find enough numbers (timeout), fall back to Strategy 2
+      // We discard partial results from rejection sampling to keep Strategy 2 logic clean and robust
+    }
+
+    // Strategy 2: Deterministic Pool (O(N))
+    // Fallback for high saturation or when Rejection Sampling fails.
+    // Guarantees finding numbers if they exist, but requires iterating all numbers.
+    const available: number[] = [];
 
     for (let i = 1; i <= totalNumbers; i++) {
-      if (!isSold(i) && !isPending(i) && !selectedNumbers.has(i)) {
+      if (!isSold(i) && !isPending(i) && !isSelected(i)) {
         available.push(i);
       }
     }
 
-    const remaining = quantityToSelect - selectedNumbers.size;
-    const newNumbers: number[] = [];
+    const finalNewNumbers: number[] = [];
 
-    // Optimization: Partial Fisher-Yates shuffle - O(k)
-    // Avoids sorting the entire array which is O(N log N)
-    if (available.length <= remaining) {
-      available.forEach((n) => newNumbers.push(n));
+    if (available.length <= remainingToSelect) {
+      available.forEach((n) => finalNewNumbers.push(n));
     } else {
       let m = available.length;
-      for (let i = 0; i < remaining; i++) {
+      for (let i = 0; i < remainingToSelect; i++) {
         const r = Math.floor(Math.random() * m);
-        newNumbers.push(available[r]);
+        finalNewNumbers.push(available[r]);
 
         // Swap-delete: Move last element to the selected position
-        // This is O(1)
         available[r] = available[m - 1];
         m--;
       }
@@ -196,7 +235,7 @@ export function NumberSelector({
 
     setSelectedNumbers((prev) => {
       const newSet = new Set(prev);
-      newNumbers.forEach((n) => newSet.add(n));
+      finalNewNumbers.forEach((n) => newSet.add(n));
       return newSet;
     });
   }, [totalNumbers, selectedNumbers, quantityToSelect]);
