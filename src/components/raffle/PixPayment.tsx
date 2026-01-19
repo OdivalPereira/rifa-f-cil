@@ -13,6 +13,11 @@ import { supabase } from '@/integrations/supabase/client';
 import { PurchaseSuccessCelebration } from './PurchaseSuccessCelebration';
 import { generatePixPayload } from '@/lib/pix';
 import { Progress } from '@/components/ui/progress';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 
 interface PixPaymentProps {
   amount: number;
@@ -353,14 +358,26 @@ export function PixPayment({
                 <div className="flex-1 p-3.5 rounded-xl bg-card border border-border/50 font-mono text-xs break-all flex items-center shadow-inner overflow-hidden line-clamp-1 opacity-70">
                   {pixPayload.slice(0, 42)}...
                 </div>
-                <Button
-                  variant="luck"
-                  size="icon"
-                  onClick={handleCopyPixKey}
-                  className={`shrink-0 h-11 w-11 rounded-xl transition-all ${copied ? 'bg-emerald border-emerald' : ''}`}
-                >
-                  {copied ? <Check className="w-5 h-5" /> : <Copy className="w-5 h-5 text-white" />}
-                </Button>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="luck"
+                      size="icon"
+                      onClick={handleCopyPixKey}
+                      aria-label={copied ? "Chave PIX copiada" : "Copiar chave PIX"}
+                      className={`shrink-0 h-11 w-11 rounded-xl transition-all ${copied ? 'bg-emerald border-emerald' : ''}`}
+                    >
+                      {copied ? (
+                        <Check className="w-5 h-5" aria-hidden="true" />
+                      ) : (
+                        <Copy className="w-5 h-5 text-white" aria-hidden="true" />
+                      )}
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>{copied ? "Copiado!" : "Copiar chave"}</p>
+                  </TooltipContent>
+                </Tooltip>
               </div>
             </div>
           </motion.div>
