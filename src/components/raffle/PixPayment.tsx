@@ -357,9 +357,10 @@ export function PixPayment({
                   variant="luck"
                   size="icon"
                   onClick={handleCopyPixKey}
+                  aria-label="Copiar chave PIX"
                   className={`shrink-0 h-11 w-11 rounded-xl transition-all ${copied ? 'bg-emerald border-emerald' : ''}`}
                 >
-                  {copied ? <Check className="w-5 h-5" /> : <Copy className="w-5 h-5 text-white" />}
+                  {copied ? <Check className="w-5 h-5" aria-hidden="true" /> : <Copy className="w-5 h-5 text-white" aria-hidden="true" />}
                 </Button>
               </div>
             </div>
@@ -427,9 +428,14 @@ export function PixPayment({
                   </Button>
                   {receiptPreview && (
                     <div className="relative h-12 w-12 rounded-xl overflow-hidden border border-emerald/50 group">
-                      <img src={receiptPreview} className="h-full w-full object-cover" />
-                      <button onClick={() => setReceiptPreview(null)} className="absolute inset-0 bg-destructive/80 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
-                        <Trash2 className="w-4 h-4 text-white" />
+                      <img src={receiptPreview} alt="Prévia do comprovante" className="h-full w-full object-cover" />
+                      <button
+                        type="button"
+                        onClick={() => setReceiptPreview(null)}
+                        aria-label="Remover comprovante"
+                        className="absolute inset-0 bg-destructive/80 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity"
+                      >
+                        <Trash2 className="w-4 h-4 text-white" aria-hidden="true" />
                       </button>
                     </div>
                   )}
