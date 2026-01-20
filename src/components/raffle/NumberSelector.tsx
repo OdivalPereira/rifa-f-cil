@@ -162,35 +162,67 @@ export function NumberSelector({
   }, [quantityToSelect]);
 
   const generateRandomNumbers = useCallback(() => {
-    // 1. Identify available numbers (O(N))
-    const available: number[] = [];
-    // Optimization: Check sets directly instead of creating a combined Set (O(N) operation avoided)
+    const remaining = quantityToSelect - selectedNumbers.size;
+    if (remaining <= 0) return;
+
     const isSold = (n: number) => soldNumbersRef.current.has(n);
     const isPending = (n: number) => pendingNumbersRef.current.has(n);
+    const isSelected = (n: number) => selectedNumbers.has(n);
 
-    for (let i = 1; i <= totalNumbers; i++) {
-      if (!isSold(i) && !isPending(i) && !selectedNumbers.has(i)) {
-        available.push(i);
-      }
-    }
+    const unavailableCount = soldNumbersRef.current.size + pendingNumbersRef.current.size + selectedNumbers.size;
+    const saturation = unavailableCount / totalNumbers;
 
-    const remaining = quantityToSelect - selectedNumbers.size;
     const newNumbers: number[] = [];
 
-    // Optimization: Partial Fisher-Yates shuffle - O(k)
-    // Avoids sorting the entire array which is O(N log N)
-    if (available.length <= remaining) {
-      available.forEach((n) => newNumbers.push(n));
-    } else {
-      let m = available.length;
-      for (let i = 0; i < remaining; i++) {
-        const r = Math.floor(Math.random() * m);
-        newNumbers.push(available[r]);
+    // Optimization: Hybrid strategy
+    // If < 75% saturation, Rejection Sampling is O(k) and much faster than O(N) array allocation.
+    // If >= 75% saturation, we fall back to scanning to avoid high collision rates.
+    if (saturation < 0.75) {
+      const candidates = new Set<number>();
+      let safetyCounter = 0;
+      // Safety limit to prevent infinite loops (though unlikely with < 75% saturation)
+      const maxAttempts = remaining * 20;
 
-        // Swap-delete: Move last element to the selected position
-        // This is O(1)
-        available[r] = available[m - 1];
-        m--;
+      while (candidates.size < remaining && safetyCounter < maxAttempts) {
+        safetyCounter++;
+        const r = Math.floor(Math.random() * totalNumbers) + 1;
+
+        if (!isSold(r) && !isPending(r) && !isSelected(r) && !candidates.has(r)) {
+          candidates.add(r);
+          newNumbers.push(r);
+        }
+      }
+
+      // If we failed to find enough numbers via sampling (rare), fill the rest with scan
+      if (newNumbers.length < remaining) {
+        const foundSet = new Set(newNumbers);
+        for (let i = 1; i <= totalNumbers; i++) {
+          if (newNumbers.length >= remaining) break;
+          if (!isSold(i) && !isPending(i) && !isSelected(i) && !foundSet.has(i)) {
+            newNumbers.push(i);
+          }
+        }
+      }
+    } else {
+      // Fallback: Scan all available numbers (O(N))
+      const available: number[] = [];
+      for (let i = 1; i <= totalNumbers; i++) {
+        if (!isSold(i) && !isPending(i) && !selectedNumbers.has(i)) {
+          available.push(i);
+        }
+      }
+
+      // Partial Fisher-Yates shuffle
+      if (available.length <= remaining) {
+        available.forEach((n) => newNumbers.push(n));
+      } else {
+        let m = available.length;
+        for (let i = 0; i < remaining; i++) {
+          const r = Math.floor(Math.random() * m);
+          newNumbers.push(available[r]);
+          available[r] = available[m - 1];
+          m--;
+        }
       }
     }
 
