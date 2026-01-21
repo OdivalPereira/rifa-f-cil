@@ -7,6 +7,7 @@ import { AuthProvider } from "@/hooks/useAuth";
 import { Suspense, lazy } from "react";
 import Index from "./pages/Index";
 import { ReferralTracker } from "@/components/ReferralTracker";
+import { LocationPrefetcher } from "@/components/LocationPrefetcher";
 import { AdminRoute } from "@/components/AdminRoute";
 import { Loader2 } from "lucide-react";
 
@@ -45,6 +46,7 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <ReferralTracker />
+          <LocationPrefetcher />
           <Suspense fallback={<LoadingFallback />}>
             <Routes>
               {/* Public routes */}

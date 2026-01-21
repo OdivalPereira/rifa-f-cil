@@ -146,8 +146,12 @@ export function useCreatePurchase() {
     }) => {
       const totalAmount = quantity * pricePerNumber;
 
-      // Capture location silently (non-blocking, with timeout)
-      const location = await captureUserLocation();
+      // Capture location (prefetch should have handled this, but we ensure it here)
+      const location = await queryClient.ensureQueryData({
+        queryKey: ['user-location'],
+        queryFn: captureUserLocation,
+        staleTime: Infinity, // Important: Accept cached value forever
+      });
 
       // Check for referral code in localStorage
       const referrerCode = localStorage.getItem('rifa_referrer');
@@ -551,4 +555,17 @@ export async function captureUserLocation(): Promise<string | null> {
     // Silently fail - location is optional
   }
   return null;
+}
+
+// Hook to prefetch/cache user location
+export function useUserLocation() {
+  return useQuery({
+    queryKey: ['user-location'],
+    queryFn: captureUserLocation,
+    staleTime: Infinity,
+    gcTime: Infinity,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+    retry: false,
+  });
 }
