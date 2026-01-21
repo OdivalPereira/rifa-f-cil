@@ -95,10 +95,29 @@ export function useSoldNumbers(raffleId: string | undefined) {
 }
 
 // Hook para buscar compras por email ou telefone
-export function useMyPurchases(email: string, phone: string) {
+export function useMyPurchases(email: string, phone: string, token?: string | null) {
   return useQuery({
-    queryKey: ['my-purchases', email, phone],
+    queryKey: ['my-purchases', email, phone, token],
     queryFn: async () => {
+      // Secure fetch via Edge Function if token is available
+      if (phone && token) {
+        const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/customer-auth?action=get-my-purchases`, {
+          method: 'POST', // Using POST to be safe with Edge Function CORS/Handling defaults
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({}) // Empty body to avoid JSON parse errors
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch purchases securely');
+        }
+
+        return await response.json();
+      }
+
       if (!email && !phone) return [];
 
       let query = supabase
@@ -410,10 +429,35 @@ export function useGenerateReferralCode() {
 }
 
 // Hook para buscar total de números comprados por um usuário
-export function useUserTotalNumbers(phone: string | null) {
+export function useUserTotalNumbers(phone: string | null, token?: string | null) {
   return useQuery({
-    queryKey: ['user-total-numbers', phone],
+    queryKey: ['user-total-numbers', phone, token],
     queryFn: async () => {
+      // Secure fetch via Edge Function
+      if (phone && token) {
+        try {
+          const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/customer-auth?action=get-my-purchases`, {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({})
+          });
+
+          if (response.ok) {
+            const data = await response.json() as Purchase[];
+            // Filter locally for approved status and sum quantity
+            return data
+              .filter((p: Purchase) => p.payment_status === 'approved')
+              .reduce((sum: number, p: Purchase) => sum + p.quantity, 0);
+          }
+        } catch (e) {
+          console.error('Secure fetch failed for total numbers', e);
+        }
+      }
+
       if (!phone) return 0;
 
       const cleanPhone = phone.replace(/\D/g, '');
