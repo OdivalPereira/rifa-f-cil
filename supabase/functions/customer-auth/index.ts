@@ -100,6 +100,35 @@ serve(async (req) => {
       return new Response(JSON.stringify(result), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
+    } else if (action === 'get-my-purchases') {
+      const authHeader = req.headers.get('Authorization');
+      if (!authHeader) {
+        return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+      }
+      const token = authHeader.replace('Bearer ', '');
+      const verification = await verifyTokenSecure(token);
+
+      if (!verification.valid || !verification.phone) {
+        return new Response(JSON.stringify({ error: 'Invalid token' }), { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+      }
+
+      // Query Purchases (securely using service role)
+      const { data, error } = await supabase
+        .from('purchases')
+        .select(`
+            *,
+            raffle:raffles(*),
+            numbers:raffle_numbers(number)
+        `)
+        .eq('buyer_phone', verification.phone)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Db error:', error);
+        return new Response(JSON.stringify({ error: 'Database error' }), { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+      }
+
+      return new Response(JSON.stringify(data), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
 
     const { phone, pin } = await req.json();
