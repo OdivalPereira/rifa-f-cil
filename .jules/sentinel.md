@@ -7,3 +7,8 @@
 **Vulnerability:** The `notify-admin-action` Edge Function directly injected `raffle_title` and `raffle_id` (user-controlled or potentially tainted data) into an HTML email template without escaping. This could allow malicious actors to inject arbitrary HTML content into admin emails.
 **Learning:** Even internal notification emails should treat all data as untrusted. Edge Functions running in Deno/Node environments do not automatically escape variables in template literals like React does.
 **Prevention:** Always use an HTML escaping helper function (or a library) when constructing HTML strings from variables in backend functions.
+
+## 2026-02-01 - Purchases Table Data Leak
+**Vulnerability:** The `purchases` table had an RLS policy `USING (true)` for SELECT, allowing any authenticated or anonymous user to list all purchases (names, emails, phones) via the Supabase client.
+**Learning:** Avoid `USING (true)` on tables with sensitive data even if you think you need it for frontend access. Use Edge Functions (Service Role) for sensitive data retrieval instead of exposing the table directly.
+**Prevention:** Audit all RLS policies with `USING (true)`. Enforce data access via RPC or Edge Functions for public-facing sensitive data.

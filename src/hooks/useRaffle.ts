@@ -101,6 +101,31 @@ export function useMyPurchases(email: string, phone: string) {
     queryFn: async () => {
       if (!email && !phone) return [];
 
+      // Try to use secure edge function if token exists
+      const token = localStorage.getItem('customer_auth_token');
+      // Only use edge function if we have a token AND we are searching by phone
+      // (Since customer-auth is phone based)
+      if (token && phone) {
+        try {
+          const response = await fetch(
+            `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/customer-auth?action=get-my-purchases`,
+            {
+              headers: {
+                'Authorization': `Bearer ${token}`,
+                'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+              }
+            }
+          );
+          if (response.ok) {
+            const data = await response.json();
+            return data || [];
+          }
+        } catch (e) {
+          console.error("Failed to fetch from edge function, falling back", e);
+        }
+      }
+
+      // Fallback (will fail for anon after migration, but works for admin)
       let query = supabase
         .from('purchases')
         .select(`
@@ -144,7 +169,7 @@ export function useCreatePurchase() {
       quantity: number;
       pricePerNumber: number;
     }) => {
-      const totalAmount = quantity * pricePerNumber;
+      // NOTE: totalAmount is calculated in RPC for security
 
       // Capture location silently (non-blocking, with timeout)
       const location = await captureUserLocation();
@@ -169,26 +194,21 @@ export function useCreatePurchase() {
         localStorage.removeItem('rifa_referrer');
       }
 
-      // Build insert data
-      const insertData = {
-        raffle_id: raffleId,
-        buyer_name: buyerName,
-        buyer_email: buyerEmail,
-        buyer_phone: buyerPhone.replace(/\D/g, ''),
-        quantity,
-        total_amount: totalAmount,
-        ...(referrerId ? { referrer_id: referrerId } : {}),
-        ...(location ? { location } : {}),
-      };
-
-      const { data, error } = await supabase
-        .from('purchases')
-        .insert(insertData as any)
-        .select()
-        .single();
+      // Call Secure RPC
+      // Cast to any because the RPC type is not yet generated
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data, error } = await supabase.rpc('create_purchase' as any, {
+        p_raffle_id: raffleId,
+        p_buyer_name: buyerName,
+        p_buyer_email: buyerEmail,
+        p_buyer_phone: buyerPhone.replace(/\D/g, ''),
+        p_quantity: quantity,
+        p_referrer_id: referrerId,
+        p_location: location
+      });
 
       if (error) throw error;
-      return data;
+      return data as unknown as Purchase;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['active-raffle'] });

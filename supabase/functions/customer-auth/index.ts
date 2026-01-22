@@ -313,9 +313,55 @@ serve(async (req) => {
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
 
+    } else if (action === 'get-my-purchases') {
+      // Verify Authorization header (Bearer <token>)
+      const authHeader = req.headers.get('Authorization');
+      if (!authHeader) {
+        return new Response(
+          JSON.stringify({ error: 'Unauthorized: Missing token' }),
+          { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      const token = authHeader.replace('Bearer ', '');
+      const { valid, phone: tokenPhone } = await verifyTokenSecure(token);
+
+      if (!valid || !tokenPhone) {
+        return new Response(
+          JSON.stringify({ error: 'Unauthorized: Invalid token' }),
+          { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      // Query purchases using Service Role (bypassing RLS)
+      const cleanPhone = tokenPhone.replace(/\D/g, '');
+
+      const { data: purchases, error: queryError } = await supabase
+        .from('purchases')
+        .select(`
+          *,
+          raffle:raffles(*),
+          numbers:raffle_numbers(number)
+        `)
+        .eq('buyer_phone', cleanPhone)
+        .order('created_at', { ascending: false });
+
+      if (queryError) {
+        console.error('Error fetching purchases:', queryError);
+        return new Response(
+          JSON.stringify({ error: 'Failed to fetch purchases' }),
+          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      return new Response(
+        JSON.stringify(purchases),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+
     } else {
       return new Response(
-        JSON.stringify({ error: 'Ação inválida. Use: register, login, verify ou reset-pin' }),
+        JSON.stringify({ error: 'Ação inválida. Use: register, login, verify, reset-pin ou get-my-purchases' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
