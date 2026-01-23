@@ -170,6 +170,7 @@ export function PurchaseSuccessCelebration({
                           variant="outline"
                           size="icon"
                           onClick={handleCopyLink}
+                          aria-label="Copiar link de indicação"
                           className="shrink-0 border-gold/30 hover:bg-gold/10 hover:border-gold h-11 w-11"
                         >
                           {copied ? (
