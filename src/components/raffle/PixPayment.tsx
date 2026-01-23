@@ -319,7 +319,11 @@ export function PixPayment({
             <div className="relative group">
               {/* Scanner Effect */}
               <div className="absolute inset-0 bg-gold/5 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity" />
-              <div className="p-5 bg-white rounded-3xl border-2 border-gold/30 shadow-[0_0_50px_-12px_rgba(234,179,8,0.3)] relative overflow-hidden">
+              <div
+                className="p-5 bg-white rounded-3xl border-2 border-gold/30 shadow-[0_0_50px_-12px_rgba(234,179,8,0.3)] relative overflow-hidden"
+                role="img"
+                aria-label="QR Code para pagamento via PIX"
+              >
                 <div className="animate-scanner" />
                 <QRCodeSVG
                   value={pixPayload}
@@ -357,6 +361,7 @@ export function PixPayment({
                   variant="luck"
                   size="icon"
                   onClick={handleCopyPixKey}
+                  aria-label="Copiar chave PIX"
                   className={`shrink-0 h-11 w-11 rounded-xl transition-all ${copied ? 'bg-emerald border-emerald' : ''}`}
                 >
                   {copied ? <Check className="w-5 h-5" /> : <Copy className="w-5 h-5 text-white" />}
@@ -393,6 +398,7 @@ export function PixPayment({
                 <motion.a
                   key={bank.name}
                   href={bank.url}
+                  aria-label={`Abrir aplicativo do ${bank.name}`}
                   whileHover={{ scale: 1.1, translateY: -2 }}
                   whileTap={{ scale: 0.95 }}
                   className={`flex flex-col items-center justify-center p-2.5 rounded-xl text-white transition-all shadow-sm ${bank.color} ${bank.hover} hover:shadow-lg`}
@@ -428,7 +434,12 @@ export function PixPayment({
                   {receiptPreview && (
                     <div className="relative h-12 w-12 rounded-xl overflow-hidden border border-emerald/50 group">
                       <img src={receiptPreview} className="h-full w-full object-cover" />
-                      <button onClick={() => setReceiptPreview(null)} className="absolute inset-0 bg-destructive/80 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                      <button
+                        type="button"
+                        onClick={() => setReceiptPreview(null)}
+                        aria-label="Remover comprovante"
+                        className="absolute inset-0 bg-destructive/80 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity"
+                      >
                         <Trash2 className="w-4 h-4 text-white" />
                       </button>
                     </div>
