@@ -7,3 +7,7 @@
 ## 2024-05-23 - Memoizing Heavy Decorations
 **Learning:** Large layout wrappers with heavy CSS animations (like `SlotMachineFrame`) re-render completely when children change. If they contain many DOM elements (lights, particles) generated in render, this adds significant overhead to every state change in the child (e.g. form inputs).
 **Action:** Extract heavy, static decorative elements into separate `memo`ized components so they don't re-render when the layout's children update.
+
+## 2025-05-24 - CSV Payload Optimization
+**Learning:** Fetching large tabular data (like sold raffle numbers) as JSON incurs significant payload overhead (~60% larger than CSV).
+**Action:** Use Supabase `.csv()` modifier and a custom manual parser (avoiding `string.split`) to reduce payload size and parsing memory/cpu overhead for large lists.
