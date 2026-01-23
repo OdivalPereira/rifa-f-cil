@@ -119,7 +119,7 @@ export function PixPayment({
         title: 'Descrição copiada!',
         description: 'Use no campo de mensagem do PIX.',
       });
-    } catch (err) { }
+    } catch (err) { /* ignore */ }
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -269,7 +269,9 @@ export function PixPayment({
                 </div>
               </div>
 
-              <DevSimulationSection quantity={quantity} setMockBuyerPhone={setMockBuyerPhone} setShowSuccess={setShowSuccess} />
+              {import.meta.env.DEV && (
+                <DevSimulationSection quantity={quantity} setMockBuyerPhone={setMockBuyerPhone} setShowSuccess={setShowSuccess} />
+              )}
             </CardContent>
           </Card>
         </motion.div>
@@ -442,14 +444,22 @@ export function PixPayment({
             </div>
           </motion.div>
 
-          <DevSimulationSection quantity={quantity} setMockBuyerPhone={setMockBuyerPhone} setShowSuccess={setShowSuccess} />
+          {import.meta.env.DEV && (
+            <DevSimulationSection quantity={quantity} setMockBuyerPhone={setMockBuyerPhone} setShowSuccess={setShowSuccess} />
+          )}
         </CardContent>
       </Card>
     </motion.div>
   );
 }
 
-function DevSimulationSection({ quantity, setMockBuyerPhone, setShowSuccess }: any) {
+interface DevSimulationSectionProps {
+  quantity: number;
+  setMockBuyerPhone: (phone: string) => void;
+  setShowSuccess: (show: boolean) => void;
+}
+
+function DevSimulationSection({ quantity, setMockBuyerPhone, setShowSuccess }: DevSimulationSectionProps) {
   return (
     <div className="mt-8 pt-4 border-t border-dashed border-border/30 text-center space-y-2 opacity-30 hover:opacity-100 transition-opacity">
       <p className="text-[9px] text-muted-foreground font-bold uppercase tracking-widest">Apenas para Testes</p>
