@@ -93,21 +93,101 @@ serve(async (req) => {
     const url = new URL(req.url);
     const action = url.searchParams.get('action');
 
+    const body = await req.json();
+
     // Verify token action
     if (action === 'verify') {
-      const { token } = await req.json();
+      const { token } = body;
       const result = await verifyTokenSecure(token); // Use secure verify
       return new Response(JSON.stringify(result), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
-    const { phone, pin } = await req.json();
+    // --- SECURE ACTIONS (Require Token) ---
+
+    if (action === 'get-my-purchases') {
+      const { token } = body;
+      const verification = await verifyTokenSecure(token);
+
+      if (!verification.valid || !verification.phone) {
+        return new Response(
+          JSON.stringify({ error: 'Token inválido ou expirado' }),
+          { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      const cleanPhone = verification.phone;
+
+      // Fetch purchases securely
+      const { data, error } = await supabase
+        .from('purchases')
+        .select(`
+          *,
+          raffle:raffles(*),
+          numbers:raffle_numbers(number)
+        `)
+        .eq('buyer_phone', cleanPhone)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Error fetching purchases:', error);
+        return new Response(
+          JSON.stringify({ error: 'Erro ao buscar compras' }),
+          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      return new Response(
+        JSON.stringify(data),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    if (action === 'get-my-stats') {
+      const { token } = body;
+      const verification = await verifyTokenSecure(token);
+
+      if (!verification.valid || !verification.phone) {
+        return new Response(
+          JSON.stringify({ error: 'Token inválido ou expirado' }),
+          { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      const cleanPhone = verification.phone;
+
+      // Fetch stats securely
+      const { data, error } = await supabase
+        .from('purchases')
+        .select('quantity')
+        .eq('buyer_phone', cleanPhone)
+        .eq('payment_status', 'approved');
+
+      if (error) {
+        console.error('Error fetching stats:', error);
+        return new Response(
+          JSON.stringify({ error: 'Erro ao buscar estatísticas' }),
+          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      const totalQuantity = data?.reduce((sum, p) => sum + p.quantity, 0) || 0;
+
+      return new Response(
+        JSON.stringify({ total_quantity: totalQuantity }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // --- PUBLIC ACTIONS (Require Phone/Pin) ---
+
+    const { phone, pin } = body;
 
     // Validate inputs
     if (!phone || !pin) {
       return new Response(
-        JSON.stringify({ error: 'Telefone e PIN são obrigatórios' }),
+        JSON.stringify({ error: 'Telefone e PIN são obrigatórios para esta ação' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
