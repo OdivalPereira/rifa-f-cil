@@ -10,7 +10,7 @@ import ReferralDashboard from '@/components/ReferralDashboard';
 
 export default function MyNumbers() {
   const navigate = useNavigate();
-  const { isAuthenticated, phone, isLoading: authLoading, logout } = useCustomerAuth();
+  const { isAuthenticated, phone, token, isLoading: authLoading, logout } = useCustomerAuth();
 
   // Redirect to /conta if not authenticated
   useEffect(() => {
@@ -19,8 +19,8 @@ export default function MyNumbers() {
     }
   }, [authLoading, isAuthenticated, navigate]);
 
-  // Fetch purchases using the authenticated phone
-  const { data: purchases, isLoading: purchasesLoading } = useMyPurchases('', phone || '');
+  // Fetch purchases using the authenticated phone and secure token
+  const { data: purchases, isLoading: purchasesLoading } = useMyPurchases('', phone || '', token);
 
   const isLoading = authLoading || purchasesLoading;
 
@@ -103,7 +103,7 @@ export default function MyNumbers() {
         {/* Main content */}
         <main className="container mx-auto px-3 sm:px-4 py-4 sm:py-8 max-w-2xl">
 
-          <ReferralDashboard phone={phone} />
+          <ReferralDashboard phone={phone} token={token} />
 
           <div className="card-jackpot p-4 sm:p-6">
             {/* Header */}

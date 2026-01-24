@@ -8,13 +8,14 @@ import { useUserTotalNumbers, useUserReferralCode, useGenerateReferralCode } fro
 
 interface ReferralDashboardProps {
   phone: string | null;
+  token?: string | null;
 }
 
-export default function ReferralDashboard({ phone }: ReferralDashboardProps) {
+export default function ReferralDashboard({ phone, token }: ReferralDashboardProps) {
   const { toast } = useToast();
   
   // Fetch user data
-  const { data: totalNumbers, isLoading: numbersLoading } = useUserTotalNumbers(phone);
+  const { data: totalNumbers, isLoading: numbersLoading } = useUserTotalNumbers(phone, token);
   const { data: userAccount, isLoading: accountLoading } = useUserReferralCode(phone);
   const generateCode = useGenerateReferralCode();
 

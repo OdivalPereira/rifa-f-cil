@@ -95,10 +95,21 @@ export function useSoldNumbers(raffleId: string | undefined) {
 }
 
 // Hook para buscar compras por email ou telefone
-export function useMyPurchases(email: string, phone: string) {
+export function useMyPurchases(email: string, phone: string, token?: string | null) {
   return useQuery({
-    queryKey: ['my-purchases', email, phone],
+    queryKey: ['my-purchases', email, phone, token],
     queryFn: async () => {
+      // Priority 1: Use secure token if available
+      if (token) {
+        const { data, error } = await supabase.functions.invoke('customer-auth', {
+          body: { action: 'get-my-purchases', token }
+        });
+        if (error) throw error;
+        // The Edge Function returns the data directly
+        return (data || []) as (Purchase & { raffle: Raffle; numbers: { number: number }[] })[];
+      }
+
+      // Priority 2: Legacy/Guest access (will fail if RLS is restricted)
       if (!email && !phone) return [];
 
       let query = supabase
@@ -117,10 +128,15 @@ export function useMyPurchases(email: string, phone: string) {
       }
 
       const { data, error } = await query;
-      if (error) throw error;
+      // If RLS blocks it, we might get an error or empty array.
+      // We return empty array to handle it gracefully for guests.
+      if (error) {
+        console.warn("Legacy purchase fetch failed (likely RLS restrictions):", error);
+        return [];
+      }
       return data || [];
     },
-    enabled: !!email || !!phone,
+    enabled: !!token || !!email || !!phone,
   });
 }
 
@@ -410,10 +426,20 @@ export function useGenerateReferralCode() {
 }
 
 // Hook para buscar total de números comprados por um usuário
-export function useUserTotalNumbers(phone: string | null) {
+export function useUserTotalNumbers(phone: string | null, token?: string | null) {
   return useQuery({
-    queryKey: ['user-total-numbers', phone],
+    queryKey: ['user-total-numbers', phone, token],
     queryFn: async () => {
+      // Priority 1: Use secure token
+      if (token) {
+        const { data, error } = await supabase.functions.invoke('customer-auth', {
+          body: { action: 'get-my-stats', token }
+        });
+        if (error) throw error;
+        return (data?.total_quantity || 0) as number;
+      }
+
+      // Priority 2: Legacy access (will fail if RLS is restricted)
       if (!phone) return 0;
 
       const cleanPhone = phone.replace(/\D/g, '');
@@ -425,13 +451,13 @@ export function useUserTotalNumbers(phone: string | null) {
         .eq('payment_status', 'approved');
 
       if (error) {
-        console.error('Error fetching user purchases:', error);
+        console.warn("Legacy stats fetch failed (likely RLS restrictions):", error);
         return 0;
       }
 
       return data?.reduce((sum, p) => sum + p.quantity, 0) || 0;
     },
-    enabled: !!phone,
+    enabled: !!token || !!phone,
   });
 }
 
