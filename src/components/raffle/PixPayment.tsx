@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -35,44 +35,9 @@ const BANK_LINKS = [
   { name: 'Santander', url: 'santander://', color: 'bg-[#EC0000]', hover: 'hover:shadow-[#EC0000]/40' },
 ];
 
-export function PixPayment({
-  amount,
-  pixKey,
-  pixKeyType,
-  beneficiaryName,
-  purchaseId,
-  expiresAt,
-  buyerPhone = '',
-  quantity = 1,
-  raffleShortCode = 'RIFA',
-}: PixPaymentProps) {
-  const { toast } = useToast();
-  const [copied, setCopied] = useState(false);
+function PaymentTimer({ expiresAt }: { expiresAt: string }) {
   const [timeLeft, setTimeLeft] = useState<string>('');
-  const [isUploading, setIsUploading] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState(0);
-  const [uploadStatus, setUploadStatus] = useState<'idle' | 'success' | 'checking'>('idle');
-  const [receiptPreview, setReceiptPreview] = useState<string | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Dev simulation state
-  const [showSuccess, setShowSuccess] = useState(false);
-  const [mockBuyerPhone, setMockBuyerPhone] = useState('11999999999');
-
-  // Generate standardized description
-  const purchaseShortId = purchaseId.slice(0, 6).toUpperCase();
-  const pixDescription = `${raffleShortCode}|${buyerPhone.replace(/\D/g, '')}|${quantity}cotas|#${purchaseShortId}`;
-
-  // Generate REAL PIX Copy and Paste Payload
-  const pixPayload = generatePixPayload({
-    key: pixKey,
-    amount: amount,
-    beneficiaryName: beneficiaryName || 'Organizador',
-    description: pixDescription,
-    txId: purchaseShortId
-  });
-
-  // Countdown timer logic
   useEffect(() => {
     const updateTimer = () => {
       const now = new Date();
@@ -93,6 +58,49 @@ export function PixPayment({
     const interval = setInterval(updateTimer, 1000);
     return () => clearInterval(interval);
   }, [expiresAt]);
+
+  return <span className="font-mono font-bold text-warning text-xl">{timeLeft}</span>;
+}
+
+export function PixPayment({
+  amount,
+  pixKey,
+  pixKeyType,
+  beneficiaryName,
+  purchaseId,
+  expiresAt,
+  buyerPhone = '',
+  quantity = 1,
+  raffleShortCode = 'RIFA',
+}: PixPaymentProps) {
+  const { toast } = useToast();
+  const [copied, setCopied] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [uploadStatus, setUploadStatus] = useState<'idle' | 'success' | 'checking'>('idle');
+  const [receiptPreview, setReceiptPreview] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Dev simulation state
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [mockBuyerPhone, setMockBuyerPhone] = useState('11999999999');
+
+  // Generate standardized description
+  const purchaseShortId = useMemo(() => purchaseId.slice(0, 6).toUpperCase(), [purchaseId]);
+
+  const pixDescription = useMemo(() =>
+    `${raffleShortCode}|${buyerPhone.replace(/\D/g, '')}|${quantity}cotas|#${purchaseShortId}`,
+    [raffleShortCode, buyerPhone, quantity, purchaseShortId]
+  );
+
+  // Generate REAL PIX Copy and Paste Payload
+  const pixPayload = useMemo(() => generatePixPayload({
+    key: pixKey,
+    amount: amount,
+    beneficiaryName: beneficiaryName || 'Organizador',
+    description: pixDescription,
+    txId: purchaseShortId
+  }), [pixKey, amount, beneficiaryName, pixDescription, purchaseShortId]);
 
   const handleCopyPixKey = async () => {
     try {
@@ -119,7 +127,9 @@ export function PixPayment({
         title: 'Descrição copiada!',
         description: 'Use no campo de mensagem do PIX.',
       });
-    } catch (err) { }
+    } catch (err) {
+      // Ignore copy error
+    }
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -167,6 +177,7 @@ export function PixPayment({
         .update({
           receipt_url: publicUrl,
           receipt_uploaded_at: new Date().toISOString()
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } as any)
         .eq('id', purchaseId);
 
@@ -304,7 +315,7 @@ export function PixPayment({
               <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest flex items-center gap-1 mb-1">
                 <Clock className="w-3 h-3 text-warning" /> Expira em
               </span>
-              <span className="font-mono font-bold text-warning text-xl">{timeLeft}</span>
+              <PaymentTimer expiresAt={expiresAt} />
             </motion.div>
             <motion.div variants={itemVariants} className="flex flex-col items-center justify-center p-4 rounded-2xl bg-emerald/5 border border-gold/20 shadow-inner">
               <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest flex items-center gap-1 mb-1">
@@ -449,7 +460,13 @@ export function PixPayment({
   );
 }
 
-function DevSimulationSection({ quantity, setMockBuyerPhone, setShowSuccess }: any) {
+interface DevSimulationProps {
+  quantity: number;
+  setMockBuyerPhone: (phone: string) => void;
+  setShowSuccess: (show: boolean) => void;
+}
+
+function DevSimulationSection({ quantity, setMockBuyerPhone, setShowSuccess }: DevSimulationProps) {
   return (
     <div className="mt-8 pt-4 border-t border-dashed border-border/30 text-center space-y-2 opacity-30 hover:opacity-100 transition-opacity">
       <p className="text-[9px] text-muted-foreground font-bold uppercase tracking-widest">Apenas para Testes</p>

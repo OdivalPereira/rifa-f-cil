@@ -7,3 +7,7 @@
 ## 2024-05-23 - Memoizing Heavy Decorations
 **Learning:** Large layout wrappers with heavy CSS animations (like `SlotMachineFrame`) re-render completely when children change. If they contain many DOM elements (lights, particles) generated in render, this adds significant overhead to every state change in the child (e.g. form inputs).
 **Action:** Extract heavy, static decorative elements into separate `memo`ized components so they don't re-render when the layout's children update.
+
+## 2024-05-24 - Isolating High-Frequency Updates
+**Learning:** Components with interval timers (e.g., payment countdowns) trigger full re-renders of their entire subtree every second. For complex components like `PixPayment` (rendering QR codes and animations), this consumes unnecessary CPU.
+**Action:** Extract the timer logic into a small, isolated child component so that only the text node updates, leaving the heavy parent component static.
