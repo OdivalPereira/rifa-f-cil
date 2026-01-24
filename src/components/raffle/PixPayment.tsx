@@ -13,6 +13,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { PurchaseSuccessCelebration } from './PurchaseSuccessCelebration';
 import { generatePixPayload } from '@/lib/pix';
 import { Progress } from '@/components/ui/progress';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface PixPaymentProps {
   amount: number;
@@ -119,7 +120,9 @@ export function PixPayment({
         title: 'Descrição copiada!',
         description: 'Use no campo de mensagem do PIX.',
       });
-    } catch (err) { }
+    } catch {
+      // Ignore clipboard errors
+    }
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -167,6 +170,7 @@ export function PixPayment({
         .update({
           receipt_url: publicUrl,
           receipt_uploaded_at: new Date().toISOString()
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } as any)
         .eq('id', purchaseId);
 
@@ -229,7 +233,7 @@ export function PixPayment({
               <div className="relative mx-auto w-20 h-20 mb-4">
                 <div className="absolute inset-0 bg-emerald/20 rounded-full animate-pulse-radar" />
                 <div className="relative w-20 h-20 rounded-full bg-emerald/10 border-2 border-emerald/50 flex items-center justify-center glow-emerald">
-                  <Check className="w-10 h-10 text-emerald animate-bounce" />
+                  <Check className="w-10 h-10 text-emerald animate-bounce" aria-hidden="true" />
                 </div>
               </div>
               <CardTitle className="text-3xl font-display text-gradient-luck">Quase lá!</CardTitle>
@@ -240,7 +244,7 @@ export function PixPayment({
             <CardContent className="text-center space-y-6 pb-8">
               <div className="p-5 bg-card/50 backdrop-blur-sm border border-emerald/20 rounded-2xl shadow-inner-slot space-y-3">
                 <p className="text-muted-foreground text-sm uppercase font-bold tracking-widest flex items-center justify-center gap-2">
-                  <Sparkles className="w-4 h-4 text-emerald" /> Status do Pedido
+                  <Sparkles className="w-4 h-4 text-emerald" aria-hidden="true" /> Status do Pedido
                 </p>
                 <div className="flex flex-col items-center gap-1">
                   <span className="font-display text-2xl text-emerald animate-pulse">ANALISANDO</span>
@@ -263,7 +267,7 @@ export function PixPayment({
                 </p>
                 <div className="flex flex-col items-center gap-3">
                   <Button variant="outline" className="w-full border-gold/30 hover:bg-gold/10 group h-12 rounded-xl" onClick={() => setUploadStatus('idle')}>
-                    <Eye className="w-4 h-4 mr-2 group-hover:rotate-12 transition-transform" />
+                    <Eye className="w-4 h-4 mr-2 group-hover:rotate-12 transition-transform" aria-hidden="true" />
                     Ver dados do PIX novamente
                   </Button>
                 </div>
@@ -285,10 +289,10 @@ export function PixPayment({
 
         <CardHeader className="text-center space-y-2 pt-6 sm:pt-8 px-4 sm:px-6 relative">
           <motion.div variants={itemVariants} className="absolute top-4 left-4 text-gold/20 hidden sm:block">
-            <Coins className="w-8 h-8 animate-float" />
+            <Coins className="w-8 h-8 animate-float" aria-hidden="true" />
           </motion.div>
           <motion.div variants={itemVariants} className="absolute top-4 right-4 text-emerald/20 hidden sm:block">
-            <Star className="w-8 h-8 animate-float [animation-delay:1.5s]" />
+            <Star className="w-8 h-8 animate-float [animation-delay:1.5s]" aria-hidden="true" />
           </motion.div>
 
           <CardTitle className="text-2xl sm:text-3xl font-display text-gradient-luck drop-shadow-sm">Pagamento Seguro</CardTitle>
@@ -302,13 +306,13 @@ export function PixPayment({
           <div className="grid grid-cols-2 gap-4">
             <motion.div variants={itemVariants} className="flex flex-col items-center justify-center p-4 rounded-2xl bg-warning/5 border border-warning/20 shadow-inner">
               <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest flex items-center gap-1 mb-1">
-                <Clock className="w-3 h-3 text-warning" /> Expira em
+                <Clock className="w-3 h-3 text-warning" aria-hidden="true" /> Expira em
               </span>
               <span className="font-mono font-bold text-warning text-xl">{timeLeft}</span>
             </motion.div>
             <motion.div variants={itemVariants} className="flex flex-col items-center justify-center p-4 rounded-2xl bg-emerald/5 border border-gold/20 shadow-inner">
               <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest flex items-center gap-1 mb-1">
-                <Sparkles className="w-3 h-3 text-gold" /> Total
+                <Sparkles className="w-3 h-3 text-gold" aria-hidden="true" /> Total
               </span>
               <span className="font-display font-bold text-gradient-gold text-xl animate-pulse-glow">{formatCurrency(amount)}</span>
             </motion.div>
@@ -332,7 +336,7 @@ export function PixPayment({
             </div>
             <div className="text-center space-y-1">
               <p className="text-xs font-bold text-foreground flex items-center justify-center gap-2">
-                <QrCodeIcon className="w-4 h-4 text-gold" /> ESCANEIE O QR CODE
+                <QrCodeIcon className="w-4 h-4 text-gold" aria-hidden="true" /> ESCANEIE O QR CODE
               </p>
               <p className="text-[10px] text-muted-foreground uppercase tracking-tighter">Use o aplicativo do seu banco</p>
             </div>
@@ -342,7 +346,7 @@ export function PixPayment({
           <motion.div variants={itemVariants} className="space-y-3">
             <div className="flex items-center justify-between px-1">
               <p className="text-xs font-bold text-foreground flex items-center gap-2 uppercase tracking-wide">
-                <Zap className="w-3 h-3 text-gold fill-gold" />
+                <Zap className="w-3 h-3 text-gold fill-gold" aria-hidden="true" />
                 PIX Copia e Cola
               </p>
               <span className="text-[10px] text-muted-foreground font-mono">{getPixKeyTypeLabel(pixKeyType)}</span>
@@ -353,14 +357,22 @@ export function PixPayment({
                 <div className="flex-1 p-3.5 rounded-xl bg-card border border-border/50 font-mono text-xs break-all flex items-center shadow-inner overflow-hidden line-clamp-1 opacity-70">
                   {pixPayload.slice(0, 42)}...
                 </div>
-                <Button
-                  variant="luck"
-                  size="icon"
-                  onClick={handleCopyPixKey}
-                  className={`shrink-0 h-11 w-11 rounded-xl transition-all ${copied ? 'bg-emerald border-emerald' : ''}`}
-                >
-                  {copied ? <Check className="w-5 h-5" /> : <Copy className="w-5 h-5 text-white" />}
-                </Button>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="luck"
+                      size="icon"
+                      onClick={handleCopyPixKey}
+                      aria-label={copied ? "Chave PIX copiada" : "Copiar chave PIX"}
+                      className={`shrink-0 h-11 w-11 rounded-xl transition-all ${copied ? 'bg-emerald border-emerald' : ''}`}
+                    >
+                      {copied ? <Check className="w-5 h-5" aria-hidden="true" /> : <Copy className="w-5 h-5 text-white" aria-hidden="true" />}
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>{copied ? "Copiado!" : "Copiar chave PIX"}</p>
+                  </TooltipContent>
+                </Tooltip>
               </div>
             </div>
           </motion.div>
@@ -370,7 +382,7 @@ export function PixPayment({
             <div className="p-3.5 space-y-2">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-bold text-emerald-light uppercase tracking-wider flex items-center gap-1">
-                  <Star className="w-3.5 h-3.5 fill-emerald-light" /> Identificação
+                  <Star className="w-3.5 h-3.5 fill-emerald-light" aria-hidden="true" /> Identificação
                 </span>
                 <button onClick={handleCopyDescription} className="text-[10px] font-bold text-foreground bg-white/10 px-2 py-0.5 rounded-full hover:bg-white/20 transition-colors uppercase">Copiar</button>
               </div>
@@ -422,14 +434,14 @@ export function PixPayment({
                     onClick={() => fileInputRef.current?.click()}
                     className="flex-1 bg-card hover:bg-emerald/10 text-emerald-light border-emerald/20 border-2 border-dashed h-12 rounded-xl group"
                   >
-                    <Upload className="w-4 h-4 mr-2 group-hover:-translate-y-1 transition-transform" />
+                    <Upload className="w-4 h-4 mr-2 group-hover:-translate-y-1 transition-transform" aria-hidden="true" />
                     Enviar Comprovante
                   </Button>
                   {receiptPreview && (
                     <div className="relative h-12 w-12 rounded-xl overflow-hidden border border-emerald/50 group">
                       <img src={receiptPreview} className="h-full w-full object-cover" />
-                      <button onClick={() => setReceiptPreview(null)} className="absolute inset-0 bg-destructive/80 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
-                        <Trash2 className="w-4 h-4 text-white" />
+                      <button onClick={() => setReceiptPreview(null)} aria-label="Remover comprovante" className="absolute inset-0 bg-destructive/80 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                        <Trash2 className="w-4 h-4 text-white" aria-hidden="true" />
                       </button>
                     </div>
                   )}
@@ -449,7 +461,13 @@ export function PixPayment({
   );
 }
 
-function DevSimulationSection({ quantity, setMockBuyerPhone, setShowSuccess }: any) {
+interface DevSimulationSectionProps {
+  quantity: number;
+  setMockBuyerPhone: (phone: string) => void;
+  setShowSuccess: (show: boolean) => void;
+}
+
+function DevSimulationSection({ quantity, setMockBuyerPhone, setShowSuccess }: DevSimulationSectionProps) {
   return (
     <div className="mt-8 pt-4 border-t border-dashed border-border/30 text-center space-y-2 opacity-30 hover:opacity-100 transition-opacity">
       <p className="text-[9px] text-muted-foreground font-bold uppercase tracking-widest">Apenas para Testes</p>
