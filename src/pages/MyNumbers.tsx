@@ -10,7 +10,7 @@ import ReferralDashboard from '@/components/ReferralDashboard';
 
 export default function MyNumbers() {
   const navigate = useNavigate();
-  const { isAuthenticated, phone, isLoading: authLoading, logout } = useCustomerAuth();
+  const { isAuthenticated, phone, token, isLoading: authLoading, logout } = useCustomerAuth();
 
   // Redirect to /conta if not authenticated
   useEffect(() => {
@@ -20,7 +20,7 @@ export default function MyNumbers() {
   }, [authLoading, isAuthenticated, navigate]);
 
   // Fetch purchases using the authenticated phone
-  const { data: purchases, isLoading: purchasesLoading } = useMyPurchases('', phone || '');
+  const { data: purchases, isLoading: purchasesLoading } = useMyPurchases('', phone || '', token);
 
   const isLoading = authLoading || purchasesLoading;
 

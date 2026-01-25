@@ -95,10 +95,33 @@ export function useSoldNumbers(raffleId: string | undefined) {
 }
 
 // Hook para buscar compras por email ou telefone
-export function useMyPurchases(email: string, phone: string) {
+export function useMyPurchases(email: string, phone: string, token?: string | null) {
   return useQuery({
-    queryKey: ['my-purchases', email, phone],
+    queryKey: ['my-purchases', email, phone, token],
     queryFn: async () => {
+      // 1. Secure Path: If token is present, use Edge Function
+      if (token) {
+        const response = await fetch(
+          `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/customer-auth?action=get-my-purchases`,
+          {
+            headers: {
+              'Content-Type': 'application/json',
+              'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+              'Authorization': `Bearer ${token}`
+            },
+          }
+        );
+
+        if (!response.ok) {
+          const error = await response.json().catch(() => ({}));
+          throw new Error(error.error || 'Failed to fetch purchases');
+        }
+
+        const data = await response.json();
+        return data;
+      }
+
+      // 2. Legacy/Insecure Path: Direct DB query (fallback)
       if (!email && !phone) return [];
 
       let query = supabase
@@ -120,7 +143,7 @@ export function useMyPurchases(email: string, phone: string) {
       if (error) throw error;
       return data || [];
     },
-    enabled: !!email || !!phone,
+    enabled: !!email || !!phone || !!token,
   });
 }
 
@@ -169,8 +192,12 @@ export function useCreatePurchase() {
         localStorage.removeItem('rifa_referrer');
       }
 
+      // Generate ID client-side
+      const id = crypto.randomUUID();
+
       // Build insert data
       const insertData = {
+        id,
         raffle_id: raffleId,
         buyer_name: buyerName,
         buyer_email: buyerEmail,
@@ -181,14 +208,23 @@ export function useCreatePurchase() {
         ...(location ? { location } : {}),
       };
 
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from('purchases')
-        .insert(insertData as any)
-        .select()
-        .single();
+        .insert(insertData as any); // eslint-disable-line @typescript-eslint/no-explicit-any
 
       if (error) throw error;
-      return data;
+
+      // Return constructed object to avoid needing SELECT permissions
+      return {
+        ...insertData,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        payment_status: 'pending',
+        expires_at: new Date(Date.now() + 30 * 60 * 1000).toISOString(), // 30 mins from now
+        pix_transaction_id: null,
+        approved_at: null,
+        approved_by: null,
+      };
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['active-raffle'] });
