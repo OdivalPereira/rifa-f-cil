@@ -119,7 +119,9 @@ export function PixPayment({
         title: 'Descrição copiada!',
         description: 'Use no campo de mensagem do PIX.',
       });
-    } catch (err) { }
+    } catch (err) {
+      // Ignore copy errors
+    }
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -167,6 +169,7 @@ export function PixPayment({
         .update({
           receipt_url: publicUrl,
           receipt_uploaded_at: new Date().toISOString()
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } as any)
         .eq('id', purchaseId);
 
@@ -300,9 +303,14 @@ export function PixPayment({
         <CardContent className="space-y-6 pb-6 sm:pb-8 px-4 sm:px-6">
           {/* Timer e Valor */}
           <div className="grid grid-cols-2 gap-4">
-            <motion.div variants={itemVariants} className="flex flex-col items-center justify-center p-4 rounded-2xl bg-warning/5 border border-warning/20 shadow-inner">
+            <motion.div
+              variants={itemVariants}
+              className="flex flex-col items-center justify-center p-4 rounded-2xl bg-warning/5 border border-warning/20 shadow-inner"
+              role="timer"
+              aria-label="Tempo restante"
+            >
               <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest flex items-center gap-1 mb-1">
-                <Clock className="w-3 h-3 text-warning" /> Expira em
+                <Clock className="w-3 h-3 text-warning" aria-hidden="true" /> Expira em
               </span>
               <span className="font-mono font-bold text-warning text-xl">{timeLeft}</span>
             </motion.div>
@@ -357,9 +365,10 @@ export function PixPayment({
                   variant="luck"
                   size="icon"
                   onClick={handleCopyPixKey}
+                  aria-label={copied ? "Chave PIX copiada" : "Copiar chave PIX"}
                   className={`shrink-0 h-11 w-11 rounded-xl transition-all ${copied ? 'bg-emerald border-emerald' : ''}`}
                 >
-                  {copied ? <Check className="w-5 h-5" /> : <Copy className="w-5 h-5 text-white" />}
+                  {copied ? <Check className="w-5 h-5" aria-hidden="true" /> : <Copy className="w-5 h-5 text-white" aria-hidden="true" />}
                 </Button>
               </div>
             </div>
@@ -372,7 +381,13 @@ export function PixPayment({
                 <span className="text-xs font-bold text-emerald-light uppercase tracking-wider flex items-center gap-1">
                   <Star className="w-3.5 h-3.5 fill-emerald-light" /> Identificação
                 </span>
-                <button onClick={handleCopyDescription} className="text-[10px] font-bold text-foreground bg-white/10 px-2 py-0.5 rounded-full hover:bg-white/20 transition-colors uppercase">Copiar</button>
+                <button
+                  onClick={handleCopyDescription}
+                  aria-label="Copiar descrição do PIX"
+                  className="text-[10px] font-bold text-foreground bg-white/10 px-2 py-0.5 rounded-full hover:bg-white/20 transition-colors uppercase"
+                >
+                  Copiar
+                </button>
               </div>
               <p className="font-mono text-xs text-emerald/80 break-all leading-tight">
                 {pixDescription}
@@ -393,6 +408,7 @@ export function PixPayment({
                 <motion.a
                   key={bank.name}
                   href={bank.url}
+                  aria-label={`Abrir app do ${bank.name}`}
                   whileHover={{ scale: 1.1, translateY: -2 }}
                   whileTap={{ scale: 0.95 }}
                   className={`flex flex-col items-center justify-center p-2.5 rounded-xl text-white transition-all shadow-sm ${bank.color} ${bank.hover} hover:shadow-lg`}
@@ -427,9 +443,13 @@ export function PixPayment({
                   </Button>
                   {receiptPreview && (
                     <div className="relative h-12 w-12 rounded-xl overflow-hidden border border-emerald/50 group">
-                      <img src={receiptPreview} className="h-full w-full object-cover" />
-                      <button onClick={() => setReceiptPreview(null)} className="absolute inset-0 bg-destructive/80 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
-                        <Trash2 className="w-4 h-4 text-white" />
+                      <img src={receiptPreview} alt="Pré-visualização do comprovante" className="h-full w-full object-cover" />
+                      <button
+                        onClick={() => setReceiptPreview(null)}
+                        aria-label="Remover comprovante"
+                        className="absolute inset-0 bg-destructive/80 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity"
+                      >
+                        <Trash2 className="w-4 h-4 text-white" aria-hidden="true" />
                       </button>
                     </div>
                   )}
@@ -449,7 +469,13 @@ export function PixPayment({
   );
 }
 
-function DevSimulationSection({ quantity, setMockBuyerPhone, setShowSuccess }: any) {
+interface DevSimulationProps {
+  quantity: number;
+  setMockBuyerPhone: (phone: string) => void;
+  setShowSuccess: (show: boolean) => void;
+}
+
+function DevSimulationSection({ quantity, setMockBuyerPhone, setShowSuccess }: DevSimulationProps) {
   return (
     <div className="mt-8 pt-4 border-t border-dashed border-border/30 text-center space-y-2 opacity-30 hover:opacity-100 transition-opacity">
       <p className="text-[9px] text-muted-foreground font-bold uppercase tracking-widest">Apenas para Testes</p>

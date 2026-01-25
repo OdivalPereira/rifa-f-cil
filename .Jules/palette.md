@@ -13,3 +13,7 @@
 ## 2024-05-26 - Interactive Card Accessibility
 **Learning:** Interactive cards that trigger modals are frequently implemented as `div`s, excluding keyboard users. Converting them to `<button>` elements requires explicitly setting `text-left` and `w-full` to preserve the card layout while restoring native focus and activation behavior.
 **Action:** When making cards interactive, use `<button type="button">` instead of `div`, and ensure CSS resets (width, text-align) are applied to match the original design.
+
+## 2024-05-27 - High-Stakes Timer Accessibility
+**Learning:** In high-stress or time-sensitive flows like payments, dynamic content (like countdown timers) must be explicitly marked with `role="timer"` and labelled to ensure screen reader users understand the urgency without constant, disruptive announcements (avoiding `aria-live="assertive"` for seconds).
+**Action:** Use `role="timer"` for countdowns and ensure all icon-only actions (copy, delete) in payment flows have explicit `aria-label`s to reduce cognitive load.
