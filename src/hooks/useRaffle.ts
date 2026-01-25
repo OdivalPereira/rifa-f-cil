@@ -2,6 +2,7 @@ import { useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import type { Tables } from '@/integrations/supabase/types';
+import { parseSoldNumbersCSV } from '@/lib/csvParser';
 
 type Raffle = Tables<'raffles'>;
 type OrganizerProfile = Tables<'organizer_profiles'>;
@@ -82,13 +83,15 @@ export function useSoldNumbers(raffleId: string | undefined) {
     queryFn: async (): Promise<Pick<RaffleNumber, 'number' | 'confirmed_at'>[]> => {
       if (!raffleId) return [];
 
+      // Optimization: Fetch as CSV to reduce payload size and parsing overhead for large datasets
       const { data, error } = await supabase
         .from('raffle_numbers')
         .select('number, confirmed_at')
-        .eq('raffle_id', raffleId);
+        .eq('raffle_id', raffleId)
+        .csv();
 
       if (error) throw error;
-      return data || [];
+      return parseSoldNumbersCSV(data as string);
     },
     enabled: !!raffleId,
   });
