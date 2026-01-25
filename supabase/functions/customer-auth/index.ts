@@ -313,9 +313,55 @@ serve(async (req) => {
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
 
+    } else if (action === 'get-my-purchases') {
+      // Verify Authorization header
+      const authHeader = req.headers.get('Authorization');
+      if (!authHeader) {
+        return new Response(
+          JSON.stringify({ error: 'Unauthorized' }),
+          { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      const token = authHeader.replace('Bearer ', '');
+      const verification = await verifyTokenSecure(token);
+
+      if (!verification.valid || !verification.phone) {
+        return new Response(
+          JSON.stringify({ error: 'Invalid token' }),
+          { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      const cleanPhone = verification.phone.replace(/\D/g, '');
+
+      // Fetch purchases
+      const { data: purchases, error: dbError } = await supabase
+        .from('purchases')
+        .select(`
+          *,
+          raffle:raffles(*),
+          numbers:raffle_numbers(number)
+        `)
+        .eq('buyer_phone', cleanPhone)
+        .order('created_at', { ascending: false });
+
+      if (dbError) {
+        console.error('Database error:', dbError);
+        return new Response(
+          JSON.stringify({ error: 'Erro ao buscar compras' }),
+          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      return new Response(
+        JSON.stringify(purchases),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+
     } else {
       return new Response(
-        JSON.stringify({ error: 'Ação inválida. Use: register, login, verify ou reset-pin' }),
+        JSON.stringify({ error: 'Ação inválida. Use: register, login, verify, reset-pin ou get-my-purchases' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
