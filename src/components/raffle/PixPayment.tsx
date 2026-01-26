@@ -1,5 +1,5 @@
-import { useState, useEffect, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useState, useEffect, useRef, useMemo } from 'react';
+import { motion, AnimatePresence, Variants } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { formatCurrency } from '@/lib/validators';
@@ -48,7 +48,6 @@ export function PixPayment({
 }: PixPaymentProps) {
   const { toast } = useToast();
   const [copied, setCopied] = useState(false);
-  const [timeLeft, setTimeLeft] = useState<string>('');
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [uploadStatus, setUploadStatus] = useState<'idle' | 'success' | 'checking'>('idle');
@@ -64,35 +63,14 @@ export function PixPayment({
   const pixDescription = `${raffleShortCode}|${buyerPhone.replace(/\D/g, '')}|${quantity}cotas|#${purchaseShortId}`;
 
   // Generate REAL PIX Copy and Paste Payload
-  const pixPayload = generatePixPayload({
+  // Optimization: Memoized to prevent expensive CRC16 re-calculation on every render
+  const pixPayload = useMemo(() => generatePixPayload({
     key: pixKey,
     amount: amount,
     beneficiaryName: beneficiaryName || 'Organizador',
     description: pixDescription,
     txId: purchaseShortId
-  });
-
-  // Countdown timer logic
-  useEffect(() => {
-    const updateTimer = () => {
-      const now = new Date();
-      const expires = new Date(expiresAt);
-      const diff = expires.getTime() - now.getTime();
-
-      if (diff <= 0) {
-        setTimeLeft('Expirado');
-        return;
-      }
-
-      const minutes = Math.floor(diff / 60000);
-      const seconds = Math.floor((diff % 60000) / 1000);
-      setTimeLeft(`${minutes}:${seconds.toString().padStart(2, '0')}`);
-    };
-
-    updateTimer();
-    const interval = setInterval(updateTimer, 1000);
-    return () => clearInterval(interval);
-  }, [expiresAt]);
+  }), [pixKey, amount, beneficiaryName, pixDescription, purchaseShortId]);
 
   const handleCopyPixKey = async () => {
     try {
@@ -119,7 +97,9 @@ export function PixPayment({
         title: 'Descrição copiada!',
         description: 'Use no campo de mensagem do PIX.',
       });
-    } catch (err) { }
+    } catch (err) {
+      // Ignore clipboard error
+    }
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -167,6 +147,7 @@ export function PixPayment({
         .update({
           receipt_url: publicUrl,
           receipt_uploaded_at: new Date().toISOString()
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } as any)
         .eq('id', purchaseId);
 
@@ -300,12 +281,7 @@ export function PixPayment({
         <CardContent className="space-y-6 pb-6 sm:pb-8 px-4 sm:px-6">
           {/* Timer e Valor */}
           <div className="grid grid-cols-2 gap-4">
-            <motion.div variants={itemVariants} className="flex flex-col items-center justify-center p-4 rounded-2xl bg-warning/5 border border-warning/20 shadow-inner">
-              <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest flex items-center gap-1 mb-1">
-                <Clock className="w-3 h-3 text-warning" /> Expira em
-              </span>
-              <span className="font-mono font-bold text-warning text-xl">{timeLeft}</span>
-            </motion.div>
+            <PaymentTimer expiresAt={expiresAt} variants={itemVariants} />
             <motion.div variants={itemVariants} className="flex flex-col items-center justify-center p-4 rounded-2xl bg-emerald/5 border border-gold/20 shadow-inner">
               <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest flex items-center gap-1 mb-1">
                 <Sparkles className="w-3 h-3 text-gold" /> Total
@@ -449,7 +425,13 @@ export function PixPayment({
   );
 }
 
-function DevSimulationSection({ quantity, setMockBuyerPhone, setShowSuccess }: any) {
+interface DevSimulationSectionProps {
+  quantity: number;
+  setMockBuyerPhone: React.Dispatch<React.SetStateAction<string>>;
+  setShowSuccess: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
+function DevSimulationSection({ quantity, setMockBuyerPhone, setShowSuccess }: DevSimulationSectionProps) {
   return (
     <div className="mt-8 pt-4 border-t border-dashed border-border/30 text-center space-y-2 opacity-30 hover:opacity-100 transition-opacity">
       <p className="text-[9px] text-muted-foreground font-bold uppercase tracking-widest">Apenas para Testes</p>
@@ -465,4 +447,39 @@ function DevSimulationSection({ quantity, setMockBuyerPhone, setShowSuccess }: a
       </div>
     </div>
   )
+}
+
+// Optimization: Extracted timer to isolate re-renders every second
+function PaymentTimer({ expiresAt, variants }: { expiresAt: string, variants: Variants }) {
+  const [timeLeft, setTimeLeft] = useState<string>('');
+
+  useEffect(() => {
+    const updateTimer = () => {
+      const now = new Date();
+      const expires = new Date(expiresAt);
+      const diff = expires.getTime() - now.getTime();
+
+      if (diff <= 0) {
+        setTimeLeft('Expirado');
+        return;
+      }
+
+      const minutes = Math.floor(diff / 60000);
+      const seconds = Math.floor((diff % 60000) / 1000);
+      setTimeLeft(`${minutes}:${seconds.toString().padStart(2, '0')}`);
+    };
+
+    updateTimer();
+    const interval = setInterval(updateTimer, 1000);
+    return () => clearInterval(interval);
+  }, [expiresAt]);
+
+  return (
+    <motion.div variants={variants} className="flex flex-col items-center justify-center p-4 rounded-2xl bg-warning/5 border border-warning/20 shadow-inner">
+      <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest flex items-center gap-1 mb-1">
+        <Clock className="w-3 h-3 text-warning" /> Expira em
+      </span>
+      <span className="font-mono font-bold text-warning text-xl">{timeLeft}</span>
+    </motion.div>
+  );
 }
