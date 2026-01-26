@@ -79,11 +79,12 @@ export default function OrganizerSignup() {
 
             navigate('/admin/rifa');
 
-        } catch (err: any) {
+        } catch (err) {
             console.error(err);
+            const errorMessage = err instanceof Error ? err.message : 'Ocorreu um erro inesperado.';
             toast({
                 title: 'Erro ao criar conta',
-                description: err.message || 'Ocorreu um erro inesperado.',
+                description: errorMessage,
                 variant: 'destructive',
             });
         } finally {
@@ -114,11 +115,18 @@ export default function OrganizerSignup() {
                                 <Label htmlFor="organizationName" className="text-foreground/90">Nome do seu Negócio (Organização)</Label>
                                 <Input
                                     id="organizationName"
+                                    autoComplete="organization"
                                     placeholder="Ex: Prêmios do João"
+                                    aria-invalid={!!errors.organizationName}
+                                    aria-describedby={errors.organizationName ? "org-error" : undefined}
                                     {...register('organizationName')}
                                     className={`input-casino ${errors.organizationName ? 'border-destructive' : ''}`}
                                 />
-                                {errors.organizationName && <p className="text-sm text-destructive">{errors.organizationName.message}</p>}
+                                {errors.organizationName && (
+                                    <p id="org-error" role="alert" className="text-sm text-destructive">
+                                        {errors.organizationName.message}
+                                    </p>
+                                )}
                             </div>
 
                             <div className="space-y-2">
@@ -126,11 +134,18 @@ export default function OrganizerSignup() {
                                 <Input
                                     id="email"
                                     type="email"
+                                    autoComplete="email"
                                     placeholder="seu@email.com"
+                                    aria-invalid={!!errors.email}
+                                    aria-describedby={errors.email ? "email-error" : undefined}
                                     {...register('email')}
                                     className={`input-casino ${errors.email ? 'border-destructive' : ''}`}
                                 />
-                                {errors.email && <p className="text-sm text-destructive">{errors.email.message}</p>}
+                                {errors.email && (
+                                    <p id="email-error" role="alert" className="text-sm text-destructive">
+                                        {errors.email.message}
+                                    </p>
+                                )}
                             </div>
 
                             <div className="space-y-2">
@@ -138,11 +153,18 @@ export default function OrganizerSignup() {
                                 <Input
                                     id="password"
                                     type="password"
+                                    autoComplete="new-password"
                                     placeholder="Mínimo 6 caracteres"
+                                    aria-invalid={!!errors.password}
+                                    aria-describedby={errors.password ? "password-error" : undefined}
                                     {...register('password')}
                                     className={`input-casino ${errors.password ? 'border-destructive' : ''}`}
                                 />
-                                {errors.password && <p className="text-sm text-destructive">{errors.password.message}</p>}
+                                {errors.password && (
+                                    <p id="password-error" role="alert" className="text-sm text-destructive">
+                                        {errors.password.message}
+                                    </p>
+                                )}
                             </div>
 
                             <div className="space-y-2">
@@ -150,11 +172,18 @@ export default function OrganizerSignup() {
                                 <Input
                                     id="confirmPassword"
                                     type="password"
+                                    autoComplete="new-password"
                                     placeholder="Repita a senha"
+                                    aria-invalid={!!errors.confirmPassword}
+                                    aria-describedby={errors.confirmPassword ? "confirm-password-error" : undefined}
                                     {...register('confirmPassword')}
                                     className={`input-casino ${errors.confirmPassword ? 'border-destructive' : ''}`}
                                 />
-                                {errors.confirmPassword && <p className="text-sm text-destructive">{errors.confirmPassword.message}</p>}
+                                {errors.confirmPassword && (
+                                    <p id="confirm-password-error" role="alert" className="text-sm text-destructive">
+                                        {errors.confirmPassword.message}
+                                    </p>
+                                )}
                             </div>
 
                             <Button
