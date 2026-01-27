@@ -313,6 +313,49 @@ serve(async (req) => {
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
 
+    } else if (action === 'get-my-purchases') {
+      // Verify Authorization header
+      const authHeader = req.headers.get('Authorization');
+      if (!authHeader) {
+        return new Response(
+          JSON.stringify({ error: 'Unauthorized' }),
+          { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      const token = authHeader.replace('Bearer ', '');
+      const verification = await verifyTokenSecure(token);
+
+      if (!verification.valid || !verification.phone) {
+        return new Response(
+          JSON.stringify({ error: 'Invalid token' }),
+          { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      const { data, error } = await supabase
+        .from('purchases')
+        .select(`
+          *,
+          raffle:raffles(*),
+          numbers:raffle_numbers(number)
+        `)
+        .eq('buyer_phone', verification.phone)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Error fetching purchases:', error);
+        return new Response(
+          JSON.stringify({ error: 'Error fetching data' }),
+          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      return new Response(
+        JSON.stringify(data),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+
     } else {
       return new Response(
         JSON.stringify({ error: 'Ação inválida. Use: register, login, verify ou reset-pin' }),

@@ -99,28 +99,31 @@ export function useMyPurchases(email: string, phone: string) {
   return useQuery({
     queryKey: ['my-purchases', email, phone],
     queryFn: async () => {
-      if (!email && !phone) return [];
+      // Prioritize Token Auth for Phone
+      const token = localStorage.getItem('customer_auth_token');
 
-      let query = supabase
-        .from('purchases')
-        .select(`
-          *,
-          raffle:raffles(*),
-          numbers:raffle_numbers(number)
-        `)
-        .order('created_at', { ascending: false });
-
-      if (email) {
-        query = query.eq('buyer_email', email);
-      } else if (phone) {
-        query = query.eq('buyer_phone', phone.replace(/\D/g, ''));
+      // If we have a token and are querying by phone, use secure endpoint
+      if (token && phone) {
+        const response = await fetch(
+          `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/customer-auth?action=get-my-purchases`,
+          {
+            headers: {
+              'Content-Type': 'application/json',
+              'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+              'Authorization': `Bearer ${token}`
+            },
+          }
+        );
+        if (!response.ok) throw new Error('Failed to fetch purchases');
+        const data = await response.json();
+        return data || [];
       }
 
-      const { data, error } = await query;
-      if (error) throw error;
-      return data || [];
+      // If querying by email or no token, return empty
+      // (Direct access via supabase.from('purchases') is now blocked by RLS)
+      return [];
     },
-    enabled: !!email || !!phone,
+    enabled: !!phone,
   });
 }
 
