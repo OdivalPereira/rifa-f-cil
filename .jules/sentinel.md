@@ -7,3 +7,8 @@
 **Vulnerability:** The `notify-admin-action` Edge Function directly injected `raffle_title` and `raffle_id` (user-controlled or potentially tainted data) into an HTML email template without escaping. This could allow malicious actors to inject arbitrary HTML content into admin emails.
 **Learning:** Even internal notification emails should treat all data as untrusted. Edge Functions running in Deno/Node environments do not automatically escape variables in template literals like React does.
 **Prevention:** Always use an HTML escaping helper function (or a library) when constructing HTML strings from variables in backend functions.
+
+## 2026-01-07 - Insecure Public RLS on Sensitive Data
+**Vulnerability:** The `purchases` table had an RLS policy `USING (true)` for SELECT, intending to let buyers see their own data, but actually allowing ANYONE to dump the entire customer database (PII).
+**Learning:** `USING (true)` is extremely dangerous for tables with sensitive data. It relies entirely on client-side logic to "filter" data, which is not security. Also, public stats views (like rankings) over private tables must be `SECURITY DEFINER` to function without opening the underlying table.
+**Prevention:** Never use `USING (true)` on sensitive tables. Use strict RLS checks (e.g., `auth.uid() = user_id`) or move data access to a verified Edge Function (Service Role) if the auth model is custom.
