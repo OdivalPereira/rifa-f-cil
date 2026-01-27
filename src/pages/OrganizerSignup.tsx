@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Mail, Lock, Sparkles, Trophy } from 'lucide-react';
+import { Loader2, Mail, Lock, Sparkles, Trophy, Eye, EyeOff } from 'lucide-react';
 import { SlotMachineFrame } from '@/components/SlotMachineFrame';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -29,6 +29,8 @@ export default function OrganizerSignup() {
     const { toast } = useToast();
     const { signUp } = useAuth();
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
     const {
         register,
@@ -79,11 +81,12 @@ export default function OrganizerSignup() {
 
             navigate('/admin/rifa');
 
-        } catch (err: any) {
+        } catch (err: unknown) {
             console.error(err);
+            const errorMessage = err instanceof Error ? err.message : 'Ocorreu um erro inesperado.';
             toast({
                 title: 'Erro ao criar conta',
-                description: err.message || 'Ocorreu um erro inesperado.',
+                description: errorMessage,
                 variant: 'destructive',
             });
         } finally {
@@ -135,25 +138,45 @@ export default function OrganizerSignup() {
 
                             <div className="space-y-2">
                                 <Label htmlFor="password" className="text-foreground/90">Senha</Label>
-                                <Input
-                                    id="password"
-                                    type="password"
-                                    placeholder="Mínimo 6 caracteres"
-                                    {...register('password')}
-                                    className={`input-casino ${errors.password ? 'border-destructive' : ''}`}
-                                />
+                                <div className="relative">
+                                    <Input
+                                        id="password"
+                                        type={showPassword ? "text" : "password"}
+                                        placeholder="Mínimo 6 caracteres"
+                                        {...register('password')}
+                                        className={`input-casino pr-10 ${errors.password ? 'border-destructive' : ''}`}
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowPassword(!showPassword)}
+                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                                        aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
+                                    >
+                                        {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                    </button>
+                                </div>
                                 {errors.password && <p className="text-sm text-destructive">{errors.password.message}</p>}
                             </div>
 
                             <div className="space-y-2">
                                 <Label htmlFor="confirmPassword" className="text-foreground/90">Confirmar Senha</Label>
-                                <Input
-                                    id="confirmPassword"
-                                    type="password"
-                                    placeholder="Repita a senha"
-                                    {...register('confirmPassword')}
-                                    className={`input-casino ${errors.confirmPassword ? 'border-destructive' : ''}`}
-                                />
+                                <div className="relative">
+                                    <Input
+                                        id="confirmPassword"
+                                        type={showConfirmPassword ? "text" : "password"}
+                                        placeholder="Repita a senha"
+                                        {...register('confirmPassword')}
+                                        className={`input-casino pr-10 ${errors.confirmPassword ? 'border-destructive' : ''}`}
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                                        aria-label={showConfirmPassword ? "Ocultar senha" : "Mostrar senha"}
+                                    >
+                                        {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                    </button>
+                                </div>
                                 {errors.confirmPassword && <p className="text-sm text-destructive">{errors.confirmPassword.message}</p>}
                             </div>
 
