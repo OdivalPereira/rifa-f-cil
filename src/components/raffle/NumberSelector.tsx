@@ -162,7 +162,48 @@ export function NumberSelector({
   }, [quantityToSelect]);
 
   const generateRandomNumbers = useCallback(() => {
-    // 1. Identify available numbers (O(N))
+    // 1. Calculate occupancy to decide strategy
+    const totalUnavailable = soldNumbersRef.current.size + pendingNumbersRef.current.size + selectedNumbers.size;
+    const occupancy = totalUnavailable / totalNumbers;
+    const remaining = quantityToSelect - selectedNumbers.size;
+
+    if (remaining <= 0) return;
+
+    // Strategy A: Rejection Sampling (Optimized for low occupancy < 75%)
+    // O(k) complexity where k is quantity to select
+    if (occupancy < 0.75) {
+      const newNumbersSet = new Set<number>();
+      let attempts = 0;
+      // Safety limit: if we can't find numbers after many tries, fallback to Strategy B
+      const maxAttempts = remaining * 20 + 50;
+
+      const isSold = (n: number) => soldNumbersRef.current.has(n);
+      const isPending = (n: number) => pendingNumbersRef.current.has(n);
+      const isSelected = (n: number) => selectedNumbers.has(n);
+
+      while (newNumbersSet.size < remaining && attempts < maxAttempts) {
+        attempts++;
+        const r = Math.floor(Math.random() * totalNumbers) + 1;
+
+        if (!isSold(r) && !isPending(r) && !isSelected(r) && !newNumbersSet.has(r)) {
+          newNumbersSet.add(r);
+        }
+      }
+
+      // If successful, update and return
+      if (newNumbersSet.size === remaining) {
+        setSelectedNumbers((prev) => {
+          const newSet = new Set(prev);
+          newNumbersSet.forEach((n) => newSet.add(n));
+          return newSet;
+        });
+        return;
+      }
+      // If loop finished without finding enough numbers, fall through to Strategy B
+    }
+
+    // Strategy B: Build Available Array & Shuffle (Fallback for high occupancy)
+    // O(N) complexity where N is totalNumbers
     const available: number[] = [];
     // Optimization: Check sets directly instead of creating a combined Set (O(N) operation avoided)
     const isSold = (n: number) => soldNumbersRef.current.has(n);
@@ -174,7 +215,6 @@ export function NumberSelector({
       }
     }
 
-    const remaining = quantityToSelect - selectedNumbers.size;
     const newNumbers: number[] = [];
 
     // Optimization: Partial Fisher-Yates shuffle - O(k)
