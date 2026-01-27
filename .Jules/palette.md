@@ -13,3 +13,7 @@
 ## 2024-05-26 - Interactive Card Accessibility
 **Learning:** Interactive cards that trigger modals are frequently implemented as `div`s, excluding keyboard users. Converting them to `<button>` elements requires explicitly setting `text-left` and `w-full` to preserve the card layout while restoring native focus and activation behavior.
 **Action:** When making cards interactive, use `<button type="button">` instead of `div`, and ensure CSS resets (width, text-align) are applied to match the original design.
+
+## 2024-05-27 - Password Visibility Toggle
+**Learning:** Password fields without visibility toggles increase error rates and user frustration. Implementing this pattern requires managing local state (`showPassword`) and swapping the input `type` between `password` and `text`, along with a dynamic `aria-label` on the toggle button for accessibility.
+**Action:** Always include a show/hide toggle for password inputs, ensuring the toggle button is properly labeled and accessible via keyboard.
