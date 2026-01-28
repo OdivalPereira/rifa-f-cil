@@ -139,8 +139,16 @@ export const RaffleHero = memo(({
             {/* Urgency Progress Bar */}
             <div className="space-y-3">
               {/* Progress Bar with Dynamic Colors */}
-              <div className="relative">
-                <div className="h-4 bg-muted/50 rounded-full overflow-hidden border border-border/50">
+              <div
+                className="relative"
+                role="progressbar"
+                aria-label="Progresso de vendas"
+                aria-valuenow={Math.round(progressPercentage)}
+                aria-valuemin={0}
+                aria-valuemax={100}
+                aria-valuetext={`${progressPercentage.toFixed(0)}% vendido`}
+              >
+                <div className="h-4 bg-muted/50 rounded-full overflow-hidden border border-border/50" aria-hidden="true">
                   <div
                     className={`h-full rounded-full transition-all duration-1000 ease-out relative overflow-hidden ${progressPercentage >= 80
                       ? 'bg-gradient-to-r from-red-600 via-red-500 to-orange-500'
@@ -163,6 +171,7 @@ export const RaffleHero = memo(({
                       : 'bg-emerald text-white'
                     }`}
                   style={{ left: `${Math.min(Math.max(progressPercentage, 5), 95)}%` }}
+                  aria-hidden="true"
                 >
                   {progressPercentage.toFixed(0)}%
                 </div>

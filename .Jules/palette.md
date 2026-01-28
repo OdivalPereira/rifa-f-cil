@@ -13,3 +13,7 @@
 ## 2024-05-26 - Interactive Card Accessibility
 **Learning:** Interactive cards that trigger modals are frequently implemented as `div`s, excluding keyboard users. Converting them to `<button>` elements requires explicitly setting `text-left` and `w-full` to preserve the card layout while restoring native focus and activation behavior.
 **Action:** When making cards interactive, use `<button type="button">` instead of `div`, and ensure CSS resets (width, text-align) are applied to match the original design.
+
+## 2025-02-18 - Accessible Custom Progress Bars
+**Learning:** Custom progress bars (using `div`s) require `role="progressbar"` and explicit ARIA attributes (`aria-valuenow`, `aria-valuemin`, `aria-valuemax`, `aria-valuetext`) to be perceptible to screen readers. Visual labels inside the bar should be hidden with `aria-hidden="true"` if `aria-valuetext` provides the context.
+**Action:** When creating or maintaining custom progress components, always wrap them in a container with these ARIA attributes.
